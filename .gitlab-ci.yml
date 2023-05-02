@@ -1,0 +1,13 @@
+image: ubuntu:jammy
+
+report:
+  stage: build
+
+  script:
+    - apt-get --yes update
+    - DEBIAN_FRONTEND=noninteractive apt-get --yes install texlive-base texlive-latex-recommended texlive-latex-extra texlive-lang-japanese texlive-science
+    - pdflatex instructions.tex
+
+  artifacts:
+    paths:
+      - instructions.pdf

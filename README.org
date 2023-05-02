@@ -1,0 +1,27 @@
+#+title: Xilinx KRIA KV260
+
+* Introduction
+
+* Build instructions
+On a moderately recent Ubuntu-base distribution, the following packages seemed to be required to build the
+report:
+
+#+BEGIN_SRC bash
+  sudo apt-get install texlive-base texlive-latex-recommended texlive-lang-japanese
+#+END_SRC
+
+Then, the actual build can be made with a simple:
+
+#+BEGIN_SRC bash
+  pdflatex instructions.tex
+#+END_SRC
+
+No fancy Lua or theme at the moment !
+
+* Automatic build with CI/CD pipeline
+If you don't want to build the report yourself, a CI pipeline is used to make it on GitLab.
+
+You can check the steps in the .gitlab-ci.yml file.
+This build uses a base Ubuntu image and basically takes the same steps as presented above for a local build.
+
+A PDF artifact can be downloaded.

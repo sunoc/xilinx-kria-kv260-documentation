@@ -60,15 +60,35 @@ but I will present it step by step here.
 %-------------------------------------------------------------------------------
 \section{Ubuntu 22.04}
 \label{sec:ubuntu-22.04}
-An official image is provided by Xilinx that allows the OS installation to be quick and
+\href{https://ubuntu.com/download/amd-xilinx}{An official image} is provided by Xilinx that allows the OS installation to be quick and
 straightforward.
 
+\begin{tcolorbox}[colback=red!5!white,colframe=red!75!black]
+  WARNING: The next part involve the \verb|dd| command writing on disks!!! \\
+  As always with the dd command, you have to be VERY careful on what arguments you give. Selecting the wrong disk will result on the destruction of your data !! \\
+  \textbf{If you are unsure of what to do, seek assistance !}
+\end{tcolorbox}
+
+
+With the image available on you machine, one can simply run the \verb|dd| command as follow to write the image to a
+previously formatted drive (here \verb|/dev/sda|). It is the possible to connect to the board using serial, as presented here:
 \begin{tcolorbox}
 \begin{verbatim}
 sudo dd if=iot-limerick-kria-classic-desktop-2204-x07-\
 20230302-63.img of=/dev/sda status=progress bs=8M && sync
 
 sudo picocom /dev/ttyUSB1 -b 115200
+\end{verbatim}
+\end{tcolorbox}
+
+Once logged in, it is typically easier and more convenient to connect the board using SSH.
+When the board is connected to the network, it is possible to know it's IP address with
+the \verb|ip| command; then it is possible to connect to the board with ssh, as follow (example):
+\begin{tcolorbox}
+\begin{verbatim}
+kria# ip -a
+
+host# ssh ubuntu@192.168.4.11
 \end{verbatim}
 \end{tcolorbox}
 

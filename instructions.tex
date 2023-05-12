@@ -128,21 +128,31 @@ guides were found to eventually put together this procedure.
 
 \subsection{DTO patching}
 \label{sec:dto-patching}
+The communication system and interaction from the Linux side towards the real-time capable core
+is not enabled by default within the Ubuntu image provided by Xilinx.
 
+Because of that, some modification of the device tree is required in order to have
+the \verb|remoteproc| system to start.
+
+Firstly, we need to get the original firmware device tree, converted
+into a readable format (DTS):
 \begin{tcolorbox}
 \begin{verbatim}
 sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
 \end{verbatim}
 \end{tcolorbox}
 
+Then we can download and apply the patch that will allow us to use the \verb|remoteproc|:
 \begin{tcolorbox}
 \begin{verbatim}
-patch
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
+documentation/-/raw/main/src/system.patch
+patch system.dts < system.patch
 \end{verbatim}
 \end{tcolorbox}
 
 Now the DTS file has been modified, one can regenerate the binary and place it on the \verb|/boot| partition
-and reboot the board.
+and reboot the board:
 \begin{tcolorbox}
 \begin{verbatim}
 dtc -I dts -O dtb system.dts -o user-override.dtb
@@ -152,7 +162,7 @@ sudo reboot now
 \end{tcolorbox}
 
 After rebooting, you can check the content of the \verb|remoteproc| system directory,
-and a \verb|remoteproc0| device should be visible, as follow.
+and a \verb|remoteproc0| device should be visible, as follow:
 \begin{tcolorbox}
 \begin{verbatim}
 ls /sys/class/remoteproc/
@@ -162,6 +172,8 @@ ls /sys/class/remoteproc/
 
 If it is the case, it means that the patch was successful and RPMsg is
 ready to test with some example.
+
+
 
 \subsection{Ping-pong example}
 \label{sec:ping-pong-example}

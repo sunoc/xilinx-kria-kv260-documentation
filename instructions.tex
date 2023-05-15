@@ -292,6 +292,11 @@ ros2 run demo_nodes_py listener
 
 You should be able to see the first terminal sending "Hello world" messages, and the second one receiving then.
 
+% -------------------------------------------------------------------------------
+\section{ROS2 in a container}
+\label{sec:ros2-container}
+WIP
+
 
 % -------------------------------------------------------------------------------
 \section{Vitis IDE}
@@ -364,24 +369,6 @@ sudo ln -s /usr/lib/x86_64-linux-gnu/libidn.so.12 /usr/lib/x86_64-linux-gnu/libi
 \end{verbatim}
 \end{tcolorbox}
 
-% -------------------------------------------------------------------------------
-\section{RPMsg}
-\label{sec:rpmsg}
-
-Get a readable copy of the device tree overlay:
-\begin{tcolorbox}
-\begin{verbatim}
-sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
-\end{verbatim}
-\end{tcolorbox}
-
-Patch it:
-
-Re-generate the device tree binary and put in on the boot partition:
-
-Reboot the board:
-
-Check if the ~remoteproc~ was successfully loaded:
 
 % -------------------------------------------------------------------------------
 \section{Loading a new firmware from Linux}

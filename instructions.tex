@@ -156,7 +156,7 @@ and reboot the board:
 \begin{tcolorbox}
 \begin{verbatim}
 dtc -I dts -O dtb system.dts -o user-override.dtb
-sudo cp user-override.dtb /boot/firmware/
+sudo mv user-override.dtb /boot/firmware/
 sudo reboot now
 \end{verbatim}
 \end{tcolorbox}
@@ -173,10 +173,42 @@ ls /sys/class/remoteproc/
 If it is the case, it means that the patch was successful and RPMsg is
 ready to test with some example.
 
+\subsection{Fan PWM control}
+\label{sec:fan-pwm-control}
+An issue that appeared with the DTO was the PWM regulation for the board fan.
+
+Indeed, this system is, in the recent version of Ubuntu, managed by default
+by the operating system, but it appeared that this system was not working anymore
+after applying some DTO for the \verb|remoteproc|.
+
+As it turned out, some malformation of the element in the DTS file (some nodes were
+at the ``wrong'' place in the file) disabled the starting for the \verb|fan_pwm|
+node. Some other weird errors appeared at the time.
+
+With the latest version of the patch that is used in this guide, it is now
+possible to have our DTO enabling the \verb|remoteproc| while keeping
+the \verb|fan_pwm| enabled.
+
+
 
 
 \subsection{Ping-pong example}
 \label{sec:ping-pong-example}
+The goal of this part is to have a program running on the Linux side that would
+send messages to the real-time core through RPMsg, get some rely back and display
+them.
+
+
+
+% -------------------------------------------------------------------------------
+\section{Building a new firmware for the R5F cores}
+\label{sec:build-new-firmw}
+wip
+
+% -------------------------------------------------------------------------------
+\section{Building a new RPMsg application for the Linux side}
+\label{sec:building-new-rpmsg}
+
 
 
 

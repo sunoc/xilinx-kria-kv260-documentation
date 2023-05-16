@@ -354,7 +354,67 @@ You should be able to see the first terminal sending "Hello world" messages, and
 % -------------------------------------------------------------------------------
 \section{ROS2 in a container}
 \label{sec:ros2-container}
-WIP
+As it is used to test and build micro-ROS configurations, running ROS2 in a Docker container is a great way to have a reproductible configuration
+of you system. This part of the guide will present how to install Docker on the Kria board and then how to use it to deploy the latest
+version of ROS2.
+
+\subsection{Installing docker}
+\label{sec:installing-docker}
+Following \href{https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository}{the official documentation}, the following steps can be taken to
+install the latest version of Docker on a Ubuntu system.
+The last command is meant to test the install. If everything went smoothly, you should see something similar to what is presented on the figure \ref{fig:hello-docker} below:
+\begin{tcolorbox}
+\begin{verbatim}
+sudo apt-get update
+sudo apt-get install ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo \
+  "deb [arch="$(dpkg --print-architecture)" \
+  signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && \
+  echo "$VERSION_CODENAME")" stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli \
+  containerd.io docker-buildx-plugin docker-compose-plugin
+sudo usermod -aG docker $USER
+newgrp docker
+
+docker run hello-world
+\end{verbatim}
+\end{tcolorbox}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{./img/hello-docker.png}
+  \caption{The return of a successful run of the ``hello world'' test Docker container}
+  \label{fig:hello-docker}
+\end{figure}
+
+\subsection{Calling a ROS2 container}
+\label{sec:call-ros2-cont}
+The following commands will pull a ROS container, version \verb|humble|, and name it \verb|ros_build|.
+A key part for having access to the interfaces (serial) is the mapping of whole the \verb|/dev| of  the host machine to the
+internal \verb|/dev|. \footnote{Note that this is an example and this situation can become a security issue. It would be a better practice
+in a production environment to map only the devices that are actually in use.}
+With the second command, we can execute \verb|bash|, as a way to open a terminal to the ``inside'' of the container.
+\begin{tcolorbox}
+\begin{verbatim}
+sudo docker run -d --name ros_build -it --net=host -v \
+     /dev:/dev --privileged ros:humble
+sudo docker exec -it ros_build bash
+\end{verbatim}
+\end{tcolorbox}
+
+From there, it becomes possible to simply use ROS2 as you would for a bare-metal install, and as presented in the section \ref{sec:ros2}.
+
 
 
 % -------------------------------------------------------------------------------
@@ -364,7 +424,7 @@ This is the recommended IDE used to build software for the Xilinx boards.
 It also include the tools to interact with the FPGA part, making the whole
 software very large (>200GB).
 
-The installer can be found on \href{Xilinx download page}{https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vitis.html}. You will need to get
+The installer can be found on \href{https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vitis.html}{Xilinx download page}. You will need to get
 a file named something like ``Xilinx\_Unified\_2022.2\_1014\_8888\_Lin64.bin''.
 
 Vitis IDE installer is compatible with versions of Ubuntu, among other distributions,

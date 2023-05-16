@@ -47,7 +47,7 @@
 \item Vitis IDE download page:\\ \url{https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vitis.html}
 \end{itemize}
 
-
+\pagebreak
 % -------------------------------------------------------------------------------
 \section{Boot Image Update}
 \label{sec:boot-image-update}
@@ -57,10 +57,38 @@ boot image of the board must be updated.
 The procedure is available in \href{https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Firmware-Update}{the official documentation},
 but I will present it step by step here.
 
+\subsection{Getting the new firmware}
+\label{sec:getting-new-firmware}
+A 2022 version of the board firmware is required in order to run the latest version of Ubuntu properly.
+
+The image can be downloaded at \href{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+K26+SOM#Boot-FW-update-with-xmutil}{the atlassian page on the topic}.
+
+\subsection{Reaching the board recovery tool}
+\label{sec:reach-board-recov}
+Now the firmware image is available, it is possible to update it using the boards recovery tool.
+Here are the steps that must be taken in order to reach this tool and update the board:
+
+\begin{itemize}
+\item Connect the board to you machine via Ethernet.
+\item Select the wired network as you connection (must be ``forced'', since it doesn't have internet access).
+\item Set a fixed IP address for your machine, in the \verb|192.168.0.1/24| range, except the specific \verb|192.168.0.111|, which will be used by the board.
+\item Using a web browser on your host machine, access \url{http://192.168.0.111}. You should now see the interface, as visible on the figure \ref{fig:recovery} below.
+\item Now the downloaded file can be uploaded as a recovery image in the bottom-right section.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\textwidth]{./img/recovery.png}
+  \caption{The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
+  \label{fig:recovery}
+\end{figure}
+
+
+
 %-------------------------------------------------------------------------------
 \section{Ubuntu 22.04}
 \label{sec:ubuntu-22.04}
-\href{https://ubuntu.com/download/amd-xilinx}{An official image} is provided by Xilinx that allows the OS installation to be quick and
+\href{https://ubuntu.com/download/amd-xilinx}{An official Ubuntu image} is provided by Xilinx that allows the OS installation to be quick and
 straightforward.
 
 \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black]

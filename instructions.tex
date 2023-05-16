@@ -89,7 +89,10 @@ Here are the steps that must be taken in order to reach this tool and update the
 \section{Ubuntu 22.04}
 \label{sec:ubuntu-22.04}
 \href{https://ubuntu.com/download/amd-xilinx}{An official Ubuntu image} is provided by Xilinx that allows the OS installation to be quick and
-straightforward.
+straightforward. Ubuntu is a common and easy to use distribution. Furthermore, it allows to install ROS2 as a package, which is most convenient
+and will be done later in this guide.
+
+One the image has been downloaded at Canonical's page (\url{https://ubuntu.com/download/amd-xilinx}), we can flash it onto the SD card.
 
 \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black]
   WARNING: The next part involve the \verb|dd| command writing on disks!!! \\
@@ -98,13 +101,18 @@ straightforward.
 \end{tcolorbox}
 
 
-With the image available on you machine, one can simply run the \verb|dd| command as follow to write the image to a
-previously formatted drive (here \verb|/dev/sda|). It is the possible to connect to the board using serial, as presented here:
+With the image available on you machine and a SD card visible as \verb|/dev/sda|\footnote{Again, it is critical to be 100\% certain that you are working with the correct device!}, one can simply run the \verb|dd| command as follow to write the image to a previously formatted drive (here \verb|/dev/sda|):
 \begin{tcolorbox}
 \begin{verbatim}
 sudo dd if=iot-limerick-kria-classic-desktop-2204-x07-\
 20230302-63.img of=/dev/sda status=progress bs=8M && sync
+\end{verbatim}
+\end{tcolorbox}
 
+Once the SD card was flash, put back on the board and a micro-USB cable has been connected from the PC to the board, it is possible to
+connect to the board in serial with an appropriate tool, for example picocom, as in the following example:
+\begin{tcolorbox}
+\begin{verbatim}
 sudo picocom /dev/ttyUSB1 -b 115200
 \end{verbatim}
 \end{tcolorbox}
@@ -122,11 +130,34 @@ host# ssh ubuntu@192.168.4.11
 
 \subsection{Proxy and DNS}
 \label{sec:proxy-dns}
-Need to be set in order to be able to download stuff.
+An issue that can occur when connecting the board to the internet is the conflicting situation with
+the school proxy.
+Indeed, as the network at Nanzan University requires to go through a proxy, some DNS errors appeared.
 
-DNS in /etc/resolv.conf
+Firstly, it is possible to set a DNS IP address in \verb|/etc/resolv.conf| by editing it and adding your favorite DNS, for example \verb|nameserver 1.1.1.1|
+next to the other \verb|nameserver| entry.
+\begin{tcolorbox}
+\begin{verbatim}
+sudo nano /etc/resolv.conf
+\end{verbatim}
+\end{tcolorbox}
 
-proxy setup with export
+Secondly, it might become needed to setup the proxy for the school.
+
+This can be done as follow, by exporting a https base proxy configuration containing you AXIA credentials, then
+by consolidating the configuration for other types of connections in the \verb|bashrc|:
+\begin{tcolorbox}
+\begin{verbatim}
+export https_proxy="http://<AXIA_username>:\
+<AXIA_psw>@proxy.ic.nanzan-u.ac.jp:8080"
+echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc
+echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc
+echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc
+echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" \
+>> ~/.bashrc
+\end{verbatim}
+\end{tcolorbox}
+
 
 % -------------------------------------------------------------------------------
 \section{Starting remoteproc}

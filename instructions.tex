@@ -122,13 +122,13 @@ When the board is connected to the network, it is possible to know it's IP addre
 the \verb|ip| command; then it is possible to connect to the board with ssh, as follow (example):
 \begin{tcolorbox}
 \begin{verbatim}
-kria# ip -a
+kria# ip addr
 
 host# ssh ubuntu@192.168.4.11
 \end{verbatim}
 \end{tcolorbox}
 
-\subsection{Proxy and DNS}
+\subsection{Proxy, DNS and root password}
 \label{sec:proxy-dns}
 An issue that can occur when connecting the board to the internet is the conflicting situation with
 the school proxy.
@@ -139,6 +139,8 @@ next to the other \verb|nameserver| entry.
 \begin{tcolorbox}
 \begin{verbatim}
 sudo nano /etc/resolv.conf
+
+sudo systemctl restart systemd-resolved
 \end{verbatim}
 \end{tcolorbox}
 
@@ -150,14 +152,39 @@ by consolidating the configuration for other types of connections in the \verb|b
 \begin{verbatim}
 export https_proxy="http://<AXIA_username>:\
 <AXIA_psw>@proxy.ic.nanzan-u.ac.jp:8080"
-echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc
-echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc
-echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc
+
+echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc && \
+echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc && \
+echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc && \
 echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" \
 >> ~/.bashrc
 \end{verbatim}
 \end{tcolorbox}
 
+Finally, it might be convenient for the \verb|sudo| tool to not ask for the password all the time.
+This change can be done by editing the sudoers file, and adding the parameter \verb|NOPASSWD|
+at the ``sudo'' line:
+\begin{tcolorbox}
+\begin{verbatim}
+sudo visudo
+
+%sudo   ALL=(ALL:ALL) NOPASSWD: ALL
+\end{verbatim}
+\end{tcolorbox}
+
+This is merely a convenience setup for devices staying at you desk. If
+the board is meant to be used in any king of production setup, a password
+should be set for making administration tasks.
+
+With all of these settings, you should be able to update the software of your board
+without any issus:
+\begin{tcolorbox}
+\begin{verbatim}
+sudo apt-get update
+sudo apt-get dist-upgrade
+sudo reboot now
+\end{verbatim}
+\end{tcolorbox}
 
 % -------------------------------------------------------------------------------
 \section{Starting remoteproc}
@@ -577,11 +604,14 @@ colcon build
 . ./install/local_setup.bash
 
 ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
+
+touch custom_r5f_toolchain.cmake
+touch custom_r5f_colcon.meta
 \end{verbatim}
 \end{tcolorbox}
 
 From there we will need some configuration files specifically for
-our Coretx R5F.
+our Cortex R5F.
 
 \begin{tcolorbox}
 \begin{verbatim}
@@ -594,20 +624,96 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 set(PLATFORM_NAME "LwIP")
 
 # Makefile flags
-set(ARCH_CPU_FLAGS "-mcpu=cortex-r5f -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -DUSE_HAL_DRIVER -DSTM32F446xx -D_TIMEVAL_DEFINED -O0 -Wall -fdata-sections -ffunction-sections")
+set(ARCH_CPU_FLAGS "-mcpu=cortex-r5 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -Wno-dev -Wno-unused-parameter -Wno-unused-value -Wno-unused-variable -Wno-unused-but-set-variable -DUSE_HAL_DRIVER -D_TIMEVAL_DEFINED -O0 -Wall -fdata-sections -ffunction-sections")
 set(ARCH_OPT_FLAGS "")
 
-set(CMAKE_C_COMPILER /microros_ws/freertos_apps/microros_nucleo_f446ze_extensions/../../toolchain/bin/arm-none-eabi-gcc)
-set(CMAKE_CXX_COMPILER /microros_ws/freertos_apps/microros_nucleo_f446ze_extensions/../../toolchain/bin/arm-none-eabi-g++)
+set(CMAKE_C_COMPILER /armr5-toolchain/bin/armr5-none-eabi-gcc)
+
+set(CMAKE_C_COMPILER_WORKS 1 CACHE INTERNAL "")
 
 set(CMAKE_C_FLAGS_INIT "-std=c11 ${ARCH_CPU_FLAGS} ${ARCH_OPT_FLAGS} -DCLOCK_MONOTONIC=0" CACHE STRING "" FORCE)
-set(CMAKE_CXX_FLAGS_INIT "-std=c++14 ${ARCH_CPU_FLAGS} ${ARCH_OPT_FLAGS} -DCLOCK_MONOTONIC=0" CACHE STRING "" FORCE)
 
 set(__BIG_ENDIAN__ 0)
 \end{verbatim}
 \end{tcolorbox}
 
 
+\begin{tcolorbox}
+\begin{verbatim}
+{
+    "names": {
+        "tracetools": {
+            "cmake-args": [
+                "-DTRACETOOLS_DISABLED=ON",
+                "-DTRACETOOLS_STATUS_CHECKING_TOOL=OFF"
+            ]
+        },
+        "rosidl_typesupport": {
+            "cmake-args": [
+                "-DROSIDL_TYPESUPPORT_SINGLE_TYPESUPPORT=ON"
+            ]
+        },
+        "rcl": {
+            "cmake-args": [
+                "-DBUILD_TESTING=OFF",
+                "-DRCL_COMMAND_LINE_ENABLED=OFF",
+                "-DRCL_LOGGING_ENABLED=OFF"
+            ]
+        },
+        "rcutils": {
+            "cmake-args": [
+                "-DENABLE_TESTING=OFF",
+                "-DRCUTILS_NO_FILESYSTEM=ON",
+                "-DRCUTILS_NO_THREAD_SUPPORT=ON",
+                "-DRCUTILS_NO_64_ATOMIC=ON",
+                "-DRCUTILS_AVOID_DYNAMIC_ALLOCATION=ON"
+            ]
+        },
+        "microxrcedds_client": {
+            "cmake-args": [
+                "-DUCLIENT_PIC=OFF",
+                "-DUCLIENT_PROFILE_UDP=OFF",
+                "-DUCLIENT_PROFILE_TCP=OFF",
+                "-DUCLIENT_PROFILE_DISCOVERY=OFF",
+                "-DUCLIENT_PROFILE_SERIAL=OFF",
+                "-UCLIENT_PROFILE_STREAM_FRAMING=ON",
+                "-DUCLIENT_PROFILE_CUSTOM_TRANSPORT=ON"
+            ]
+        },
+        "rmw_microxrcedds": {
+            "cmake-args": [
+                "-DRMW_UXRCE_MAX_NODES=1",
+                "-DRMW_UXRCE_MAX_PUBLISHERS=5",
+                "-DRMW_UXRCE_MAX_SUBSCRIPTIONS=5",
+                "-DRMW_UXRCE_MAX_SERVICES=1",
+                "-DRMW_UXRCE_MAX_CLIENTS=1",
+                "-DRMW_UXRCE_MAX_HISTORY=4",
+                "-DRMW_UXRCE_TRANSPORT=custom"
+            ]
+        }
+    }
+}
+\end{verbatim}
+\end{tcolorbox}
+
+\begin{tcolorbox}
+\begin{verbatim}
 export PATH=$PATH:$(pwd)/toolchain/bin
+\end{verbatim}
+\end{tcolorbox}
+
+\begin{tcolorbox}
+\begin{verbatim}
+ros2 run micro_ros_setup build_firmware.sh $(pwd)/custom_r5f_toolchain.cmake $(pwd)/custom_r5f_colcon.meta
+\end{verbatim}
+\end{tcolorbox}
+
+Then, back on the host machine, we can download the static library and the include files:
+\begin{tcolorbox}
+\begin{verbatim}
+mkdir /home/sunoc/Xilinx/workspace/openamp_echo_demo/microros_lib
+scp ubuntu@192.168.11.4:/microros_ws/firmware/build/* /home/sunoc/Xilinx/workspace/openamp_echo_demo/microros_lib/
+\end{verbatim}
+\end{tcolorbox}
 
 \end{document}

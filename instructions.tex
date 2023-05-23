@@ -177,12 +177,47 @@ the board is meant to be used in any king of production setup, a password
 should be set for making administration tasks.
 
 With all of these settings, you should be able to update the software of your board
-without any issus:
+without any issues:
 \begin{tcolorbox}
 \begin{verbatim}
 sudo apt-get update
 sudo apt-get dist-upgrade
 sudo reboot now
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection{Extra: removing useless stuff}
+\label{sec:extr-remov-usel}
+As the desktop part is not used at all, there are some packages
+that can be purges in order for the system to become more lightweight.
+
+The main issue with Ubuntu systems is the forced integration of Snap.
+Here are some step to try and remove all of that. These steps
+take a lot of time though.
+
+\begin{tcolorbox}
+\begin{verbatim}
+sudo systemctl disable snapd.service
+sudo systemctl disable snapd.socket
+sudo systemctl disable snapd.seeded.service
+sudo snap list #show the installed package, remove then all:
+sudo snap remove --purge firefox
+sudo snap remove --purge gnome-3-38-2004
+sudo snap remove --purge gnome-42-2204
+sudo snap remove --purge gtk-common-themes
+sudo snap remove --purge snapd-desktop-integration
+sudo snap remove --purge snap-store
+sudo snap remove --purge bare
+sudo snap remove --purge core20
+sudo snap remove --purge core22
+sudo snap remove --purge snapd
+sudo snap list # check that everything is uninstalled
+
+sudo rm -rf /var/cache/snapd/
+sudo rm -rf ~/snap
+sudo apt autoremove --purge snapd
+
+systemctl list-units | grep snapd
 \end{verbatim}
 \end{tcolorbox}
 

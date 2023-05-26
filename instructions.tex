@@ -191,10 +191,10 @@ sudo reboot now
 As the desktop part is not used at all, there are some packages
 that can be purges in order for the system to become more lightweight.
 
-The main issue with Ubuntu systems is the forced integration of Snap.
+In particular, the main issue with Ubuntu systems is the forced integration of Snap.
 Here are some step to try and remove all of that. These steps
-take a lot of time though.
-
+take a lot of time though, but the system fan runs sensibly slower
+without all of this stuff:
 \begin{tcolorbox}
 \begin{verbatim}
 sudo systemctl disable snapd.service
@@ -326,7 +326,7 @@ to be built, we need to setup Xilinx preferred IDE: Vitis.
 \label{sec:vitis-ide}
 This is the recommended IDE used to build software for the Xilinx boards.
 It also include the tools to interact with the FPGA part, making the whole
-software very large (>200GB).
+software very large (around 200GB of disk usage).
 
 The installer can be found on \href{https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vitis.html}{Xilinx download page}. You will need to get
 a file named something like ``Xilinx\_Unified\_2022.2\_1014\_8888\_Lin64.bin''.
@@ -370,22 +370,38 @@ sudo chmod +x ./Xilinx_Unified_2022.2_1014_8888_Lin64.bin
 \end{verbatim}
 \end{tcolorbox}
 
+From there you can follow the step-by-step graphical installer.
+The directory chosen for the rest of this guide for the \verb|Xilinx| directory
+is directly the \verb|\$HOME|, but the installation can be set elsewhere is needed.
+
 
 % -------------------------------------------------------------------------------
-\section{Building an example firmware for the Cortex R5F}
+\section{WIP::: Building an example firmware for the Cortex R5F}
 \label{sec:bulding-an-example}
-\href{Xilinx documentation about building a demo firmware}{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1837006921/OpenAMP+Base+Hardware+Configurations\#Build-RPU-firmware}
+\href{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1837006921/OpenAMP+Base+Hardware+Configurations\#Build-RPU-firmware}{Xilinx documentation about building a demo firmware}
 
 \subsection{Generating the platform configuration file}
 \label{sec:gener-platf-conf}
+In order to have the libraries and configurations in the IDE ready to be used for our board, we need to obtain configuration files, as presented in the 
+\href{https://xilinx.github.io/kria-apps-docs/kv260/2022.1/build/html/docs/build_vitis_platform.html?highlight=xsa}{Xilinx guid for Kria and Vitis}. At the \href{https://github.com/Xilinx/kria-vitis-platforms}{dedicated repository}, we can have such configurations, but they required to be built.
 
-\url{https://xilinx.github.io/kria-apps-docs/kv260/2022.1/build/html/docs/build_vitis_platform.html?highlight=xsa}
-
-\url{https://github.com/Xilinx/kria-vitis-platforms}
+\verb|Cmake|, \verb|tcl| and \verb|idn| will become needed in order to build the firmware.
+As discussed in a thread on \href{https://support.xilinx.com/s/question/0D52E00006jrzsYSAQ/platform-project-cannot-be-created-on-vitis?language=en\_US}{Xilinx community forum}, \verb|libidn11| is specifically required, but creating a symbolic link from the current, 12 version works.
+\begin{tcolorbox}
+\begin{verbatim}
+sudo apt-get update
+sudo apt-get install cmake tcl libidn11-dev \
+libidn-dev libidn12 idn
+sudo ln -s /usr/lib/x86_64-linux-gnu/libidn.so.12 \
+/usr/lib/x86_64-linux-gnu/libidn.so.11
+\end{verbatim}
+\end{tcolorbox}
 
 \begin{tcolorbox}
 \begin{verbatim}
-git clone --recursive https://github.com/Xilinx/kria-vitis-platforms.git
+cd ~/Xilinx
+git clone --recursive \
+https://github.com/Xilinx/kria-vitis-platforms.git
 cd kria-vitis-platforms/k26/platforms
 export XILINX_VIVADO=/home/sunoc/Xilinx/Vivado/2022.2/
 export XILINX_VITIS=/home/sunoc/Xilinx/Vitis/2022.2/
@@ -393,16 +409,20 @@ make platform PLATFORM=k26_base_starter_kit
 \end{verbatim}
 \end{tcolorbox}
 
-Cmake, tcl and idn will become needed in order to build the firmware.
-As discussed in a thread on \href{Xilinx community forum}{https://support.xilinx.com/s/question/0D52E00006jrzsYSAQ/platform-project-cannot-be-created-on-vitis?language=en\_US}, \verb|libidn11| is specifically required, but
-creating a symbolic link from the current, 12 version works.
+
+
+
+ Memory values to setup of a new firmware project:
 \begin{tcolorbox}
 \begin{verbatim}
-sudo apt-get update
-sudo apt-get install cmake tcl libidn11-dev libidn-dev libidn12 idn
-sudo ln -s /usr/lib/x86_64-linux-gnu/libidn.so.12 /usr/lib/x86_64-linux-gnu/libidn.so.11
+psu_ddr_S_AXI_BASEADDR             0x3ed00000
+psu_ocm_ram_1_S_AXI_BASEADDR       0xfffc0000
+psu_r5_tcm_ram_0_S_AXI_BASEADDR    0x00000000
+psu_r5_tcm_ram_1_S_AXI_BASEADDR    0x00020000
 \end{verbatim}
 \end{tcolorbox}
+
+
 
 
 % -------------------------------------------------------------------------------

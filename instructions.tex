@@ -483,6 +483,7 @@ psu_r5_tcm_ram_1_S_AXI_BASEADDR    0x00020000
 \end{tcolorbox}
 
 
+
 % -------------------------------------------------------------------------------
 \section{Building and running an example program on the Linux side}
 \label{sec:building-running-an}
@@ -491,7 +492,7 @@ to test the RPMsg function, we need some program on the Linux side of the Kria
 board to ``talk'' with the real-time side.
 
 Some source is provided by Xilinx to build a demonstration software that does
-this purpose: specifically interract with the demonstration firmware.
+this purpose: specifically interact with the demonstration firmware.
 
 Here are the steps required to obtain the sources, and build the program.
 As a reminder, this is meant to be done on the Linux running on the
@@ -507,15 +508,22 @@ sudo ln -s $(pwd)/echo_test /usr/bin/
 \end{verbatim}
 \end{tcolorbox}
 
+
+
 % -------------------------------------------------------------------------------
 \section{WIP::: Loading a new firmware from Linux}
 \label{sec:loading-new-firmware}
+This is a work in progress.
 
+These instructions are useful to upload and start the firmware
+on the R5F from the Linux, but there are some issues.
+This will be fixed eventually.
 \begin{tcolorbox}
 \begin{verbatim}
 sudo -s
 cp image_echo_test /lib/firmware
-echo image_echo_test  > /sys/class/remoteproc/remoteproc0/firmware
+echo image_echo_test  > /sys/class/remoteproc/\
+remoteproc0/firmware
 echo start > /sys/class/remoteproc/remoteproc0/state
 echo_test
 echo stop > /sys/class/remoteproc/remoteproc0/state
@@ -544,13 +552,15 @@ sudo find / -name 'armr5-none-eabi-gcc'
 \end{tcolorbox}
 
 The return should look something like this:\\
-\verb|/home/sunoc/Xilinx/Vitis/2022.2/gnu/armr5/lin/gcc-arm-none-eabi/bin/armr5-none-eabi-gcc|
+\verb|/home/sunoc/Xilinx/Vitis/2022.2/gnu/armr5/lin/|\\
+\verb|gcc-arm-none-eabi/bin/armr5-none-eabi-gcc|
 
 You can then re-use some part of that path and run the following commands to start the
 Docker container with access to the toolchain for ARM R5:
 \begin{tcolorbox}
 \begin{verbatim}
-toolchain='/home/sunoc/Xilinx/Vitis/2022.2/gnu/armr5/lin/gcc-arm-none-eabi/'
+toolchain='/home/sunoc/Xilinx/Vitis/2022.2/gnu/\
+armr5/lin/gcc-arm-none-eabi/'
 docker run -d --name ros_build -it --net=host \
 -v /dev:/dev \
 -v $toolchain:/armr5-toolchain \
@@ -589,8 +599,11 @@ touch custom_r5f_colcon.meta
 \end{tcolorbox}
 
 From there we will need some configuration files specifically for
-our Cortex R5F.
+our Cortex R5F. The two following settings are required in order to build our library.
 
+Here is a configuration that should work for you \verb|my_custom_toolchain.cmake|
+
+WIP: make this available as a downloadable file form my git repo.
 \begin{tcolorbox}
 \begin{verbatim}
 include(CMakeForceCompiler)
@@ -602,20 +615,29 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 set(PLATFORM_NAME "LwIP")
 
 # Makefile flags
-set(ARCH_CPU_FLAGS "-mcpu=cortex-r5 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -Wno-dev -Wno-unused-parameter -Wno-unused-value -Wno-unused-variable -Wno-unused-but-set-variable -DUSE_HAL_DRIVER -D_TIMEVAL_DEFINED -O0 -Wall -fdata-sections -ffunction-sections")
+set(ARCH_CPU_FLAGS "-mcpu=cortex-r5 -mthumb \
+-mfpu=fpv4-sp-d16 -mfloat-abi=hard -Wno-dev \
+-Wno-unused-parameter -Wno-unused-value -Wno-unused-variable \
+-Wno-unused-but-set-variable -DUSE_HAL_DRIVER \
+-D_TIMEVAL_DEFINED -O0 -Wall -fdata-sections \
+-ffunction-sections")
 set(ARCH_OPT_FLAGS "")
 
 set(CMAKE_C_COMPILER /armr5-toolchain/bin/armr5-none-eabi-gcc)
 
 set(CMAKE_C_COMPILER_WORKS 1 CACHE INTERNAL "")
 
-set(CMAKE_C_FLAGS_INIT "-std=c11 ${ARCH_CPU_FLAGS} ${ARCH_OPT_FLAGS} -DCLOCK_MONOTONIC=0" CACHE STRING "" FORCE)
+set(CMAKE_C_FLAGS_INIT "-std=c11 ${ARCH_CPU_FLAGS} \
+${ARCH_OPT_FLAGS} -DCLOCK_MONOTONIC=0" CACHE STRING "" FORCE)
 
 set(__BIG_ENDIAN__ 0)
 \end{verbatim}
 \end{tcolorbox}
 
 
+And here is a configuration for the \verb|my_custom_colcon.meta|.
+
+WIP: make this available as a downloadable file form my git repo.
 \begin{tcolorbox}
 \begin{verbatim}
 {
@@ -674,27 +696,28 @@ set(__BIG_ENDIAN__ 0)
 \end{verbatim}
 \end{tcolorbox}
 
+Now we have both our configuration wiles, we can build the library with the following ros2 command:
 \begin{tcolorbox}
 \begin{verbatim}
-export PATH=$PATH:$(pwd)/toolchain/bin
-\end{verbatim}
-\end{tcolorbox}
-
-\begin{tcolorbox}
-\begin{verbatim}
-ros2 run micro_ros_setup build_firmware.sh $(pwd)/custom_r5f_toolchain.cmake $(pwd)/custom_r5f_colcon.meta
+ros2 run micro_ros_setup build_firmware.sh \
+$(pwd)/custom_r5f_toolchain.cmake $(pwd)/custom_r5f_colcon.meta
 \end{verbatim}
 \end{tcolorbox}
 
 Then, back on the host machine, we can download the static library and the include files:
 \begin{tcolorbox}
 \begin{verbatim}
-mkdir /home/sunoc/Xilinx/workspace/openamp_echo_demo/microros_lib
-scp ubuntu@192.168.11.4:/microros_ws/firmware/build/* /home/sunoc/Xilinx/workspace/openamp_echo_demo/microros_lib/
+mkdir /home/sunoc/Xilinx/\
+workspace/openamp_echo_demo/microros_lib
+
+scp ubuntu@192.168.11.4:/microros_ws/firmware/build/* \
+/home/sunoc/Xilinx/workspace/openamp_echo_demo/microros_lib/
 \end{verbatim}
 \end{tcolorbox}
 
 
+
+% -------------------------------------------------------------------------------
 \section{Including the micro-ROS static library in a project}
 Now we have a Vitis demonstration project available and the \verb|libmicroros| static library
 available, we can combine both by including this library into our Kria project.

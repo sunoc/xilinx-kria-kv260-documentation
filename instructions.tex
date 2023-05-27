@@ -376,7 +376,7 @@ is directly the \verb|\$HOME|, but the installation can be set elsewhere is need
 
 
 % -------------------------------------------------------------------------------
-\section{WIP::: Building an example firmware for the Cortex R5F}
+\section{Building an example firmware for the Cortex R5F}
 \label{sec:bulding-an-example}
 As visible on the official \href{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1837006921/OpenAMP+Base+Hardware+Configurations\#Build-RPU-firmware}{Xilinx documentation about building a demo firmware}, this section will present the required steps for building a new firmware for the R5F core of our Kria board. The goal
 here is to have a demonstration firmware running, able to use the RPMsg system to communicate with the Linux APU.
@@ -388,6 +388,8 @@ In order to have the libraries and configurations in the IDE ready to be used fo
 
 \verb|Cmake|, \verb|tcl| and \verb|idn| will become needed in order to build the firmware.
 As discussed in a thread on \href{https://support.xilinx.com/s/question/0D52E00006jrzsYSAQ/platform-project-cannot-be-created-on-vitis?language=en\_US}{Xilinx community forum}, \verb|libidn11| is specifically required, but creating a symbolic link from the current, 12 version works.
+
+Here are the steps for building this configuration file:
 \begin{tcolorbox}
 \begin{verbatim}
 sudo apt-get update
@@ -395,11 +397,7 @@ sudo apt-get install cmake tcl libidn11-dev \
 libidn-dev libidn12 idn
 sudo ln -s /usr/lib/x86_64-linux-gnu/libidn.so.12 \
 /usr/lib/x86_64-linux-gnu/libidn.so.11
-\end{verbatim}
-\end{tcolorbox}
 
-\begin{tcolorbox}
-\begin{verbatim}
 cd ~/Xilinx
 git clone --recursive \
 https://github.com/Xilinx/kria-vitis-platforms.git
@@ -486,9 +484,18 @@ psu_r5_tcm_ram_1_S_AXI_BASEADDR    0x00020000
 
 
 % -------------------------------------------------------------------------------
-\section{Loading a new firmware from Linux}
-\label{sec:loading-new-firmware}
+\section{Building and running an example program on the Linux side}
+\label{sec:building-running-an}
+In order to test the deployment of the firmware on the R5F side, and in particular
+to test the RPMsg function, we need some program on the Linux side of the Kria
+board to ``talk'' with the real-time side.
 
+Some source is provided by Xilinx to build a demonstration software that does
+this purpose: specifically interract with the demonstration firmware.
+
+Here are the steps required to obtain the sources, and build the program.
+As a reminder, this is meant to be done on the Linux running on the
+Kria board, NOT on your host machine !
 \begin{tcolorbox}
 \begin{verbatim}
 git clone https://github.com/Xilinx/meta-openamp.git
@@ -500,6 +507,9 @@ sudo ln -s $(pwd)/echo_test /usr/bin/
 \end{verbatim}
 \end{tcolorbox}
 
+% -------------------------------------------------------------------------------
+\section{WIP::: Loading a new firmware from Linux}
+\label{sec:loading-new-firmware}
 
 \begin{tcolorbox}
 \begin{verbatim}
@@ -511,6 +521,7 @@ echo_test
 echo stop > /sys/class/remoteproc/remoteproc0/state
 \end{verbatim}
 \end{tcolorbox}
+
 
 
 % -------------------------------------------------------------------------------

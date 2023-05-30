@@ -559,8 +559,8 @@ You can then re-use some part of that path and run the following commands to sta
 Docker container with access to the toolchain for ARM R5:
 \begin{tcolorbox}
 \begin{verbatim}
-toolchain='/home/sunoc/Xilinx/Vitis/2022.2/gnu/\
-armr5/lin/gcc-arm-none-eabi/'
+toolchain="/home/sunoc/Xilinx/Vitis/2022.2/gnu/\
+armr5/lin/gcc-arm-none-eabi/"
 docker run -d --name ros_build -it --net=host \
 -v /dev:/dev \
 -v $toolchain:/armr5-toolchain \
@@ -573,6 +573,31 @@ docker exec -it ros_build bash
 Now we are in the ROS2 container, we can build the micro-ROS firmware as presented in the \href{https://micro.ros.org/docs/tutorials/advanced/create\_custom\_static\_library}{dedicated micro-ROS guide}:
 \begin{tcolorbox}
 \begin{verbatim}
+ln -s /armr5-toolchain/armrm-xilinx-eabi/usr/include/c++/11.2.0/arm-xilinx-eabi/arm/ /usr/include/c++/11/
+ln -s /armr5-toolchain/armrm-xilinx-eabi/usr/include/c++/11.2.0/arm-xilinx-eabi/bits/* /usr/include/c++/11/bits/
+ln -s /armr5-toolchain/armrm-xilinx-eabi/usr/include/c++/11.2.0/arm-xilinx-eabi/ext/* /usr/include/c++/11/ext/
+ln -s /armr5-toolchain/armrm-xilinx-eabi/usr/include/c++/11.2.0/arm-xilinx-eabi/thumb/ /usr/include/c++/11/
+
+# link the libraries
+ln -s /armr5-toolchain/x86_64-oesdk-linux/lib/* /lib
+
+# ignore the warnings for the next command:
+ln -s /armr5-toolchain/armrm-xilinx-eabi/usr/include/* /usr/include/
+
+# overriding some of the headers
+ln -fs /armr5-toolchain/armrm-xilinx-eabi/usr/include/ctype.h /usr/include/
+ln -fs /armr5-toolchain/armrm-xilinx-eabi/usr/include/locale.h /usr/include/
+ln -fs /armr5-toolchain/armrm-xilinx-eabi/usr/include/pthread.h /usr/include/
+ln -fs /armr5-toolchain/armrm-xilinx-eabi/usr/include/threads.h /usr/include/
+
+# don't wanna use the x86 __locale header
+mv /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h /usr/include/x86_64-linux-gnu/bits/types/BKP__locale_t.h
+mv /usr/include/x86_64-linux-gnu/bits/types/locale_t.h /usr/include/x86_64-linux-gnu/bits/types/BKP_locale_t.h
+ln -s /armr5-toolchain/armrm-xilinx-eabi/usr/include/sys/_locale.h /usr/include/c++/11/bits/
+mkdir /usr/include/c++/11/bits/types/
+ln -s /armr5-toolchain/armrm-xilinx-eabi/usr/include/sys/_locale.h /usr/include/c++/11/bits/types/locale_t.h
+
+
 . /opt/ros/$ROS_DISTRO/setup.bash
 
 mkdir microros_ws
@@ -581,7 +606,7 @@ git clone -b $ROS_DISTRO \
 https://github.com/micro-ROS/micro_ros_setup.git \
 src/micro_ros_setup
 
-sudo apt update
+sudo apt update && \
 sudo apt-get -y install python3-pip wget nano
 
 sudo rosdep fix-permissions
@@ -590,6 +615,16 @@ rosdep install --from-paths src --ignore-src -y
 
 colcon build
 . ./install/local_setup.bash
+
+# using my fork for the ament_cmake repository
+sed -i 's/ament\/ament_cmake/sunoc\/ament_cmake/g' ./install/micro_ros_setup/config/generate_lib/dev_ros2_packages.txt
+sed -i 's/ament\/ament_cmake/sunoc\/ament_cmake/g' ./src/micro_ros_setup/config/generate_lib/dev_ros2_packages.txt
+sed -i 's/raw.githubusercontent.com\/ros2\/ros2\/humble\/ros2.repos/gitlab.com\/sunoc\/xilinx-kria-kv260-documentation\/-\/snippets\/2548852\/raw\/main\/ros2.repos/g' ./src/micro_ros_setup/scripts/create_ws.sh
+
+# same for the ament_index repository
+sed -i 's/ament\/ament_index/sunoc\/ament_index/g' ./install/micro_ros_setup/config/generate_lib/dev_ros2_packages.txt
+sed -i 's/ament\/ament_index/sunoc\/ament_index/g' ./src/micro_ros_setup/config/generate_lib/dev_ros2_packages.txt
+
 
 ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
 
@@ -601,104 +636,31 @@ touch custom_r5f_colcon.meta
 From there we will need some configuration files specifically for
 our Cortex R5F. The two following settings are required in order to build our library.
 
+
 Here is a configuration that should work for you \verb|my_custom_toolchain.cmake|
 
 WIP: make this available as a downloadable file form my git repo.
 \begin{tcolorbox}
-\begin{verbatim}
-include(CMakeForceCompiler)
-
-set(CMAKE_SYSTEM_NAME Generic)
-set(CMAKE_SYSTEM_PROCESSOR arm)
-set(CMAKE_CROSSCOMPILING 1)
-set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
-set(PLATFORM_NAME "LwIP")
-
-# Makefile flags
-set(ARCH_CPU_FLAGS "-mcpu=cortex-r5 -mthumb \
--mfpu=fpv4-sp-d16 -mfloat-abi=hard -Wno-dev \
--Wno-unused-parameter -Wno-unused-value -Wno-unused-variable \
--Wno-unused-but-set-variable -DUSE_HAL_DRIVER \
--D_TIMEVAL_DEFINED -O0 -Wall -fdata-sections \
--ffunction-sections")
-set(ARCH_OPT_FLAGS "")
-
-set(CMAKE_C_COMPILER /armr5-toolchain/bin/armr5-none-eabi-gcc)
-
-set(CMAKE_C_COMPILER_WORKS 1 CACHE INTERNAL "")
-
-set(CMAKE_C_FLAGS_INIT "-std=c11 ${ARCH_CPU_FLAGS} \
-${ARCH_OPT_FLAGS} -DCLOCK_MONOTONIC=0" CACHE STRING "" FORCE)
-
-set(__BIG_ENDIAN__ 0)
-\end{verbatim}
+\verbatiminput{src/my_custom_toolchain.cmake}
 \end{tcolorbox}
-
 
 And here is a configuration for the \verb|my_custom_colcon.meta|.
 
 WIP: make this available as a downloadable file form my git repo.
 \begin{tcolorbox}
-\begin{verbatim}
-{
-    "names": {
-        "tracetools": {
-            "cmake-args": [
-                "-DTRACETOOLS_DISABLED=ON",
-                "-DTRACETOOLS_STATUS_CHECKING_TOOL=OFF"
-            ]
-        },
-        "rosidl_typesupport": {
-            "cmake-args": [
-                "-DROSIDL_TYPESUPPORT_SINGLE_TYPESUPPORT=ON"
-            ]
-        },
-        "rcl": {
-            "cmake-args": [
-                "-DBUILD_TESTING=OFF",
-                "-DRCL_COMMAND_LINE_ENABLED=OFF",
-                "-DRCL_LOGGING_ENABLED=OFF"
-            ]
-        },
-        "rcutils": {
-            "cmake-args": [
-                "-DENABLE_TESTING=OFF",
-                "-DRCUTILS_NO_FILESYSTEM=ON",
-                "-DRCUTILS_NO_THREAD_SUPPORT=ON",
-                "-DRCUTILS_NO_64_ATOMIC=ON",
-                "-DRCUTILS_AVOID_DYNAMIC_ALLOCATION=ON"
-            ]
-        },
-        "microxrcedds_client": {
-            "cmake-args": [
-                "-DUCLIENT_PIC=OFF",
-                "-DUCLIENT_PROFILE_UDP=OFF",
-                "-DUCLIENT_PROFILE_TCP=OFF",
-                "-DUCLIENT_PROFILE_DISCOVERY=OFF",
-                "-DUCLIENT_PROFILE_SERIAL=OFF",
-                "-UCLIENT_PROFILE_STREAM_FRAMING=ON",
-                "-DUCLIENT_PROFILE_CUSTOM_TRANSPORT=ON"
-            ]
-        },
-        "rmw_microxrcedds": {
-            "cmake-args": [
-                "-DRMW_UXRCE_MAX_NODES=1",
-                "-DRMW_UXRCE_MAX_PUBLISHERS=5",
-                "-DRMW_UXRCE_MAX_SUBSCRIPTIONS=5",
-                "-DRMW_UXRCE_MAX_SERVICES=1",
-                "-DRMW_UXRCE_MAX_CLIENTS=1",
-                "-DRMW_UXRCE_MAX_HISTORY=4",
-                "-DRMW_UXRCE_TRANSPORT=custom"
-            ]
-        }
-    }
-}
-\end{verbatim}
+\verbatiminput{src/my_custom_colcon.meta}
 \end{tcolorbox}
+
 
 Now we have both our configuration wiles, we can build the library with the following ros2 command:
 \begin{tcolorbox}
 \begin{verbatim}
+ln -s /armr5-toolchain/armrm-xilinx-eabi/usr/include/c++/11.2.0/ /usr/include/c++/
+ln -s /armr5-toolchain/armrm-xilinx-eabi/usr/include/c++/11.2.0/arm-xilinxmllibarmv5tehard-eabi/bits/c++config.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/c++/11.2.0/bits/
+ln -s /usr/include/dlfcn.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/
+
+
+
 ros2 run micro_ros_setup build_firmware.sh \
 $(pwd)/custom_r5f_toolchain.cmake $(pwd)/custom_r5f_colcon.meta
 \end{verbatim}

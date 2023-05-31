@@ -186,6 +186,50 @@ sudo reboot now
 \end{verbatim}
 \end{tcolorbox}
 
+
+\subsection{Setting a static IP address}
+\label{sec:setting-static-ip}
+A static IP can be set by writing the following
+configuration into your \verb|netplan| configuration file.
+
+The name of the files might vary:
+\begin{tcolorbox}
+\begin{verbatim}
+sudo nano /etc/netplan/50-cloud-init.yaml
+\end{verbatim}
+\end{tcolorbox}
+
+You can then set the wanted IP as follow:
+\begin{tcolorbox}
+\begin{verbatim}
+network:
+  renderer: NetworkManager
+  version: 2
+  ethernets:
+    eth0:
+      addresses:
+        - 192.168.11.103/24
+      routes:
+        - to: default
+          via: 192.168.11.1
+      nameservers:
+        addresses:
+          - 8.8.8.8
+          - 1.1.1.1
+\end{verbatim}
+\end{tcolorbox}
+
+Finally, the change in settings can be applied
+as follow:
+\begin{tcolorbox}
+\begin{verbatim}
+sudo netplan apply
+\end{verbatim}
+\end{tcolorbox}
+
+
+
+
 \subsection{Extra: removing useless stuff}
 \label{sec:extr-remov-usel}
 As the desktop part is not used at all, there are some packages

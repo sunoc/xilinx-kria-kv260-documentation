@@ -7,7 +7,7 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 set(PLATFORM_NAME "LwIP")
 
 # Makefile flags
-set(ARCH_CPU_FLAGS "-O2 -ffunction-sections -fdata-sections -fno-exceptions -mcpu=cortex-r5 -nostdlib -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -Wno-unused-parameter -Wno-unused-value -Wno-unused-variable -Wno-unused-but-set-variable -DUSE_HAL_DRIVER -D_TIMEVAL_DEFINED -Wall")
+set(ARCH_CPU_FLAGS "-O2 -ffunction-sections -fdata-sections -fno-exceptions -mcpu=cortex-r5 -nostdlib -mthumb -mfpu=vfpv3-d16 -mfloat-abi=hard -Wno-unused-parameter -Wno-unused-value -Wno-unused-variable -Wno-unused-function -Wno-unused-but-set-variable -DUSE_HAL_DRIVER -D_TIMEVAL_DEFINED  -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -Wall")
 set(ARCH_OPT_FLAGS "")
 
 set(CMAKE_C_COMPILER /armr5-toolchain/bin/armr5-none-eabi-gcc)

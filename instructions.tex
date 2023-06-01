@@ -622,30 +622,8 @@ docker exec -it ros_build bash
 Now we are in the ROS2 container, we can build the micro-ROS firmware as presented in the \href{https://micro.ros.org/docs/tutorials/advanced/create\_custom\_static\_library}{dedicated micro-ROS guide}:
 \begin{tcolorbox}
 \begin{verbatim}
-ln -s /armr5-toolchain/armrm-xilinx-eabi/usr/include/c++/11.2.0/arm-xilinx-eabi/arm/ /usr/include/c++/11/
-ln -s /armr5-toolchain/armrm-xilinx-eabi/usr/include/c++/11.2.0/arm-xilinx-eabi/bits/* /usr/include/c++/11/bits/
-ln -s /armr5-toolchain/armrm-xilinx-eabi/usr/include/c++/11.2.0/arm-xilinx-eabi/ext/* /usr/include/c++/11/ext/
-ln -s /armr5-toolchain/armrm-xilinx-eabi/usr/include/c++/11.2.0/arm-xilinx-eabi/thumb/ /usr/include/c++/11/
-
-# link the libraries
-ln -s /armr5-toolchain/x86_64-oesdk-linux/lib/* /lib
-
-# ignore the warnings for the next command:
-ln -s /armr5-toolchain/armrm-xilinx-eabi/usr/include/* /usr/include/
-
-# overriding some of the headers
-ln -fs /armr5-toolchain/armrm-xilinx-eabi/usr/include/ctype.h /usr/include/
-ln -fs /armr5-toolchain/armrm-xilinx-eabi/usr/include/locale.h /usr/include/
-ln -fs /armr5-toolchain/armrm-xilinx-eabi/usr/include/pthread.h /usr/include/
-ln -fs /armr5-toolchain/armrm-xilinx-eabi/usr/include/threads.h /usr/include/
-
-# don't wanna use the x86 __locale header
-mv /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h /usr/include/x86_64-linux-gnu/bits/types/BKP__locale_t.h
-mv /usr/include/x86_64-linux-gnu/bits/types/locale_t.h /usr/include/x86_64-linux-gnu/bits/types/BKP_locale_t.h
-ln -s /armr5-toolchain/armrm-xilinx-eabi/usr/include/sys/_locale.h /usr/include/c++/11/bits/
-mkdir /usr/include/c++/11/bits/types/
-ln -s /armr5-toolchain/armrm-xilinx-eabi/usr/include/sys/_locale.h /usr/include/c++/11/bits/types/locale_t.h
-
+sudo apt update && \
+sudo apt-get -y install python3-pip wget nano
 
 . /opt/ros/$ROS_DISTRO/setup.bash
 
@@ -655,28 +633,20 @@ git clone -b $ROS_DISTRO \
 https://github.com/micro-ROS/micro_ros_setup.git \
 src/micro_ros_setup
 
-sudo apt update && \
-sudo apt-get -y install python3-pip wget nano
-
-sudo rosdep fix-permissions
-rosdep update
+sudo rosdep fix-permissions &&\
+rosdep update &&\
 rosdep install --from-paths src --ignore-src -y
 
 colcon build
 . ./install/local_setup.bash
 
-# using my fork for the ament_cmake repository
-sed -i 's/ament\/ament_cmake/sunoc\/ament_cmake/g' ./install/micro_ros_setup/config/generate_lib/dev_ros2_packages.txt
-sed -i 's/ament\/ament_cmake/sunoc\/ament_cmake/g' ./src/micro_ros_setup/config/generate_lib/dev_ros2_packages.txt
-sed -i 's/raw.githubusercontent.com\/ros2\/ros2\/humble\/ros2.repos/gitlab.com\/sunoc\/xilinx-kria-kv260-documentation\/-\/snippets\/2548852\/raw\/main\/ros2.repos/g' ./src/micro_ros_setup/scripts/create_ws.sh
-
-# same for the ament_index repository
-sed -i 's/ament\/ament_index/sunoc\/ament_index/g' ./install/micro_ros_setup/config/generate_lib/dev_ros2_packages.txt
-sed -i 's/ament\/ament_index/sunoc\/ament_index/g' ./src/micro_ros_setup/config/generate_lib/dev_ros2_packages.txt
-
-
 ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
+\end{verbatim}
+\end{tcolorbox}
 
+
+\begin{tcolorbox}
+\begin{verbatim}
 touch custom_r5f_toolchain.cmake
 touch custom_r5f_colcon.meta
 \end{verbatim}
@@ -704,11 +674,18 @@ WIP: make this available as a downloadable file form my git repo.
 Now we have both our configuration wiles, we can build the library with the following ros2 command:
 \begin{tcolorbox}
 \begin{verbatim}
-ln -s /armr5-toolchain/armrm-xilinx-eabi/usr/include/c++/11.2.0/ /usr/include/c++/
-ln -s /armr5-toolchain/armrm-xilinx-eabi/usr/include/c++/11.2.0/arm-xilinxmllibarmv5tehard-eabi/bits/c++config.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/c++/11.2.0/bits/
-ln -s /usr/include/dlfcn.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/
+mv /armr5-toolchain/armrm-xilinx-eabi/usr/include/dirent.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/dirent.h.bkp
+ln -s /usr/include/dirent.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/
+ln -s /usr/include/features.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/
+ln -s /usr/include/features-time64.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/
+ln -s /usr/include/stdc-predef.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/
 
+sudo apt-get update && sudo apt-get install -y libc6-dev-i386
+ln -s /usr/include/x86_64-linux-gnu/gnu /armr5-toolchain/armrm-xilinx-eabi/usr/include/
+ln -s /usr/include/x86_64-linux-gnu/bits /armr5-toolchain/armrm-xilinx-eabi/usr/include/
 
+mv /armr5-toolchain/armrm-xilinx-eabi/usr/include/string.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/string.h.bkp
+ln -s /usr/include/string.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/
 
 ros2 run micro_ros_setup build_firmware.sh \
 $(pwd)/custom_r5f_toolchain.cmake $(pwd)/custom_r5f_colcon.meta

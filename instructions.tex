@@ -446,8 +446,8 @@ cd ~/Xilinx
 git clone --recursive \
 https://github.com/Xilinx/kria-vitis-platforms.git
 cd kria-vitis-platforms/k26/platforms
-export XILINX_VIVADO=/home/sunoc/Xilinx/Vivado/2022.2/
-export XILINX_VITIS=/home/sunoc/Xilinx/Vitis/2022.2/
+export XILINX_VIVADO=/home/$USER/Xilinx/Vivado/2022.2/
+export XILINX_VITIS=/home/$USER/Xilinx/Vitis/2022.2/
 make platform PLATFORM=k26_base_starter_kit
 \end{verbatim}
 \end{tcolorbox}
@@ -713,11 +713,11 @@ $(pwd)/custom_r5f_toolchain.cmake $(pwd)/custom_r5f_colcon.meta
 Then, back on the host machine, we can download the static library and the include files:
 \begin{tcolorbox}
 \begin{verbatim}
-mkdir /home/sunoc/Xilinx/\
+mkdir /home/$USER/Xilinx/\
 workspace/openamp_echo_demo/microros_lib
 
 scp ubuntu@192.168.11.4:/microros_ws/firmware/build/* \
-/home/sunoc/Xilinx/workspace/openamp_echo_demo/microros_lib/
+/home/$USER/Xilinx/workspace/openamp_echo_demo/microros_lib/
 \end{verbatim}
 \end{tcolorbox}
 

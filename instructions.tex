@@ -596,15 +596,20 @@ sudo find / -name 'armr5-none-eabi-gcc'
 \end{tcolorbox}
 
 The return should look something like this:\\
-\verb|/home/sunoc/Xilinx/Vitis/2022.2/gnu/armr5/lin/|\\
+\verb|/home/$USER/Xilinx/Vitis/2022.2/gnu/armr5/lin/|\\
 \verb|gcc-arm-none-eabi/bin/armr5-none-eabi-gcc|
 
 You can then re-use some part of that path and run the following commands to start the
-Docker container with access to the toolchain for ARM R5:
+Docker container with access to the toolchain for ARM R5.
+Since the directory inside of Xilinx workspace is used by the IDE itself for building
+the firmware, it is a good idea to make a copy of the compiler first.
+In the following example, we are copying the \verb|gcc-arm-none-eabi| provided by
+Xilinx on our \verb|/home/$USER/src/| directory:
 \begin{tcolorbox}
 \begin{verbatim}
-toolchain="/home/sunoc/Xilinx/Vitis/2022.2/gnu/\
-armr5/lin/gcc-arm-none-eabi/"
+cp -r /home/$USER/Xilinx/Vitis/2022.2/gnu/\
+armr5/lin/gcc-arm-none-eabi/ /home/$USER/src/
+toolchain="/home/$USER/src/gcc-arm-none-eabi/"
 docker run -d --name ros_build -it --net=host \
 -v /dev:/dev \
 -v $toolchain:/armr5-toolchain \

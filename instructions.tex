@@ -674,17 +674,11 @@ WIP: make this available as a downloadable file form my git repo.
 Now we have both our configuration wiles, we can build the library with the following ros2 command:
 \begin{tcolorbox}
 \begin{verbatim}
-mv /armr5-toolchain/armrm-xilinx-eabi/usr/include/dirent.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/dirent.h.bkp
-ln -s /usr/include/dirent.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/
-ln -s /usr/include/features.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/
-ln -s /usr/include/features-time64.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/
-ln -s /usr/include/stdc-predef.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/
-
-ln -s /usr/include/x86_64-linux-gnu/gnu /armr5-toolchain/armrm-xilinx-eabi/usr/include/
-ln -s /usr/include/x86_64-linux-gnu/bits /armr5-toolchain/armrm-xilinx-eabi/usr/include/
-
-mv /armr5-toolchain/armrm-xilinx-eabi/usr/include/string.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/string.h.bkp
-ln -s /usr/include/string.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/
+sudo apt-get update && sudo apt-get install rsync
+rsync -avh --progress /armr5-toolchain/bin/ /bin/
+rsync -avh --progress /armr5-toolchain/armrm-xilinx-eabi/usr/ /usr/
+rsync -avh --progress /armr5-toolchain/armrm-xilinx-eabi/var/ /var/
+cp -r /armr5-toolchain/x86_64-oesdk-linux /usr/
 
 ros2 run micro_ros_setup build_firmware.sh \
 $(pwd)/custom_r5f_toolchain.cmake $(pwd)/custom_r5f_colcon.meta

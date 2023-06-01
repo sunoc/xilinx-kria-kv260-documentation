@@ -623,7 +623,7 @@ Now we are in the ROS2 container, we can build the micro-ROS firmware as present
 \begin{tcolorbox}
 \begin{verbatim}
 sudo apt update && \
-sudo apt-get -y install python3-pip wget nano
+sudo apt-get -y install python3-pip wget nano libc6-dev-i386
 
 . /opt/ros/$ROS_DISTRO/setup.bash
 
@@ -680,7 +680,6 @@ ln -s /usr/include/features.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/
 ln -s /usr/include/features-time64.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/
 ln -s /usr/include/stdc-predef.h /armr5-toolchain/armrm-xilinx-eabi/usr/include/
 
-sudo apt-get update && sudo apt-get install -y libc6-dev-i386
 ln -s /usr/include/x86_64-linux-gnu/gnu /armr5-toolchain/armrm-xilinx-eabi/usr/include/
 ln -s /usr/include/x86_64-linux-gnu/bits /armr5-toolchain/armrm-xilinx-eabi/usr/include/
 

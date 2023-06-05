@@ -592,10 +592,15 @@ Here is how to do all of this and then opening a \verb|bash| shell in the contai
 \begin{tcolorbox}
 \begin{verbatim}
 pushd /home/$USER/Downloads
-wget https://developer.arm.com/-/media/Files/downloads/gnu/12.2.mpacbti-rel1/binrel/arm-gnu-toolchain-12.2.mpacbti-rel1-x86_64-arm-none-eabi.tar.xz
-tar -xvf arm-gnu-toolchain-12.2.mpacbti-rel1-x86_64-arm-none-eabi.tar.xz
+wget https://developer.arm.com/-/media/Files/downloads/\
+gnu/12.2.mpacbti-rel1/binrel/arm-gnu-toolchain-12.2\
+.mpacbti-rel1-x86_64-arm-none-eabi.tar.xz
+tar -xvf arm-gnu-toolchain-12.2.mpacbti-rel1-x86_64-\
+arm-none-eabi.tar.xz
 popd
-toolchain="/home/$USER/Downloads/arm-gnu-toolchain-12.2.mpacbti-rel1-x86_64-arm-none-eabi/"
+
+toolchain="/home/$USER/Downloads/arm-gnu-toolchain-\
+12.2.mpacbti-rel1-x86_64-arm-none-eabi/"
 
 
 docker run -d --name ros_build -it --net=host \
@@ -620,7 +625,11 @@ master/rosdep/sources.list.d/20-default.list && \
 popd
 
 sudo apt update
+\end{verbatim}
+\end{tcolorbox}
 
+\begin{tcolorbox}
+\begin{verbatim}
 . /opt/ros/$ROS_DISTRO/setup.bash
 
 mkdir microros_ws
@@ -647,30 +656,24 @@ we also are going to copy the cross-compiler into the microros workspace,
 then we can build the library with the following ros2 command:
 \begin{tcolorbox}
 \begin{verbatim}
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/custom_r5f_toolchain.cmake
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/custom_r5f_colcon.meta
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
+documentation/-/raw/main/src/custom_r5f_toolchain.cmake
+
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
+documentation/-/raw/main/src/custom_r5f_colcon.meta
 
 cp -r /armr5-toolchain/ $(pwd)/toolchain && \
 export PATH=$PATH:$(pwd)/toolchain/bin
 
 ros2 run micro_ros_setup build_firmware.sh \
-$(pwd)/custom_r5f_toolchain.cmake $(pwd)/custom_r5f_colcon.meta
+$(pwd)/custom_r5f_toolchain.cmake $(pwd)/\
+custom_r5f_colcon.meta
+
+exit
 \end{verbatim}
 \end{tcolorbox}
 
-Then, back on the host machine, we can download the static library and the include files:
-\begin{tcolorbox}
-\begin{verbatim}
-mkdir /home/$USER/Xilinx/\
-workspace/openamp_echo_demo/microros_lib
-
-docker container ls -a
-
-docker cp  b8ddea5d8fad:/microros_ws/firmware/build/* \
-/home/$USER/Xilinx/workspace/openamp_echo_demo/microros_lib/
-\end{verbatim}
-\end{tcolorbox}
-
+\pagebreak
 \subsection{WIP::: Static library warnings}
 \label{sec:stat-libr-warn}
 In this extra section, I want to take notes about the large amount of warning that appears
@@ -682,6 +685,20 @@ whe building the micro-ROS static library.
 \section{Including the micro-ROS static library in a project}
 Now we have a Vitis demonstration project available and the \verb|libmicroros| static library
 available, we can combine both by including this library into our Kria project.
+
+On the host machine running the IDE, we can download the static library and the include files from the build Docker.
+Here, we assume your Vitis IDE workspace sits in you home directory.
+\begin{tcolorbox}
+\begin{verbatim}
+mkdir /home/$USER/workspace/microros_lib
+
+docker cp ros_build:/microros_ws/firmware/build/libmicroros.a\
+ /home/$USER/workspace/microros_lib/
+
+docker cp ros_build:/microros_ws/firmware/build/include \
+/home/$USER/workspace/microros_lib/
+\end{verbatim}
+\end{tcolorbox}
 
 Many parameters are available to be set up in the IDE for the compilation toolchain, but here is
 a setup that worked to have the IDE to recognize the include files and to be able to use them

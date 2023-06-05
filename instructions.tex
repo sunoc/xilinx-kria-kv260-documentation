@@ -586,30 +586,18 @@ it is most common in the guides about micro-ROS to build the firmwares and libra
 so we can have access of the ROS environment without installing it on my machine.
 One can simply run this command to summon a ROS2 Docker\footnote{If Docker is not set up on your machine, you can follow the guide on \href{https://docs.docker.com/engine/install/ubuntu/}{the official website}. When you can successfully run the ``hello-world'' container, you are good to go.} with the wanted version, but first we also need to check the cross-compilation tools.
 
-These are provided with the Vitis IDE, installed earlier in this guide, but
-you should check if the path to the binaries are correct:
-
+We are downloading the latest \verb|arm-none-eabi| gcc compiler directly from the ARM website.
+The cross-compilation tool can then be extracted, set as our ``toolchain'' variable, then passed as a parameter when creating the Docker container.
+Here is how to do all of this and then opening a \verb|bash| shell in the container:
 \begin{tcolorbox}
 \begin{verbatim}
-sudo find / -name 'armr5-none-eabi-gcc'
-\end{verbatim}
-\end{tcolorbox}
+pushd /home/$USER/Downloads
+wget https://developer.arm.com/-/media/Files/downloads/gnu/12.2.mpacbti-rel1/binrel/arm-gnu-toolchain-12.2.mpacbti-rel1-x86_64-arm-none-eabi.tar.xz
+tar -xvf arm-gnu-toolchain-12.2.mpacbti-rel1-x86_64-arm-none-eabi.tar.xz
+popd
+toolchain="/home/$USER/Downloads/arm-gnu-toolchain-12.2.mpacbti-rel1-x86_64-arm-none-eabi/"
 
-The return should look something like this:\\
-\verb|/home/$USER/Xilinx/Vitis/2022.2/gnu/armr5/lin/|\\
-\verb|gcc-arm-none-eabi/bin/armr5-none-eabi-gcc|
 
-You can then re-use some part of that path and run the following commands to start the
-Docker container with access to the toolchain for ARM R5.
-Since the directory inside of Xilinx workspace is used by the IDE itself for building
-the firmware, it is a good idea to make a copy of the compiler first.
-In the following example, we are copying the \verb|gcc-arm-none-eabi| provided by
-Xilinx on our \verb|/home/$USER/src/| directory:
-\begin{tcolorbox}
-\begin{verbatim}
-cp -r /home/$USER/Xilinx/Vitis/2022.2/gnu/\
-armr5/lin/gcc-arm-none-eabi/ /home/$USER/src/
-toolchain="/home/$USER/src/gcc-arm-none-eabi/"
 docker run -d --name ros_build -it --net=host \
 -v /dev:/dev \
 -v $toolchain:/armr5-toolchain \
@@ -624,6 +612,14 @@ Now we are in the ROS2 container, we can build the micro-ROS firmware as present
 \begin{verbatim}
 sudo apt update && \
 sudo apt-get -y install python3-pip wget nano libc6-dev-i386
+
+sudo mkdir -p /etc/ros/rosdep/sources.list.d && \
+pushd /etc/ros/rosdep/sources.list.d && \
+wget https://raw.githubusercontent.com/ros/rosdistro/\
+master/rosdep/sources.list.d/20-default.list && \
+popd
+
+sudo apt update
 
 . /opt/ros/$ROS_DISTRO/setup.bash
 
@@ -645,40 +641,17 @@ ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
 \end{tcolorbox}
 
 
-\begin{tcolorbox}
-\begin{verbatim}
-touch custom_r5f_toolchain.cmake
-touch custom_r5f_colcon.meta
-\end{verbatim}
-\end{tcolorbox}
-
 From there we will need some configuration files specifically for
-our Cortex R5F. The two following settings are required in order to build our library.
-
-
-Here is a configuration that should work for you \verb|my_custom_toolchain.cmake|
-
-WIP: make this available as a downloadable file form my git repo.
-\begin{tcolorbox}
-\verbatiminput{src/my_custom_toolchain.cmake}
-\end{tcolorbox}
-
-And here is a configuration for the \verb|my_custom_colcon.meta|.
-
-WIP: make this available as a downloadable file form my git repo.
-\begin{tcolorbox}
-\verbatiminput{src/my_custom_colcon.meta}
-\end{tcolorbox}
-
-
-Now we have both our configuration wiles, we can build the library with the following ros2 command:
+our Cortex R5F. Both configuration files will be downloaded from my repository;
+we also are going to copy the cross-compiler into the microros workspace,
+then we can build the library with the following ros2 command:
 \begin{tcolorbox}
 \begin{verbatim}
-sudo apt-get update && sudo apt-get install rsync
-rsync -avh --progress /armr5-toolchain/bin/ /bin/
-rsync -avh --progress /armr5-toolchain/armrm-xilinx-eabi/usr/ /usr/
-rsync -avh --progress /armr5-toolchain/armrm-xilinx-eabi/var/ /var/
-cp -r /armr5-toolchain/x86_64-oesdk-linux /usr/
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/custom_r5f_toolchain.cmake
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/custom_r5f_colcon.meta
+
+cp -r /armr5-toolchain/ $(pwd)/toolchain && \
+export PATH=$PATH:$(pwd)/toolchain/bin
 
 ros2 run micro_ros_setup build_firmware.sh \
 $(pwd)/custom_r5f_toolchain.cmake $(pwd)/custom_r5f_colcon.meta
@@ -691,10 +664,17 @@ Then, back on the host machine, we can download the static library and the inclu
 mkdir /home/$USER/Xilinx/\
 workspace/openamp_echo_demo/microros_lib
 
-scp ubuntu@192.168.11.4:/microros_ws/firmware/build/* \
+docker container ls -a
+
+docker cp  b8ddea5d8fad:/microros_ws/firmware/build/* \
 /home/$USER/Xilinx/workspace/openamp_echo_demo/microros_lib/
 \end{verbatim}
 \end{tcolorbox}
+
+\subsection{WIP::: Static library warnings}
+\label{sec:stat-libr-warn}
+In this extra section, I want to take notes about the large amount of warning that appears
+whe building the micro-ROS static library.
 
 
 

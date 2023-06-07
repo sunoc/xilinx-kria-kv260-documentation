@@ -364,6 +364,133 @@ ready to test with some example; however, in order for these examples
 to be built, we need to setup Xilinx preferred IDE: Vitis.
 
 
+% -------------------------------------------------------------------------------
+\section{Building and running an example program on the Linux side}
+\label{sec:building-running-an}
+In order to test the deployment of the firmware on the R5F side, and in particular
+to test the RPMsg function, we need some program on the Linux side of the Kria
+board to ``talk'' with the real-time side.
+
+Some source is provided by Xilinx to build a demonstration software that does
+this purpose: specifically interact with the demonstration firmware.
+
+Here are the steps required to obtain the sources, and build the program.
+As a reminder, this is meant to be done on the Linux running on the
+Kria board, NOT on your host machine !
+\begin{tcolorbox}
+\begin{verbatim}
+git clone https://github.com/Xilinx/meta-openamp.git
+cd  meta-openamp
+git checkout xlnx-rel-v2022.2
+cd  .//recipes-openamp/rpmsg-examples/rpmsg-echo-test
+make
+sudo ln -s $(pwd)/echo_test /usr/bin/
+\end{verbatim}
+\end{tcolorbox}
+
+% -------------------------------------------------------------------------------
+\section{Building the micro-ROS static library}
+\label{sec:building-micro-ros}
+In this section, the goal is to build the micro-ROS library in order to be
+able to integrate the micro-ROS function into our Cortex R5F firmware.
+All of this should be done via cross-compiling on a host machine, however
+it is most common in the guides about micro-ROS to build the firmwares and libraries within a Docker,
+so we can have access of the ROS environment without installing it on my machine.
+One can simply run this command to summon a ROS2 Docker\footnote{If Docker is not set up on your machine, you can follow the guide on \href{https://docs.docker.com/engine/install/ubuntu/}{the official website}. When you can successfully run the ``hello-world'' container, you are good to go.} with the wanted version, but first we also need to check the cross-compilation tools.
+
+We are downloading the latest \verb|arm-none-eabi| gcc compiler directly from the ARM website.
+The cross-compilation tool can then be extracted, set as our ``toolchain'' variable, then passed as a parameter when creating the Docker container.
+Here is how to do all of this and then opening a \verb|bash| shell in the container:
+\begin{tcolorbox}
+\begin{verbatim}
+pushd /home/$USER/Downloads
+wget https://developer.arm.com/-/media/Files/downloads/\
+gnu/12.2.mpacbti-rel1/binrel/arm-gnu-toolchain-12.2\
+.mpacbti-rel1-x86_64-arm-none-eabi.tar.xz
+tar -xvf arm-gnu-toolchain-12.2.mpacbti-rel1-x86_64-\
+arm-none-eabi.tar.xz
+popd
+
+toolchain="/home/$USER/Downloads/arm-gnu-toolchain-\
+12.2.mpacbti-rel1-x86_64-arm-none-eabi/"
+
+
+docker run -d --name ros_build -it --net=host \
+-v /dev:/dev \
+-v $toolchain:/armr5-toolchain \
+--privileged ros:humble
+docker exec -it ros_build bash
+\end{verbatim}
+\end{tcolorbox}
+
+
+Now we are in the ROS2 container, we can build the micro-ROS firmware as presented in the \href{https://micro.ros.org/docs/tutorials/advanced/create\_custom\_static\_library}{dedicated micro-ROS guide}:
+\begin{tcolorbox}
+\begin{verbatim}
+sudo apt update && \
+sudo apt-get -y install python3-pip wget nano libc6-dev-i386
+
+sudo mkdir -p /etc/ros/rosdep/sources.list.d && \
+pushd /etc/ros/rosdep/sources.list.d && \
+wget https://raw.githubusercontent.com/ros/rosdistro/\
+master/rosdep/sources.list.d/20-default.list && \
+popd
+
+sudo apt update
+\end{verbatim}
+\end{tcolorbox}
+
+\begin{tcolorbox}
+\begin{verbatim}
+. /opt/ros/$ROS_DISTRO/setup.bash
+
+mkdir microros_ws
+cd microros_ws
+git clone -b $ROS_DISTRO \
+https://github.com/micro-ROS/micro_ros_setup.git \
+src/micro_ros_setup
+
+sudo rosdep fix-permissions &&\
+rosdep update &&\
+rosdep install --from-paths src --ignore-src -y
+
+colcon build
+. ./install/local_setup.bash
+
+ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
+\end{verbatim}
+\end{tcolorbox}
+
+
+From there we will need some configuration files specifically for
+our Cortex R5F. Both configuration files will be downloaded from my repository;
+we also are going to copy the cross-compiler into the microros workspace,
+then we can build the library with the following ros2 command:
+\begin{tcolorbox}
+\begin{verbatim}
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
+documentation/-/raw/main/src/custom_r5f_toolchain.cmake
+
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
+documentation/-/raw/main/src/custom_r5f_colcon.meta
+
+cp -r /armr5-toolchain/ $(pwd)/toolchain && \
+export PATH=$PATH:$(pwd)/toolchain/bin
+
+ros2 run micro_ros_setup build_firmware.sh \
+$(pwd)/custom_r5f_toolchain.cmake $(pwd)/\
+custom_r5f_colcon.meta
+
+exit
+\end{verbatim}
+\end{tcolorbox}
+
+\pagebreak
+\subsection{WIP::: Static library warnings}
+\label{sec:stat-libr-warn}
+In this extra section, I want to take notes about the large amount of warning that appears
+whe building the micro-ROS static library.
+
 
 % -------------------------------------------------------------------------------
 \section{Vitis IDE}
@@ -529,32 +656,6 @@ psu_r5_tcm_ram_1_S_AXI_BASEADDR    0x00020000
 
 
 % -------------------------------------------------------------------------------
-\section{Building and running an example program on the Linux side}
-\label{sec:building-running-an}
-In order to test the deployment of the firmware on the R5F side, and in particular
-to test the RPMsg function, we need some program on the Linux side of the Kria
-board to ``talk'' with the real-time side.
-
-Some source is provided by Xilinx to build a demonstration software that does
-this purpose: specifically interact with the demonstration firmware.
-
-Here are the steps required to obtain the sources, and build the program.
-As a reminder, this is meant to be done on the Linux running on the
-Kria board, NOT on your host machine !
-\begin{tcolorbox}
-\begin{verbatim}
-git clone https://github.com/Xilinx/meta-openamp.git
-cd  meta-openamp
-git checkout xlnx-rel-v2022.2
-cd  .//recipes-openamp/rpmsg-examples/rpmsg-echo-test
-make
-sudo ln -s $(pwd)/echo_test /usr/bin/
-\end{verbatim}
-\end{tcolorbox}
-
-
-
-% -------------------------------------------------------------------------------
 \section{WIP::: Loading a new firmware from Linux}
 \label{sec:loading-new-firmware}
 This is a work in progress.
@@ -573,112 +674,6 @@ echo_test
 echo stop > /sys/class/remoteproc/remoteproc0/state
 \end{verbatim}
 \end{tcolorbox}
-
-
-
-% -------------------------------------------------------------------------------
-\section{Building the micro-ROS static library}
-\label{sec:building-micro-ros}
-In this section, the goal is to build the micro-ROS library in order to be
-able to integrate the micro-ROS function into our Cortex R5F firmware.
-All of this should be done via cross-compiling on a host machine, however
-it is most common in the guides about micro-ROS to build the firmwares and libraries within a Docker,
-so we can have access of the ROS environment without installing it on my machine.
-One can simply run this command to summon a ROS2 Docker\footnote{If Docker is not set up on your machine, you can follow the guide on \href{https://docs.docker.com/engine/install/ubuntu/}{the official website}. When you can successfully run the ``hello-world'' container, you are good to go.} with the wanted version, but first we also need to check the cross-compilation tools.
-
-We are downloading the latest \verb|arm-none-eabi| gcc compiler directly from the ARM website.
-The cross-compilation tool can then be extracted, set as our ``toolchain'' variable, then passed as a parameter when creating the Docker container.
-Here is how to do all of this and then opening a \verb|bash| shell in the container:
-\begin{tcolorbox}
-\begin{verbatim}
-pushd /home/$USER/Downloads
-wget https://developer.arm.com/-/media/Files/downloads/\
-gnu/12.2.mpacbti-rel1/binrel/arm-gnu-toolchain-12.2\
-.mpacbti-rel1-x86_64-arm-none-eabi.tar.xz
-tar -xvf arm-gnu-toolchain-12.2.mpacbti-rel1-x86_64-\
-arm-none-eabi.tar.xz
-popd
-
-toolchain="/home/$USER/Downloads/arm-gnu-toolchain-\
-12.2.mpacbti-rel1-x86_64-arm-none-eabi/"
-
-
-docker run -d --name ros_build -it --net=host \
--v /dev:/dev \
--v $toolchain:/armr5-toolchain \
---privileged ros:humble
-docker exec -it ros_build bash
-\end{verbatim}
-\end{tcolorbox}
-
-
-Now we are in the ROS2 container, we can build the micro-ROS firmware as presented in the \href{https://micro.ros.org/docs/tutorials/advanced/create\_custom\_static\_library}{dedicated micro-ROS guide}:
-\begin{tcolorbox}
-\begin{verbatim}
-sudo apt update && \
-sudo apt-get -y install python3-pip wget nano libc6-dev-i386
-
-sudo mkdir -p /etc/ros/rosdep/sources.list.d && \
-pushd /etc/ros/rosdep/sources.list.d && \
-wget https://raw.githubusercontent.com/ros/rosdistro/\
-master/rosdep/sources.list.d/20-default.list && \
-popd
-
-sudo apt update
-\end{verbatim}
-\end{tcolorbox}
-
-\begin{tcolorbox}
-\begin{verbatim}
-. /opt/ros/$ROS_DISTRO/setup.bash
-
-mkdir microros_ws
-cd microros_ws
-git clone -b $ROS_DISTRO \
-https://github.com/micro-ROS/micro_ros_setup.git \
-src/micro_ros_setup
-
-sudo rosdep fix-permissions &&\
-rosdep update &&\
-rosdep install --from-paths src --ignore-src -y
-
-colcon build
-. ./install/local_setup.bash
-
-ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
-\end{verbatim}
-\end{tcolorbox}
-
-
-From there we will need some configuration files specifically for
-our Cortex R5F. Both configuration files will be downloaded from my repository;
-we also are going to copy the cross-compiler into the microros workspace,
-then we can build the library with the following ros2 command:
-\begin{tcolorbox}
-\begin{verbatim}
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
-documentation/-/raw/main/src/custom_r5f_toolchain.cmake
-
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
-documentation/-/raw/main/src/custom_r5f_colcon.meta
-
-cp -r /armr5-toolchain/ $(pwd)/toolchain && \
-export PATH=$PATH:$(pwd)/toolchain/bin
-
-ros2 run micro_ros_setup build_firmware.sh \
-$(pwd)/custom_r5f_toolchain.cmake $(pwd)/\
-custom_r5f_colcon.meta
-
-exit
-\end{verbatim}
-\end{tcolorbox}
-
-\pagebreak
-\subsection{WIP::: Static library warnings}
-\label{sec:stat-libr-warn}
-In this extra section, I want to take notes about the large amount of warning that appears
-whe building the micro-ROS static library.
-
 
 
 % -------------------------------------------------------------------------------
@@ -729,6 +724,13 @@ With both of these setup in your project, you should be able to include the foll
 #include <rcl/error_handling.h>
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
+\end{verbatim}
+\end{tcolorbox}
+
+
+\begin{tcolorbox}
+\begin{verbatim}
+scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/Debug/rpmsg_pingpong_microros_lib.elf  kria:/home/ubuntu/
 \end{verbatim}
 \end{tcolorbox}
 

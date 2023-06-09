@@ -4,4 +4,7 @@
 *.pdf
 *.toc
 *.dvi
+*.fdb*
+*.fls
+*.gz
 auto/

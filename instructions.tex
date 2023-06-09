@@ -489,8 +489,15 @@ exit
 \subsection{WIP::: Static library warnings}
 \label{sec:stat-libr-warn}
 In this extra section, I want to take notes about the large amount of warning that appears
-whe building the micro-ROS static library.
+when building the micro-ROS static library.
 
+\begin{itemize}
+\item \verb|Package 'rcutils' exports library 'dl' which couldn't be found|: A warning that appears for almost every package. This warning is referenced in a \href{https://github.com/micro-ROS/freertos_apps/issues/37}{Issue ticket on micro-ROS GitHub page}. Need to investigate more since the issue is marked as closed, and seemed to have been solved by user ncnynl.
+\item \verb|warning: array subscript has type 'char' [-Wchar-subscripts]|: No idea what's going on here.
+\item \verb|warning: implicit declaration of function 'usleep';|, \verb|warning: implicit declaration of function 'clock_gettime'|: Normal, the time-related library will be added in the Vitis project.
+\item \verb|warning: implicit declaration of function 'strdup';|: Feels similar to the ``usleep'' warning, but need to be sure.
+\item The package ``rcutils'' displays a lot of warnings. Need to check these in detail.
+\end{itemize}
 
 % -------------------------------------------------------------------------------
 \section{Vitis IDE}
@@ -748,7 +755,7 @@ ROS2 on a Ubuntu system\footnote{The curl command from the guide does not work t
   but the command wget used instead does work. The key is then moved to the correct spot with mv}.
 We will follow this guide here.
 
-Firstly, we need to update the locals,  enable the universe Ubuntu repository, get the key and add the repository for ROS2. This can be done as follow:
+Firstly, we need to update the locals, enable the universe Ubuntu repository, get the key and add the repository for ROS2. This can be done as follow:
 
 \begin{tcolorbox}
 \begin{verbatim}

@@ -1,5 +1,6 @@
 \documentclass[10pt]{article}
 \usepackage{CJKutf8}
+\usepackage{xurl}
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{float}
@@ -38,22 +39,22 @@
 \item Board product information:\\ 
   \url{https://www.xilinx.com/products/som/kria/kv260-vision-starter-kit.html}
 \item SoC product information:\\ 
-\url{https://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html}
+  \url{https://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html}
 \item Download page for the official Canonical Ubuntu releases for the board:\\ \url{https://ubuntu.com/download/amd-xilinx}
 \item Xilinx official documentation:\\ 
-\url{https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Summary}
+  \url{https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Summary}
 \item Atlassian documentation:\\ 
-\url{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+K26+SOM}
+  \url{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+K26+SOM}
 \item Fixstar presentation (JP):\\  
-\url{https://speakerdeck.com/fixstars/fpga-seminar-12-fixstars-corporation-20220727}
+  \url{https://speakerdeck.com/fixstars/fpga-seminar-12-fixstars-corporation-20220727}
 \item Xilinx OpenAMP demo documentation:\\ 
-\url{https://xilinx.github.io/kria-apps-docs/openamp/build/html/openamp\_landing.html}
+  \url{https://xilinx.github.io/kria-apps-docs/openamp/build/html/openamp\_landing.html}
 \item Libmetal and OpenAMP official Xilinx documentation:\\ 
-\url{https://docs.xilinx.com/r/en-US/ug1186-zynq-openamp-gsg/Introduction?tocId=GFruK4\_sY1eyu3jD9X1EuA}
+  \url{https://docs.xilinx.com/r/en-US/ug1186-zynq-openamp-gsg/Introduction?tocId=GFruK4\_sY1eyu3jD9X1EuA}
 \item Guide for KV260 board setup (JP):\\ 
-\url{https://zenn.dev/ryuz88/articles/kv260\_setup\_memo\_ubuntu22}
+  \url{https://zenn.dev/ryuz88/articles/kv260\_setup\_memo\_ubuntu22}
 \item Vitis IDE download page:\\ 
-\url{https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vitis.html}
+  \url{https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vitis.html}
 \end{itemize}
 
 \pagebreak
@@ -162,9 +163,9 @@ by consolidating the configuration for other types of connections in the \verb|b
 export https_proxy="http://<AXIA_username>:\
 <AXIA_psw>@proxy.ic.nanzan-u.ac.jp:8080"
 
-echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc && \
-echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc && \
-echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc && \
+echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc \
+echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc \
+echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc \
 echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" \
 >> ~/.bashrc
 \end{verbatim}
@@ -253,7 +254,7 @@ without all of this stuff:
 sudo systemctl disable snapd.service
 sudo systemctl disable snapd.socket
 sudo systemctl disable snapd.seeded.service
-sudo snap list #show the installed package, remove then all:
+sudo snap list #show installed package, remove then all:
 sudo snap remove --purge firefox
 sudo snap remove --purge gnome-3-38-2004
 sudo snap remove --purge gnome-42-2204
@@ -306,9 +307,10 @@ This exact use-case is not exactly presented in the official documentation, but 
 guides were found to eventually put together this procedure.
 
 \begin{itemize}
-\item \href{https://speakerdeck.com/fixstars/fpga-seminar-12-fixstars-corporation-20220727}{A slideshow (JP) from Fixstar employees} presents how
-  to use the device tree to enable the communication between the cores.
-\item \href{https://zenn.dev/ryuz88/articles/kv260_setup_memo_ubuntu22}{This blog article (JP)} shows all the major steps on how to enable the \verb|remoteproc|.
+\item A slideshow (JP) from Fixstar employees presents how to use the device tree to enable the communication between the cores. \\
+  \url{https://speakerdeck.com/fixstars/fpga-seminar-12-fixstars-corporation-20220727}
+\item This blog article (JP) shows all major steps on how to enable the \verb|remoteproc|. \\
+  \url{https://zenn.dev/ryuz88/articles/kv260_setup_memo_ubuntu22}
 \end{itemize}
 
 
@@ -407,7 +409,7 @@ it is most common in the guides about micro-ROS to build the firmwares and libra
 so we can have access of the ROS environment without installing it on my machine.
 One can simply run this command to summon a ROS2 Docker\footnote{If Docker is not set up on your machine, you can follow the guide on \href{https://docs.docker.com/engine/install/ubuntu/}{the official website}. When you can successfully run the ``hello-world'' container, you are good to go.} with the wanted version, but first we also need to check the cross-compilation tools.
 
-We are downloading the latest \verb|arm-none-eabi| gcc compiler directly from the ARM website.
+We are downloading the latest \verb|arm-none-eabi| gcc compiler directly \\from the ARM website.
 The cross-compilation tool can then be extracted, set as our ``toolchain'' variable, then passed as a parameter when creating the Docker container.
 Here is how to do all of this and then opening a \verb|bash| shell in the container:
 \begin{tcolorbox}
@@ -437,7 +439,10 @@ Now we are in the ROS2 container, we can build the micro-ROS firmware as present
 \begin{tcolorbox}
 \begin{verbatim}
 sudo apt update && \
-sudo apt-get -y install python3-pip wget nano libc6-dev-i386
+sudo apt-get -y install python3-pip \
+                        wget \
+                        nano \
+                        libc6-dev-i386
 
 sudo mkdir -p /etc/ros/rosdep/sources.list.d && \
 pushd /etc/ros/rosdep/sources.list.d && \
@@ -501,9 +506,15 @@ In this extra section, I want to take notes about the large amount of warning th
 when building the micro-ROS static library.
 
 \begin{itemize}
-\item \verb|Package 'rcutils' exports library 'dl' which couldn't be found|: A warning that appears for almost every package. This warning is referenced in a \href{https://github.com/micro-ROS/freertos_apps/issues/37}{Issue ticket on micro-ROS GitHub page}. Need to investigate more since the issue is marked as closed, and seemed to have been solved by user ncnynl.
-\item \verb|warning: array subscript has type 'char' [-Wchar-subscripts]|: No idea what's going on here.
-\item \verb|warning: implicit declaration of function 'usleep';|, \verb|warning: implicit declaration of function 'clock_gettime'|: Normal, the time-related library will be added in the Vitis project.
+\item \verb|Package 'rcutils' exports library 'dl' couldn't be found|:\\
+  A warning that appears for almost every package. 
+  This warning is referenced in a \href{https://github.com/micro-ROS/freertos_apps/issues/37}{Issue ticket on micro-ROS GitHub page}. 
+  Need to investigate more since the issue is marked as closed, and seemed to have been solved by user ncnynl.
+\item \verb|warning: array subscript has type 'char' [-Wchar-subscripts]|:\\
+  No idea what's going on here.
+\item \verb|warning: implicit declaration of function 'usleep';|,\\
+      \verb|warning: implicit declaration of function 'clock_gettime'|:\\
+      Normal, the time-related library will be added in the Vitis project.
 \item \verb|warning: implicit declaration of function 'strdup';|: Feels similar to the ``usleep'' warning, but need to be sure.
 \item The package ``rcutils'' displays a lot of warnings. Need to check these in detail.
 \end{itemize}
@@ -693,7 +704,7 @@ echo stop > /sys/class/remoteproc/remoteproc0/state
 
 
 % -------------------------------------------------------------------------------
-\section{Including the micro-ROS static library in a project}
+\section{WIP::: Including the micro-ROS static library in a project}
 Now we have a Vitis demonstration project available and the \verb|libmicroros| static library
 available, we can combine both by including this library into our Kria project.
 
@@ -703,8 +714,8 @@ Here, we assume your Vitis IDE workspace sits in you home directory.
 \begin{verbatim}
 mkdir /home/$USER/workspace/microros_lib
 
-docker cp ros_build:/microros_ws/firmware/build/libmicroros.a\
- /home/$USER/workspace/microros_lib/
+docker cp ros_build:/microros_ws/firmware/build/\
+  libmicroros.a/home/$USER/workspace/microros_lib/
 
 docker cp ros_build:/microros_ws/firmware/build/include \
 /home/$USER/workspace/microros_lib/
@@ -746,7 +757,8 @@ With both of these setup in your project, you should be able to include the foll
 
 \begin{tcolorbox}
 \begin{verbatim}
-scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/Debug/rpmsg_pingpong_microros_lib.elf  kria:/home/ubuntu/
+scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
+  Debug/rpmsg_pingpong_microros_lib.elf  kria:/home/ubuntu/
 \end{verbatim}
 \end{tcolorbox}
 

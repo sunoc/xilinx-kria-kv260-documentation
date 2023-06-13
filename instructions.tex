@@ -333,8 +333,9 @@ sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
 Then we can download and apply the patch that will allow us to use the \verb|remoteproc|:
 \begin{tcolorbox}
 \begin{verbatim}
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
-documentation/-/raw/main/src/system.patch
+wget https://raw.githubusercontent.com/sunoc/xilinx-kria-\
+kv260-documentation/main/src/system.patch
+
 patch system.dts < system.patch
 \end{verbatim}
 \end{tcolorbox}

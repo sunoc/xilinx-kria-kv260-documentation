@@ -8,7 +8,7 @@
         },
         "rosidl_typesupport": {
             "cmake-args": [
-               "-DROSIDL_TYPESUPPORT_SINGLE_TYPESUPPORT=ON"
+                "-DROSIDL_TYPESUPPORT_SINGLE_TYPESUPPORT=ON"
             ]
         },
         "rcl": {
@@ -17,7 +17,7 @@
                 "-DRCL_COMMAND_LINE_ENABLED=OFF",
                 "-DRCL_LOGGING_ENABLED=OFF"
             ]
-        },
+        }, 
         "rcutils": {
             "cmake-args": [
                 "-DENABLE_TESTING=OFF",

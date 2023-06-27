@@ -1,6 +1,7 @@
 \documentclass[10pt]{article}
 \usepackage{CJKutf8}
 \usepackage{xurl}
+\usepackage{fontawesome5}
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{float}
@@ -8,13 +9,18 @@
 % can create colorful boxes, for warning p.ex.
 \usepackage[most]{tcolorbox}
 
+\makeatletter
+\newcommand{\github}[1]{%
+   \href{#1}{GitHub \faGithubSquare}%
+}
+\makeatother
+
 % making the text of the report sans serif
 \renewcommand{\familydefault}{\sfdefault}
 
 \title{Setting up and using Xilinx's KRIA KV260 board \\[1ex] \large \begin{CJK}{UTF8}{min}南山大学\end{CJK}}
 \date{}
-\author{Vincent Conus}
-
+\author{Vincent Conus  -  Source availbe at \github{https://github.com/sunoc/xilinx-kria-kv260-documentation}}
 \begin{document}
 
 \maketitle

@@ -860,8 +860,8 @@ The last command is meant to test the install. If everything went smoothly, you 
 \begin{tcolorbox}
 \begin{verbatim}
 sudo apt-get update
-sudo apt-get install ca-certificates curl gnupg
-sudo install -m 0755 -d /etc/apt/keyrings
+sudo apt-get install ca-certificates curl sudo
+gnupg install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
 sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
@@ -901,12 +901,62 @@ in a production environment to map only the devices that are actually in use.}
 With the second command, we can execute \verb|bash|, as a way to open a terminal to the ``inside'' of the container.
 \begin{tcolorbox}
 \begin{verbatim}
-sudo docker run -d --name ros_build -it --net=host -v \
-     /dev:/dev --privileged ros:humble
-sudo docker exec -it ros_build bash
+sudo docker run -d --name ros_agent -it --net=host -v \
+     /dev:/dev --privileged ros:iron
+sudo docker exec -it ros_agent bash
 \end{verbatim}
 \end{tcolorbox}
 
 From there, it becomes possible to simply use ROS2 as you would for a bare-metal install, and as presented in the section \ref{sec:ros2}.
+
+\begin{tcolorbox}
+\begin{verbatim}
+  source /opt/ros/$ROS_DISTRO/setup.bash
+
+  # Create a workspace and download the micro-ROS tools
+  mkdir microros_ws
+  cd microros_ws
+  git clone -b $ROS_DISTRO https://github.com/micro-ROS/\
+  micro_ros_setup.git src/micro_ros_setup
+
+  # Update dependencies using rosdep
+  sudo apt update && rosdep update
+  rosdep install --from-paths src --ignore-src -y
+
+  # Install pip
+  sudo apt-get install python3-pip
+
+  # Build micro-ROS tools and source them
+  colcon build
+  source install/local_setup.bash
+\end{verbatim}
+\end{tcolorbox}
+
+\begin{tcolorbox}
+\begin{verbatim}
+# Download micro-ROS-Agent packages
+source install/local_setup.bash
+ros2 run micro_ros_setup create_agent_ws.sh
+
+# Build step
+ros2 run micro_ros_setup build_agent.sh
+source install/local_setup.bash
+
+# Run a micro-ROS agent
+ros2 run micro_ros_agent micro_ros_agent serial \
+--dev /dev/ttyUSB1
+\end{verbatim}
+\end{tcolorbox}
+
+From a different shell:
+\begin{tcolorbox}
+\begin{verbatim}
+  source /opt/ros/$ROS_DISTRO/setup.bash
+  
+  # Subscribe to micro-ROS ping topic
+  ros2 topic echo /microROS/ping
+\end{verbatim}
+\end{tcolorbox}
+  
 
 \end{document}

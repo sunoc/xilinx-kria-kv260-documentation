@@ -957,6 +957,23 @@ From a different shell:
   ros2 topic echo /microROS/ping
 \end{verbatim}
 \end{tcolorbox}
-  
+
+% ===============================================================================
+\pagebreak
+\appendix
+% -------------------------------------------------------------------------------
+\section{DTO patch file}
+\label{sec:DTO patch file}
+\inputminted{diff}{./src/system.patch}
+
+% -------------------------------------------------------------------------------
+\section{Custom toolchain CMake settings}
+\label{sec:toolchainsettings}
+\inputminted{cmake}{./src/custom_r5f_toolchain.cmake}
+
+% -------------------------------------------------------------------------------
+\section{Custom Colcon meta settings}
+\label{sec:colconsettings}
+\inputminted{yaml}{./src/custom_r5f_colcon.meta}
 
 \end{document}

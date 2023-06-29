@@ -8,3 +8,4 @@
 *.fls
 *.gz
 auto/
+_minted*

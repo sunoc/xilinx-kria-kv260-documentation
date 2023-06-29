@@ -502,26 +502,6 @@ exit
 \end{verbatim}
 \end{tcolorbox}
 
-\pagebreak
-\subsection{WIP::: Static library warnings}
-\label{sec:stat-libr-warn}
-In this extra section, I want to take notes about the large amount of warning that appears
-when building the micro-ROS static library.
-
-\begin{itemize}
-\item \verb|Package 'rcutils' exports library 'dl' couldn't be found|:\\
-  A warning that appears for almost every package. 
-  This warning is referenced in a \href{https://github.com/micro-ROS/freertos_apps/issues/37}{Issue ticket on micro-ROS GitHub page}. 
-  Need to investigate more since the issue is marked as closed, and seemed to have been solved by user ncnynl.
-\item \verb|warning: array subscript has type 'char' [-Wchar-subscripts]|:\\
-  No idea what's going on here.
-\item \verb|warning: implicit declaration of function 'usleep';|,\\
-      \verb|warning: implicit declaration of function 'clock_gettime'|:\\
-      Normal, the time-related library will be added in the Vitis project.
-\item \verb|warning: implicit declaration of function 'strdup';|: Feels similar to the ``usleep'' warning, but need to be sure.
-\item The package ``rcutils'' displays a lot of warnings. Need to check these in detail.
-\end{itemize}
-
 % -------------------------------------------------------------------------------
 \section{Vitis IDE}
 \label{sec:vitis-ide}

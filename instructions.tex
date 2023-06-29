@@ -12,9 +12,14 @@
 % can create colorful boxes, for warning p.ex.
 \usepackage[most]{tcolorbox}
 
+% the symbols used for these function are listed here:
+% http://mirrors.ibiblio.org/CTAN/fonts/fontawesome5/doc/fontawesome5.pdf
 \makeatletter
 \newcommand{\github}[1]{%
    \href{#1}{GitHub \faGithubSquare}%
+ }
+\newcommand{\gitlab}[1]{%
+   \href{#1}{GitLab \faGitlab}%
 }
 \makeatother
 

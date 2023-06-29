@@ -1022,4 +1022,18 @@ the container in which the previous setup were install, not on the host running 
 \label{sec:colconsettings}
 \inputminted[linenos]{yaml}{./src/custom_r5f_colcon.meta}
 
+% -------------------------------------------------------------------------------
+\section{Firmware time functions}
+\label{sec:timefunctions}
+
+\subsection{Main function}
+\inputminted[linenos]{c}{./src/clock.c}
+
+\subsection{Header file with definitions}
+\begin{minted}[linenos]{c}
+#define MICROSECONDS_PER_SECOND    ( 1000000LL )                                   /**< Microseconds per second. */
+#define NANOSECONDS_PER_SECOND     ( 1000000000LL )                                /**< Nanoseconds per second. */
+#define NANOSECONDS_PER_TICK       ( NANOSECONDS_PER_SECOND / configTICK_RATE_HZ ) /**< Nanoseconds per FreeRTOS tick. */  
+\end{minted}
+
 \end{document}

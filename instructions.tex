@@ -749,6 +749,41 @@ scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
 \end{tcolorbox}
 
 % -------------------------------------------------------------------------------
+\section{WIP:: Using micro-ROS in a Kria demonstration project}
+\label{sec:kriademomicroros}
+Beyond the inclusion of the library, actually using the micro-ROS system
+within an external project require more than just importing the needed
+functions.
+
+Indeed, if you would be just adding the various function for sending messages to the
+general ROS2 network, you would face issues with three key aspects, namely:
+\begin{itemize}
+\item Time-related functions, in particular \verb|clock_gettime|.
+\item Memory allocation functions.
+\item Communication function.
+\end{itemize}
+
+All three points requires some custom function, specific for the board.
+In our case, I will present the implementation of these functions for the
+Kria board.
+
+\subsection{Custom time-related functions}
+\label{sec:timefuncs}
+
+The end result is visible in the appendix \ref{sec:timefunctions}.
+
+
+\subsection{Custom memory allocator functions}
+\label{sec:memallocators}
+
+\subsection{Custom transport layer functions}
+\label{sec:transportlayer}
+
+
+
+
+% -------------------------------------------------------------------------------
+\pagebreak
 \section{Loading a new firmware from Linux}
 \label{sec:loading-new-firmware}
 Having now the latest version of our firmware (with or without the included micro-ROS library) loaded onto our Kria's Linux, we want to load and run it

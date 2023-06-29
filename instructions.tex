@@ -1,4 +1,6 @@
 \documentclass[10pt]{article}
+\usepackage{minted}
+\setminted{breaklines}
 \usepackage{CJKutf8}
 \usepackage{xurl}
 \usepackage{fontawesome5}
@@ -681,30 +683,8 @@ psu_r5_tcm_ram_1_S_AXI_BASEADDR    0x00020000
 \end{tcolorbox}
 
 
-
 % -------------------------------------------------------------------------------
-\section{WIP::: Loading a new firmware from Linux}
-\label{sec:loading-new-firmware}
-This is a work in progress.
-
-These instructions are useful to upload and start the firmware
-on the R5F from the Linux, but there are some issues.
-This will be fixed eventually.
-\begin{tcolorbox}
-\begin{verbatim}
-sudo -s
-cp image_echo_test /lib/firmware
-echo image_echo_test  > /sys/class/remoteproc/\
-remoteproc0/firmware
-echo start > /sys/class/remoteproc/remoteproc0/state
-echo_test
-echo stop > /sys/class/remoteproc/remoteproc0/state
-\end{verbatim}
-\end{tcolorbox}
-
-
-% -------------------------------------------------------------------------------
-\section{WIP::: Including the micro-ROS static library in a project}
+\section{Including the micro-ROS static library in a project}
 Now we have a Vitis demonstration project available and the \verb|libmicroros| static library
 available, we can combine both by including this library into our Kria project.
 
@@ -754,7 +734,13 @@ With both of these setup in your project, you should be able to include the foll
 \end{verbatim}
 \end{tcolorbox}
 
-
+The details for the inclusions and the use-case of the library will depend on the implementation of the firmware
+itself.
+But in general, as the firmware is successfully built and an \verb|.elf| file is available, one can upload said
+firmware to the Kria board (or any remote server accessible through SSH, for that matter) with the following
+command.
+Note that in that case, we are retrieving the binary for a project named ``rpmsg\_pingpong\_microros\_lib''.
+You own path will vary depending on how your project was named in the first place.
 \begin{tcolorbox}
 \begin{verbatim}
 scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
@@ -762,6 +748,29 @@ scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
 \end{verbatim}
 \end{tcolorbox}
 
+% -------------------------------------------------------------------------------
+\section{Loading a new firmware from Linux}
+\label{sec:loading-new-firmware}
+Having now the latest version of our firmware (with or without the included micro-ROS library) loaded onto our Kria's Linux, we want to load and run it
+on the Cortex micro-controller side.
+
+Here are the instructions used to upload and start the firmware
+on the R5F from the Linux.
+In this sequence, we are entering a root shell with \verb|sudo -s|, but this can
+also be archived by putting the commands in a script to be executed with \verb|sudo|.
+It is also important to note that the \verb|echo_test| part is specific for the RPMsg base
+demonstration firmware. It is not to be used for other firmware (including the one involving micro-ROS).
+\begin{tcolorbox}
+\begin{verbatim}
+sudo -s
+cp image_echo_test /lib/firmware
+echo image_echo_test  > /sys/class/remoteproc/\
+remoteproc0/firmware
+echo start > /sys/class/remoteproc/remoteproc0/state
+echo_test
+echo stop > /sys/class/remoteproc/remoteproc0/state
+\end{verbatim}
+\end{tcolorbox}
 
 % -------------------------------------------------------------------------------
 \pagebreak
@@ -908,7 +917,7 @@ sudo docker exec -it ros_agent bash
 \end{tcolorbox}
 
 From there, it becomes possible to simply use ROS2 as you would for a bare-metal install, and as presented in the section \ref{sec:ros2}.
-
+The following lines show the whole procedure on how to enable a micro-ROS agent that will listen and talk using UART on the \verb|/dev/ttyUSB1| port.
 \begin{tcolorbox}
 \begin{verbatim}
   source /opt/ros/$ROS_DISTRO/setup.bash
@@ -948,7 +957,9 @@ ros2 run micro_ros_agent micro_ros_agent serial \
 \end{verbatim}
 \end{tcolorbox}
 
-From a different shell:
+Samewise, from a different shell, it is possible to run a demonstration ping-pong topic communication.
+Note that you need to be careful to have you shell in the ``correct'' space: these command need to be run inside
+the container in which the previous setup were install, not on the host running the container system.
 \begin{tcolorbox}
 \begin{verbatim}
   source /opt/ros/$ROS_DISTRO/setup.bash

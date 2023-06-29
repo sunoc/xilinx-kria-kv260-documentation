@@ -338,7 +338,7 @@ sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
 \end{verbatim}
 \end{tcolorbox}
 
-Then we can download and apply the patch that will allow us to use the \verb|remoteproc|:
+Then we can download and apply the patch\footnote{The file is also visible in the appendix \ref{sec:DTO patch file} at the end of this report.} that will allow us to use the \verb|remoteproc|:
 \begin{tcolorbox}
 \begin{verbatim}
 wget https://raw.githubusercontent.com/sunoc/xilinx-kria-\
@@ -479,7 +479,7 @@ ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
 
 
 From there we will need some configuration files specifically for
-our Cortex R5F. Both configuration files will be downloaded from my repository;
+our Cortex R5F. Both configuration files\footnote{Both files are also visible in the appendixes \ref{sec:toolchainsettings} and \ref{sec:colconsettings} at the end of this report.} will be downloaded from my repository;
 we also are going to copy the cross-compiler into the microros workspace,
 then we can build the library with the following ros2 command:
 \begin{tcolorbox}
@@ -975,16 +975,16 @@ the container in which the previous setup were install, not on the host running 
 % -------------------------------------------------------------------------------
 \section{DTO patch file}
 \label{sec:DTO patch file}
-\inputminted{diff}{./src/system.patch}
+\inputminted[linenos]{diff}{./src/system.patch}
 
 % -------------------------------------------------------------------------------
 \section{Custom toolchain CMake settings}
 \label{sec:toolchainsettings}
-\inputminted{cmake}{./src/custom_r5f_toolchain.cmake}
+\inputminted[linenos]{cmake}{./src/custom_r5f_toolchain.cmake}
 
 % -------------------------------------------------------------------------------
 \section{Custom Colcon meta settings}
 \label{sec:colconsettings}
-\inputminted{yaml}{./src/custom_r5f_colcon.meta}
+\inputminted[linenos]{yaml}{./src/custom_r5f_colcon.meta}
 
 \end{document}

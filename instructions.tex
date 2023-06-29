@@ -97,7 +97,7 @@ Here are the steps that must be taken in order to reach this tool and update the
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{./img/recovery.png}
+  \includegraphics[width=1\textwidth]{./img/recovery.png}
   \caption{The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
   \label{fig:recovery}
 \end{figure}
@@ -297,6 +297,7 @@ sudo reboot now
 \end{tcolorbox}
 
 % -------------------------------------------------------------------------------
+\pagebreak
 \section{Starting remoteproc}
 \label{sec:starting-remoteproc}
 One of the advantage of this board, as cited previously, is the presence of
@@ -590,7 +591,7 @@ make platform PLATFORM=k26_base_starter_kit
 \end{tcolorbox}
 
 
-%\pagebreak
+\pagebreak
 \subsection{Setting up a new IDE project for the Kria board}
 \label{sec:setting-up-new}
 With the platform configuration files available, we can now use the IDE to generate a
@@ -606,14 +607,14 @@ captions.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{./img/vitis_new/project2}
+  \includegraphics[width=0.6\textwidth]{./img/vitis_new/project2}
   \caption{For the platform, we need to get our build Kria configuration. In the ``Create a new platform...'' tab, click the ``Browse...'' button.}
   \label{fig:project2}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{./img/vitis_new/project3}
+  \includegraphics[width=0.6\textwidth]{./img/vitis_new/project3}
   \caption{In the file explorer, we should navigate in the ``k26'' directory, where the configuration file was build.
     From here we are looking for a ``.xsa'' file, located in a ``hw'' directory, as visible.}
   \label{fig:project3}
@@ -621,7 +622,7 @@ captions.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{./img/vitis_new/project4}
+  \includegraphics[width=0.6\textwidth]{./img/vitis_new/project4}
   \caption{With the configuration file loaded, we can now select a name for our platform, but most importantly, we have to select the ``psu\_cortex5\_0'' core
     as a target. The other, Cortex 53 is the APU running Linux.}
   \label{fig:project4}
@@ -629,7 +630,7 @@ captions.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{./img/vitis_new/project5}
+  \includegraphics[width=0.6\textwidth]{./img/vitis_new/project5}
   \caption{In this next window, we can give a name to our firmware project. It is also critical here to select the core we want to build for.
     Once again, we want to use the ``psu\_cortex5\_0''.}
   \label{fig:project5}
@@ -637,14 +638,14 @@ captions.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{./img/vitis_new/project6}
+  \includegraphics[width=0.6\textwidth]{./img/vitis_new/project6}
   \caption{Here, we want to select ``freertos10\_xilinx'' as our Operating System. The rest can remain unchanged.}
   \label{fig:project6}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{./img/vitis_new/project7}
+  \includegraphics[width=0.6\textwidth]{./img/vitis_new/project7}
   \caption{Finally, we can select the demonstration template we are going to use; here we go with ``OpenAMP echo-test'' since we want to
     have some simple try of the RPMsg system. Finish.}
   \label{fig:project7}
@@ -690,7 +691,7 @@ for compiling the firmware.
 \label{sec:including-micro-ros}
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{./img/vitis_new/include}
+  \includegraphics[width=0.6\textwidth]{./img/vitis_new/include}
   \caption{Firstly, in the ``C/C++ Build'' settings of your firmware project, under the ``Settings'' menu, you should find the gcc compiler
     ``Directories''. In here you should add the ``include'' directory of your library. Be careful however, if your include files are in
   a second layer of directory (as it is the case for libmicroros) you will need to include each sub-directory individually.}
@@ -699,7 +700,7 @@ for compiling the firmware.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{./img/vitis_new/include2}
+  \includegraphics[width=0.6\textwidth]{./img/vitis_new/include2}
   \caption{Secondly, in the gcc linkers ``Libraries'', you can add the top level directory of your library. In our case, it is the
     directory that contains both the ``include'' directory added earlier, and also the ``libmicroros.a'' file.}
   \label{fig:include2}
@@ -764,7 +765,7 @@ The end result is visible in the appendix \ref{sec:timefunctions}.
 
 
 % -------------------------------------------------------------------------------
-\pagebreak
+%\pagebreak
 \section{Loading a new firmware from Linux}
 \label{sec:loading-new-firmware}
 Having now the latest version of our firmware (with or without the included micro-ROS library) loaded onto our Kria's Linux, we want to load and run it
@@ -912,7 +913,7 @@ docker run hello-world
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.9\textwidth]{./img/hello-docker.png}
+  \includegraphics[width=0.7\textwidth]{./img/hello-docker.png}
   \caption{The return of a successful run of the ``hello world'' test Docker container}
   \label{fig:hello-docker}
 \end{figure}
@@ -994,16 +995,19 @@ the container in which the previous setup were install, not on the host running 
 \inputminted[linenos]{diff}{./src/system.patch}
 
 % -------------------------------------------------------------------------------
+\pagebreak
 \section{Custom toolchain CMake settings}
 \label{sec:toolchainsettings}
 \inputminted[linenos]{cmake}{./src/custom_r5f_toolchain.cmake}
 
 % -------------------------------------------------------------------------------
+\pagebreak
 \section{Custom Colcon meta settings}
 \label{sec:colconsettings}
 \inputminted[linenos]{yaml}{./src/custom_r5f_colcon.meta}
 
 % -------------------------------------------------------------------------------
+\pagebreak
 \section{Firmware time functions}
 \label{sec:timefunctions}
 

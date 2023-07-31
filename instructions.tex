@@ -23,9 +23,11 @@
 % making the text of the report sans serif
 \renewcommand{\familydefault}{\sfdefault}
 
-\title{Setting up and using Xilinx's KRIA KV260 board \\[1ex] \large \begin{CJK}{UTF8}{min}南山大学\end{CJK}}
+\title{Setting up and using Xilinx's KRIA KV260 board \\
+  [1ex] \large \begin{CJK}{UTF8}{min}南山大学\end{CJK}}
 \date{}
-\author{Vincent Conus  -  Source available at \gitlab{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation}}
+\author{Vincent Conus  -  Source available at
+  \gitlab{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation}}
 \begin{document}
 
 \maketitle
@@ -51,7 +53,8 @@
   \url{https://www.xilinx.com/products/som/kria/kv260-vision-starter-kit.html}
 \item SoC product information:\\ 
   \url{https://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html}
-\item Download page for the official Canonical Ubuntu releases for the board:\\ \url{https://ubuntu.com/download/amd-xilinx}
+\item Download page for the official Canonical Ubuntu releases for the board:\\
+  \url{https://ubuntu.com/download/amd-xilinx}
 \item Xilinx official documentation:\\ 
   \url{https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Summary}
 \item Atlassian documentation:\\ 
@@ -75,32 +78,46 @@
 In order to be able to boot a newer version of Linux, the
 boot image of the board must be updated.
 
-The procedure is available in \href{https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Firmware-Update}{the official documentation},
-but I will present it step by step here.
+The procedure is available in
+\href{https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Firmware-Update}
+{the official documentation}, but I will present it step by step here.
 
 \subsection{Getting the new firmware}
 %\label{sec:getting-new-firmware}
-A 2022 version of the board firmware is required in order to run the latest version of Ubuntu properly.
+A 2022 version of the board firmware is required in order to run the latest
+version of Ubuntu properly.
 
-The image can be downloaded at \href{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+K26+SOM#Boot-FW-update-with-xmutil}{the atlassian page on the topic}.
+The image can be downloaded at
+\href{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+K26+
+SOM#Boot-FW-update-with-xmutil}
+{the atlassian page on the topic}.
 
 \subsection{Reaching the board recovery tool}
 %\label{sec:reach-board-recov}
-Now the firmware image is available, it is possible to update it using the boards recovery tool.
-Here are the steps that must be taken in order to reach this tool and update the board:
+Now the firmware image is available, it is possible to update it using the
+boards recovery tool. Here are the steps that must be taken in order to reach
+this tool and update the board:
 
 \begin{itemize}
 \item Connect the board to your machine via Ethernet.
-\item Select the wired network as your connection (must be ``forced'', since it doesn't have internet access).
-\item Set a fixed IP address for your machine, in the \verb|192.168.0.1/24| range, except the specific \verb|192.168.0.111|, which will be used by the board.
-\item Using a web browser on your host machine, access \url{http://192.168.0.111}. Thou shall now see the interface, as visible on the figure \ref{fig:recovery} below.
-\item Now the downloaded file can be uploaded as a recovery image in the bottom-right section.
+\item Select the wired network as your connection (must be ``forced'', since it
+  doesn't have internet access).
+\item Set a fixed IP address for your machine, in the \verb|192.168.0.1/24|
+  range, except the specific \verb|192.168.0.111|, which will be used by the
+  board.
+\item Using a web browser on your host machine, access
+  \url{http://192.168.0.111}. Thou shall now see the interface, as visible on
+  the figure \ref{fig:recovery} below.
+\item Now the downloaded file can be uploaded as a recovery image in the
+  bottom-right section.
 \end{itemize}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=1\textwidth]{./img/recovery.png}
-  \caption{The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
+  \caption{The recovery tool for the board, access from Firefox. We can see
+    board information at the center, and the tools to upload the firmware at
+    the bottom of the page.}
   \label{fig:recovery}
 \end{figure}
 
@@ -109,68 +126,83 @@ Here are the steps that must be taken in order to reach this tool and update the
 %-------------------------------------------------------------------------------
 \section{Ubuntu 22.04}
 %\label{sec:ubuntu-22.04}
-\href{https://ubuntu.com/download/amd-xilinx}{An official Ubuntu image} is provided by Xilinx that allows the OS installation to be quick and
-straightforward. Ubuntu is a common and easy to use distribution. Furthermore, it allows to install ROS2 as a package, which is most convenient
-and will be done later in this guide.
+\href{https://ubuntu.com/download/amd-xilinx}{An official Ubuntu image} is
+provided by Xilinx that allows the OS installation to be quick and
+straightforward. Ubuntu is a common and easy to use distribution. Furthermore,
+it allows to install ROS2 as a package, which is most convenient and will be
+done later in this guide.
 
-One the image has been downloaded at Canonical's page (\url{https://ubuntu.com/download/amd-xilinx}), we can flash it onto the SD card.
+One the image has been downloaded at Canonical's page
+(\url{https://ubuntu.com/download/amd-xilinx}),
+we can flash it onto the SD card.
 
 \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black]
   WARNING: The next part involve the \verb|dd| command writing on disks!!! \\
-  As always with the dd command, thou have to be VERY careful on what arguments thou give. Selecting the wrong disk will result on the destruction of your data !! \\
+  As always with the dd command, thou have to be VERY careful on what arguments
+  thou give. Selecting the wrong disk will result on the destruction of
+  thy data !! \\
   \underline{If thou art unsure of what to do, seek assistance !}
 \end{tcolorbox}
 
 
-With the image available on thy machine and a SD card visible as \verb|/dev/sda|\footnote{Again, it is critical to be 100\% certain that you are working with the correct device!}, one can simply run the \verb|dd| command as follow to write the image to a previously formatted drive (here \verb|/dev/sda|):
+With the image available on thy machine and a SD card visible as \verb|/dev/sda|
+\footnote{Again, it is critical to be 100\% certain that you are working with
+  the correct device!}, one can simply run the \verb|dd| command as follow to
+write the image to a previously formatted drive (here \verb|/dev/sda|):
+
 \begin{tcolorbox}
-\begin{verbatim}
-sudo dd if=iot-limerick-kria-classic-desktop-2204-x07-\
-20230302-63.img of=/dev/sda status=progress bs=8M && sync
-\end{verbatim}
+\begin{minted}{sh}
+sudo dd if=iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img
+of=/dev/sda status=progress bs=8M && sync
+\end{minted}
 \end{tcolorbox}
 
-Once the SD card was flash, put back on the board and a micro-USB cable has been connected from the PC to the board, it is possible to
-connect to the board in serial with an appropriate tool, for example picocom, as in the following example:
+Once the SD card was flash, put back on the board and a micro-USB cable has been
+connected from the PC to the board, it is possible to
+connect to the board in serial with an appropriate tool, for example picocom,
+as in the following example:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 sudo picocom /dev/ttyUSB1 -b 115200
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
-Once logged in, it is typically easier and more convenient to connect the board using SSH.
-When the board is connected to the network, it is possible to know it's IP address with
-the \verb|ip| command; then it is possible to connect to the board with ssh, as follow (example):
+Once logged in, it is typically easier and more convenient to connect the board
+using SSH. When the board is connected to the network, it is possible to know
+it's IP address with the \verb|ip| command; then it is possible to connect to
+the board with ssh, as follow (example):
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 kria# ip addr
 
 host# ssh ubuntu@192.168.4.11
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 \subsection{Proxy, DNS and root password}
 %\label{sec:proxy-dns}
-An issue that can occur when connecting the board to the internet is the conflicting situation with
-the school proxy.
-Indeed, as the network at Nanzan University requires to go through a proxy, some DNS errors appeared.
+An issue that can occur when connecting the board to the internet is the
+conflicting situation with the school proxy. Indeed, as the network at Nanzan
+University requires to go through a proxy, some DNS errors appeared.
 
-Firstly, it is possible to set a DNS IP address in \verb|/etc/resolv.conf| by editing it and adding your favorite DNS, for example \verb|nameserver 1.1.1.1|
+Firstly, it is possible to set a DNS IP address in \verb|/etc/resolv.conf| by
+editing it and adding your favorite DNS, for example \verb|nameserver 1.1.1.1|
 next to the other \verb|nameserver| entry.
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 sudo nano /etc/resolv.conf
 
 sudo systemctl restart systemd-resolved
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 Secondly, it might become needed to setup the proxy for the school.
 
-This can be done as follow, by exporting a https base proxy configuration containing you AXIA credentials, then
-by consolidating the configuration for other types of connections in the \verb|bashrc|:
+This can be done as follow, by exporting a https base proxy configuration
+containing you AXIA credentials, then by consolidating the configuration for
+other types of connections in the \verb|bashrc|:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 export https_proxy="http://<AXIA_username>:\
 <AXIA_psw>@proxy.ic.nanzan-u.ac.jp:8080"
 
@@ -179,32 +211,33 @@ echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc \
 echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc \
 echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" \
 >> ~/.bashrc
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
-Finally, it might be convenient for the \verb|sudo| tool to not ask for the password all the time.
-This change can be done by editing the sudoers file, and adding the parameter \verb|NOPASSWD|
+Finally, it might be convenient for the \verb|sudo| tool to not ask for the
+password all the time. This change can be done by editing the sudoers file, and
+adding the parameter \verb|NOPASSWD|
 at the ``sudo'' line:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 sudo visudo
 
 %sudo   ALL=(ALL:ALL) NOPASSWD: ALL
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 This is merely a convenience setup for devices staying at you desk. If
 the board is meant to be used in any king of production setup, a password
 should be set for making administration tasks.
 
-With all of these settings, you should be able to update the software of your board
-without any issues:
+With all of these settings, you should be able to update the software of your
+board without any issues:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 sudo apt-get update
 sudo apt-get dist-upgrade
 sudo reboot now
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 
@@ -215,14 +248,14 @@ configuration into your \verb|netplan| configuration file.
 
 The name of the files might vary:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 sudo nano /etc/netplan/50-cloud-init.yaml
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 You can then set the wanted IP as follow:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{yaml}
 network:
   renderer: NetworkManager
   version: 2
@@ -237,15 +270,15 @@ network:
         addresses:
           - 8.8.8.8
           - 1.1.1.1
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 Finally, the change in settings can be applied
 as follow:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 sudo netplan apply
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 
@@ -256,12 +289,12 @@ sudo netplan apply
 As the desktop part is not used at all, there are some packages
 that can be purges in order for the system to become more lightweight.
 
-In particular, the main issue with Ubuntu systems is the forced integration of Snap.
-Here are some step to try and remove all of that. These steps
+In particular, the main issue with Ubuntu systems is the forced integration of
+Snap. Here are some step to try and remove all of that. These steps
 take a lot of time though, but the system fan runs sensibly slower
 without all of this stuff:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 sudo systemctl disable snapd.service
 sudo systemctl disable snapd.socket
 sudo systemctl disable snapd.seeded.service
@@ -283,19 +316,20 @@ sudo rm -rf ~/snap
 sudo apt autoremove --purge snapd
 
 systemctl list-units | grep snapd
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
-And here are some other stuff that can safely be removed too is the desktop is not to be used:
+And here are some other stuff that can safely be removed too is the desktop is
+not to be used:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 sudo apt-get autoremove --purge yaru-theme-icon \
 fonts-noto-cjk yaru-theme-gtk vim-runtime \
 ubuntu-wallpapers-jammy humanity-icon-theme
 
 sudo apt-get autoclean
 sudo reboot now
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 % ------------------------------------------------------------------------------
@@ -310,16 +344,17 @@ a Linux distribution and ROS2; and the MCU, running FreeRTOS and micro-ROS.
 
 The communication between both side is meant to be done using shared memory, but
 some extra setup is required.
-This section will present how to setup and use as an example the \verb|remoteproc|
-and RPMsg system.
+This section will present how to setup and use as an example the
+\verb|remoteproc| and RPMsg system.
 
 \subsection{References}
 %\label{sec:referances}
-This exact use-case is not exactly presented in the official documentation, but some
-guides were found to eventually put together this procedure.
+This exact use-case is not exactly presented in the official documentation,
+but some guides were found to eventually put together this procedure.
 
 \begin{itemize}
-\item A slideshow (JP) from Fixstar employees presents how to use the device tree to enable the communication between the cores. \\
+\item A slideshow (JP) from Fixstar employees presents how to use the device
+  tree to enable the communication between the cores. \\
   \url{https://speakerdeck.com/fixstars/fpga-seminar-12-fixstars-corporation-20220727}
 \item This blog article (JP) shows all major steps on how to enable the \verb|remoteproc|. \\
   \url{https://zenn.dev/ryuz88/articles/kv260_setup_memo_ubuntu22}
@@ -337,50 +372,50 @@ the \verb|remoteproc| system to start.
 Firstly, we need to get the original firmware device tree, converted
 into a readable format (DTS):
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 Then we can download and apply the patch\footnote{The file is also visible in the appendix \ref{sec:DTO patch file} at the end of this report.} that will allow us to use the \verb|remoteproc|:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
 documentation/-/raw/main/src/system.patch
 
 patch system.dts < system.patch
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 As for the board to be able to reserve the correct amount of memory with the new settings, some
 \verb|cma| kernel configuration is needed\footnote{The overlapping memory will not prevent the board to boot,
   but it disables the PWM for the CPU fan, which will then run at full speed, making noise.}:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 sudo nano /etc/default/flash-kernel
 LINUX_KERNEL_CMDLINE="quiet splash cma=512M cpuidle.off=1"
 LINUX_KERNEL_CMDLINE_DEFAULTS=""
 sudo flash-kernel
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 Now the DTS file has been modified, one can regenerate the binary and place it on the \verb|/boot| partition
 and reboot the board:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 dtc -I dts -O dtb system.dts -o user-override.dtb
 sudo mv user-override.dtb /boot/firmware/
 sudo reboot now
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 After rebooting, you can check the content of the \verb|remoteproc| system directory,
 and a \verb|remoteproc0| device should be visible, as follow:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 ls /sys/class/remoteproc/
 #  remoteproc0
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 If it is the case, it means that the patch was successful and RPMsg is
@@ -402,14 +437,14 @@ Here are the steps required to obtain the sources, and build the program.
 As a reminder, this is meant to be done on the Linux running on the
 Kria board, NOT on your host machine !
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 git clone https://github.com/Xilinx/meta-openamp.git
 cd  meta-openamp
 git checkout xlnx-rel-v2022.2
 cd  .//recipes-openamp/rpmsg-examples/rpmsg-echo-test
 make
 sudo ln -s $(pwd)/echo_test /usr/bin/
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 % ------------------------------------------------------------------------------
@@ -426,7 +461,7 @@ We are downloading the latest \verb|arm-none-eabi| gcc compiler directly \\from 
 The cross-compilation tool can then be extracted, set as our ``toolchain'' variable, then passed as a parameter when creating the Docker container.
 Here is how to do all of this and then opening a \verb|bash| shell in the container:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 pushd /home/$USER/Downloads
 wget https://developer.arm.com/-/media/Files/downloads/\
 gnu/12.2.mpacbti-rel1/binrel/arm-gnu-toolchain-12.2\
@@ -446,22 +481,22 @@ docker run -d --name ros_build -it --net=host \
 --privileged ros:iron
 
 docker exec -it ros_build bash
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 
 Now we are in the ROS2 container, we can build the micro-ROS firmware as presented in the \href{https://micro.ros.org/docs/tutorials/advanced/create\_custom\_static\_library}{dedicated micro-ROS guide}:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 sudo apt update && \
 sudo apt-get -y install python3-pip \
                         wget \
                         nano
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 . /opt/ros/$ROS_DISTRO/setup.bash
 
 mkdir microros_ws
@@ -478,7 +513,7 @@ colcon build
 . ./install/local_setup.bash
 
 ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 
@@ -487,7 +522,7 @@ our Cortex R5F. Both configuration files\footnote{Both files are also visible in
 we also are going to copy the cross-compiler into the microros workspace,
 then we can build the library with the following ros2 command:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
 documentation/-/raw/main/src/custom_r5f_toolchain.cmake
 
@@ -502,7 +537,7 @@ $(pwd)/custom_r5f_toolchain.cmake $(pwd)/\
 custom_r5f_colcon.meta
 
 exit
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 % ------------------------------------------------------------------------------
@@ -527,7 +562,7 @@ LTS from Ubuntu. For other Linux distributions or operating system, please refer
 %\label{sec:install-dependencies}
 Some packages are required to be installed in order for the installation process to happen successfully:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 sudo apt-get update
 sudo apt-get install libncurses-dev \
 ncurses-term \
@@ -537,21 +572,21 @@ libncurses5 \
 libtinfo5 \
 libncurses5-dev \
 libncursesw5-dev
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 Once this is done, the downloaded binary installer can be executed:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 ./Xilinx_Unified_2022.2_1014_8888_Lin64.bin
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 If it is not possible to execute it, make it executable with the \verb|chmod| command:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 sudo chmod +x ./Xilinx_Unified_2022.2_1014_8888_Lin64.bin
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 From there you can follow the step-by-step graphical installer.
@@ -575,7 +610,7 @@ As discussed in a thread on \href{https://support.xilinx.com/s/question/0D52E000
 
 Here are the steps for building this configuration file:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 sudo apt-get update
 sudo apt-get install cmake tcl libidn11-dev \
 libidn-dev libidn12 idn
@@ -589,7 +624,7 @@ cd kria-vitis-platforms/k26/platforms
 export XILINX_VIVADO=/home/$USER/Xilinx/Vivado/2022.2/
 export XILINX_VITIS=/home/$USER/Xilinx/Vitis/2022.2/
 make platform PLATFORM=k26_base_starter_kit
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 
@@ -658,12 +693,12 @@ In the Xilinx documentation, it is made mention of the addresses setting that sh
 These valued look different from what could be set in the DTO for the Linux side, but they appear to
 work for the example we are running:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{text}
 psu_ddr_S_AXI_BASEADDR             0x3ed00000
 psu_ocm_ram_1_S_AXI_BASEADDR       0xfffc0000
 psu_r5_tcm_ram_0_S_AXI_BASEADDR    0x00000000
 psu_r5_tcm_ram_1_S_AXI_BASEADDR    0x00020000
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 
@@ -675,7 +710,7 @@ available, we can combine both by including this library into our Kria project.
 On the host machine running the IDE, we can download the static library and the include files from the build Docker.
 Here, we assume your Vitis IDE workspace sits in you home directory.
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 mkdir /home/$USER/workspace/microros_lib
 
 docker cp ros_build:/microros_ws/firmware/build/\
@@ -683,7 +718,7 @@ docker cp ros_build:/microros_ws/firmware/build/\
 
 docker cp ros_build:/microros_ws/firmware/build/include \
 /home/$USER/workspace/microros_lib/
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 Many parameters are available to be set up in the IDE for the compilation toolchain, but here is
@@ -710,12 +745,12 @@ for compiling the firmware.
 
 With both of these setup in your project, you should be able to include the following micro-ROS libraries into your project:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{c}
 #include <rcl/rcl.h>
 #include <rcl/error_handling.h>
 #include <rclc/rclc.h>
 #include <rclc/executor.h>
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 The details for the inclusions and the use-case of the library will depend on the implementation of the firmware
@@ -726,10 +761,10 @@ command.
 Note that in that case, we are retrieving the binary for a project named ``rpmsg\_pingpong\_microros\_lib''.
 You own path will vary depending on how your project was named in the first place.
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
   Debug/rpmsg_pingpong_microros_lib.elf  kria:/home/ubuntu/
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 % ------------------------------------------------------------------------------
@@ -789,17 +824,19 @@ want it to.
 %\pagebreak
 \section{Loading a new firmware from Linux}
 %\label{sec:loading-new-firmware}
-Having now the latest version of our firmware (with or without the included micro-ROS library) loaded onto our Kria's Linux, we want to load and run it
+Having now the latest version of our firmware (with or without the included
+micro-ROS library) loaded onto our Kria's Linux, we want to load and run it
 on the Cortex micro-controller side.
 
 Here are the instructions used to upload and start the firmware
 on the R5F from the Linux.
 In this sequence, we are entering a root shell with \verb|sudo -s|, but this can
 also be archived by putting the commands in a script to be executed with \verb|sudo|.
-It is also important to note that the \verb|echo_test| part is specific for the RPMsg base
-demonstration firmware. It is not to be used for other firmware (including the one involving micro-ROS).
+It is also important to note that the \verb|echo_test| part is specific for the
+RPMsg base demonstration firmware. It is not to be used for other firmware
+(including the one involving micro-ROS).
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 sudo -s
 cp image_echo_test /lib/firmware
 echo image_echo_test  > /sys/class/remoteproc/\
@@ -807,15 +844,15 @@ remoteproc0/firmware
 echo start > /sys/class/remoteproc/remoteproc0/state
 echo_test
 echo stop > /sys/class/remoteproc/remoteproc0/state
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 % ------------------------------------------------------------------------------
 \pagebreak
 \section{ROS2}
 \label{sec:ros2}
-As an Ubuntu distribution is installed on the board, the installation of ROS2 can be done
-in a standard way, using the repository.
+As an Ubuntu distribution is installed on the board, the installation of ROS2
+can be done in a standard way, using the repository.
 
 An \href{https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html}{official documentation}
 is provided with ROS2 themselves with a step-by-step guide on how to install
@@ -823,10 +860,11 @@ ROS2 on a Ubuntu system\footnote{The curl command from the guide does not work t
   but the command wget used instead does work. The key is then moved to the correct spot with mv}.
 We will follow this guide here.
 
-Firstly, we need to update the locals, enable the universe Ubuntu repository, get the key and add the repository for ROS2. This can be done as follow:
+Firstly, we need to update the locals, enable the universe Ubuntu repository,
+get the key and add the repository for ROS2. This can be done as follow:
 
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 locale  # check for UTF-8
 sudo apt update && sudo apt install -y locales
 sudo locale-gen en_US en_US.UTF-8
@@ -839,63 +877,67 @@ sudo apt update && sudo apt install -y curl wget
 wget https://raw.githubusercontent.com/ros/rosdistro/\
 master/ros.key
 sudo mv ros.key /usr/share/keyrings/ros-archive-keyring.gpg
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 
 This is a one-liner to add the ROS2 repository:
 
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 echo "deb [arch=$(dpkg --print-architecture) \
 signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
 http://packages.ros.org/ros2/ubuntu $(. \
 /etc/os-release && echo $UBUNTU_CODENAME) main" | \
 sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 It is then possible to install ROS2\footnote{This command installs a complete ``desktop'' version of ROS2. If space is a constraint, different, less complete packages can be install. Please refer to the official documentation about it.} as follow:
 
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 sudo apt update
 sudo apt upgrade -y
 sudo apt install -y ros-humble-desktop \
 ros-humble-ros-base \
 python3-argcomplete \
 ros-dev-tools
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
-Once installed, it is possible to test the system with a provided example. You need to open two terminals and log wish SSH onto the board, then running respectively:
+Once installed, it is possible to test the system with a provided example.
+You need to open two terminals and log wish SSH onto the board, then running
+respectively:
 
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 source /opt/ros/humble/setup.bash
 ros2 run demo_nodes_cpp talker
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 
 
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 source /opt/ros/humble/setup.bash
 ros2 run demo_nodes_py listener
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 
-You should be able to see the first terminal sending "Hello world" messages, and the second one receiving then.
+You should be able to see the first terminal sending "Hello world" messages,
+and the second one receiving then.
 
 
 % ------------------------------------------------------------------------------
 \section{ROS2 in a container}
 %\label{sec:ros2-container}
-As it is used to test and build micro-ROS configurations, running ROS2 in a Docker container is a great way to have a reproducible configuration
-of you system. This part of the guide will present how to install Docker on the Kria board and then how to use it to deploy the latest
-version of ROS2.
+As it is used to test and build micro-ROS configurations, running ROS2 in a
+Docker container is a great way to have a reproducible configuration
+of you system. This part of the guide will present how to install Docker on the
+Kria board and then how to use it to deploy the latest version of ROS2.
 
 \subsection{Installing docker}
 %\label{sec:installing-docker}
@@ -905,7 +947,7 @@ Following \href{https://docs.docker.com/engine/install/ubuntu/#install-using-the
 install the latest version of Docker on a Ubuntu system.
 The last command is meant to test the install. If everything went smoothly, you should see something similar to what is presented on the figure \ref{fig:hello-docker} below:
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 sudo apt-get update
 sudo apt-get install ca-certificates curl sudo
 gnupg install -m 0755 -d /etc/apt/keyrings
@@ -929,7 +971,7 @@ sudo usermod -aG docker $USER
 newgrp docker
 
 docker run hello-world
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 \begin{figure}[H]
@@ -947,17 +989,17 @@ internal \verb|/dev|. \footnote{Note that this is an example and this situation 
 in a production environment to map only the devices that are actually in use.}
 With the second command, we can execute \verb|bash|, as a way to open a terminal to the ``inside'' of the container.
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 sudo docker run -d --name ros_agent -it --net=host -v \
      /dev:/dev --privileged ros:iron
 sudo docker exec -it ros_agent bash
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 From there, it becomes possible to simply use ROS2 as you would for a bare-metal install, and as presented in the section \ref{sec:ros2}.
 The following lines show the whole procedure on how to enable a micro-ROS agent that will listen and talk using UART on the \verb|/dev/ttyUSB1| port.
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
   source /opt/ros/$ROS_DISTRO/setup.bash
 
   # Create a workspace and download the micro-ROS tools
@@ -976,11 +1018,11 @@ The following lines show the whole procedure on how to enable a micro-ROS agent 
   # Build micro-ROS tools and source them
   colcon build
   source install/local_setup.bash
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
 # Download micro-ROS-Agent packages
 source install/local_setup.bash
 ros2 run micro_ros_setup create_agent_ws.sh
@@ -992,19 +1034,19 @@ source install/local_setup.bash
 # Run a micro-ROS agent
 ros2 run micro_ros_agent micro_ros_agent serial \
 --dev /dev/ttyUSB1
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 Samewise, from a different shell, it is possible to run a demonstration ping-pong topic communication.
 Note that you need to be careful to have you shell in the ``correct'' space: these command need to be run inside
 the container in which the previous setup were install, not on the host running the container system.
 \begin{tcolorbox}
-\begin{verbatim}
+\begin{minted}{sh}
   source /opt/ros/$ROS_DISTRO/setup.bash
   
   # Subscribe to micro-ROS ping topic
   ros2 topic echo /microROS/ping
-\end{verbatim}
+\end{minted}
 \end{tcolorbox}
 
 % ==============================================================================

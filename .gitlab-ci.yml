@@ -4,6 +4,9 @@ report:
   stage: build
 
   script:
+    - apt-get update -y
+    - apt-get install -y python3 python3-pip
+    - pip install pygments
     - pdflatex --shell-escape instructions.tex
 
   artifacts:

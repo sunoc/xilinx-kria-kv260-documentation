@@ -4,7 +4,7 @@ report:
   stage: build
 
   script:
-    - pdflatex instructions.tex
+    - pdflatex --shell-escape instructions.tex
 
   artifacts:
     paths:

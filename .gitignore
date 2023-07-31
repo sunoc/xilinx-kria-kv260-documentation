@@ -4,4 +4,6 @@
 *.pdf
 *.toc
 *.dvi
+*.pyg
+_minted-instructions/
 auto/

@@ -1,5 +1,10 @@
 \documentclass[10pt]{article}
+\usepackage[a4paper, total={6.5in, 9in}]{geometry}
+\usepackage{minted}
+\setminted{breaklines}
 \usepackage{CJKutf8}
+\usepackage{xurl}
+\usepackage{fontawesome5}
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{float}
@@ -7,17 +12,24 @@
 % can create colorful boxes, for warning p.ex.
 \usepackage[most]{tcolorbox}
 
+% the symbols used for these function are listed here:
+% http://mirrors.ibiblio.org/CTAN/fonts/fontawesome5/doc/fontawesome5.pdf
+\makeatletter
+\newcommand{\gitlab}[1]{%
+   \href{#1}{GitLab \faGitlab}%
+}
+\makeatother
+
 % making the text of the report sans serif
 \renewcommand{\familydefault}{\sfdefault}
 
 \title{Setting up and using Xilinx's KRIA KV260 board \\[1ex] \large \begin{CJK}{UTF8}{min}南山大学\end{CJK}}
 \date{}
-\author{Vincent Conus}
-
+\author{Vincent Conus  -  Source availbe at \gitlab{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation}}
 \begin{document}
 
 \maketitle
-
+\vspace{4cm}
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.8\textwidth]{./img/board}
@@ -29,26 +41,35 @@
 \pagebreak
 %-------------------------------------------------------------------------------
 \section{Introduction and motivation}
-\label{sec:intr-motiv}
+%\label{sec:intr-motiv}
 
 \subsection{Documentation and guides}
 \label{sec:documentation-guides}
 
 \begin{itemize}
-\item Board product information:\\ \url{https://www.xilinx.com/products/som/kria/kv260-vision-starter-kit.html}
-\item SoC product information:\\ \url{https://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html}
+\item Board product information:\\ 
+  \url{https://www.xilinx.com/products/som/kria/kv260-vision-starter-kit.html}
+\item SoC product information:\\ 
+  \url{https://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html}
 \item Download page for the official Canonical Ubuntu releases for the board:\\ \url{https://ubuntu.com/download/amd-xilinx}
-\item Xilinx official documentation:\\ \url{https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Summary}
-\item Atlassian documentation:\\ \url{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+K26+SOM}
-\item Fixstar presentation (JP):\\  \url{https://speakerdeck.com/fixstars/fpga-seminar-12-fixstars-corporation-20220727}
-\item Xilinx OpenAMP demo documentation:\\ \url{https://xilinx.github.io/kria-apps-docs/openamp/build/html/openamp\_landing.html}
-\item Libmetal and OpenAMP official Xilinx documentation:\\ \url{https://docs.xilinx.com/r/en-US/ug1186-zynq-openamp-gsg/Introduction?tocId=GFruK4\_sY1eyu3jD9X1EuA}
-\item Guide for KV260 board setup (JP):\\ \url{https://zenn.dev/ryuz88/articles/kv260\_setup\_memo\_ubuntu22}
-\item Vitis IDE download page:\\ \url{https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vitis.html}
+\item Xilinx official documentation:\\ 
+  \url{https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Summary}
+\item Atlassian documentation:\\ 
+  \url{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+K26+SOM}
+\item Fixstar presentation (JP):\\  
+  \url{https://speakerdeck.com/fixstars/fpga-seminar-12-fixstars-corporation-20220727}
+\item Xilinx OpenAMP demo documentation:\\ 
+  \url{https://xilinx.github.io/kria-apps-docs/openamp/build/html/openamp\_landing.html}
+\item Libmetal and OpenAMP official Xilinx documentation:\\ 
+  \url{https://docs.xilinx.com/r/en-US/ug1186-zynq-openamp-gsg/Introduction?tocId=GFruK4\_sY1eyu3jD9X1EuA}
+\item Guide for KV260 board setup (JP):\\ 
+  \url{https://zenn.dev/ryuz88/articles/kv260\_setup\_memo\_ubuntu22}
+\item Vitis IDE download page:\\ 
+  \url{https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vitis.html}
 \end{itemize}
 
 \pagebreak
-% -------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 \section{Boot Image Update}
 \label{sec:boot-image-update}
 In order to be able to boot a newer version of Linux, the
@@ -78,7 +99,7 @@ Here are the steps that must be taken in order to reach this tool and update the
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{./img/recovery.png}
+  \includegraphics[width=1\textwidth]{./img/recovery.png}
   \caption{The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
   \label{fig:recovery}
 \end{figure}
@@ -153,9 +174,9 @@ by consolidating the configuration for other types of connections in the \verb|b
 export https_proxy="http://<AXIA_username>:\
 <AXIA_psw>@proxy.ic.nanzan-u.ac.jp:8080"
 
-echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc && \
-echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc && \
-echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc && \
+echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc \
+echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc \
+echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc \
 echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" \
 >> ~/.bashrc
 \end{verbatim}
@@ -244,7 +265,7 @@ without all of this stuff:
 sudo systemctl disable snapd.service
 sudo systemctl disable snapd.socket
 sudo systemctl disable snapd.seeded.service
-sudo snap list #show the installed package, remove then all:
+sudo snap list #show installed package, remove then all:
 sudo snap remove --purge firefox
 sudo snap remove --purge gnome-3-38-2004
 sudo snap remove --purge gnome-42-2204
@@ -277,7 +298,8 @@ sudo reboot now
 \end{verbatim}
 \end{tcolorbox}
 
-% -------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
+\pagebreak
 \section{Starting remoteproc}
 \label{sec:starting-remoteproc}
 One of the advantage of this board, as cited previously, is the presence of
@@ -297,9 +319,10 @@ This exact use-case is not exactly presented in the official documentation, but 
 guides were found to eventually put together this procedure.
 
 \begin{itemize}
-\item \href{https://speakerdeck.com/fixstars/fpga-seminar-12-fixstars-corporation-20220727}{A slideshow (JP) from Fixstar employees} presents how
-  to use the device tree to enable the communication between the cores.
-\item \href{https://zenn.dev/ryuz88/articles/kv260_setup_memo_ubuntu22}{This blog article (JP)} shows all the major steps on how to enable the \verb|remoteproc|.
+\item A slideshow (JP) from Fixstar employees presents how to use the device tree to enable the communication between the cores. \\
+  \url{https://speakerdeck.com/fixstars/fpga-seminar-12-fixstars-corporation-20220727}
+\item This blog article (JP) shows all major steps on how to enable the \verb|remoteproc|. \\
+  \url{https://zenn.dev/ryuz88/articles/kv260_setup_memo_ubuntu22}
 \end{itemize}
 
 
@@ -319,11 +342,12 @@ sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
 \end{verbatim}
 \end{tcolorbox}
 
-Then we can download and apply the patch that will allow us to use the \verb|remoteproc|:
+Then we can download and apply the patch\footnote{The file is also visible in the appendix \ref{sec:DTO patch file} at the end of this report.} that will allow us to use the \verb|remoteproc|:
 \begin{tcolorbox}
 \begin{verbatim}
 wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
 documentation/-/raw/main/src/system.patch
+
 patch system.dts < system.patch
 \end{verbatim}
 \end{tcolorbox}
@@ -364,7 +388,7 @@ ready to test with some example; however, in order for these examples
 to be built, we need to setup Xilinx preferred IDE: Vitis.
 
 
-% -------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 \section{Building and running an example program on the Linux side}
 \label{sec:building-running-an}
 In order to test the deployment of the firmware on the R5F side, and in particular
@@ -388,7 +412,7 @@ sudo ln -s $(pwd)/echo_test /usr/bin/
 \end{verbatim}
 \end{tcolorbox}
 
-% -------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 \section{Building the micro-ROS static library}
 \label{sec:building-micro-ros}
 In this section, the goal is to build the micro-ROS library in order to be
@@ -398,7 +422,7 @@ it is most common in the guides about micro-ROS to build the firmwares and libra
 so we can have access of the ROS environment without installing it on my machine.
 One can simply run this command to summon a ROS2 Docker\footnote{If Docker is not set up on your machine, you can follow the guide on \href{https://docs.docker.com/engine/install/ubuntu/}{the official website}. When you can successfully run the ``hello-world'' container, you are good to go.} with the wanted version, but first we also need to check the cross-compilation tools.
 
-We are downloading the latest \verb|arm-none-eabi| gcc compiler directly from the ARM website.
+We are downloading the latest \verb|arm-none-eabi| gcc compiler directly \\from the ARM website.
 The cross-compilation tool can then be extracted, set as our ``toolchain'' variable, then passed as a parameter when creating the Docker container.
 Here is how to do all of this and then opening a \verb|bash| shell in the container:
 \begin{tcolorbox}
@@ -416,9 +440,11 @@ toolchain="/home/$USER/Downloads/arm-gnu-toolchain-\
 
 
 docker run -d --name ros_build -it --net=host \
+--hostname ros_build \
 -v /dev:/dev \
 -v $toolchain:/armr5-toolchain \
---privileged ros:humble
+--privileged ros:iron
+
 docker exec -it ros_build bash
 \end{verbatim}
 \end{tcolorbox}
@@ -428,15 +454,9 @@ Now we are in the ROS2 container, we can build the micro-ROS firmware as present
 \begin{tcolorbox}
 \begin{verbatim}
 sudo apt update && \
-sudo apt-get -y install python3-pip wget nano libc6-dev-i386
-
-sudo mkdir -p /etc/ros/rosdep/sources.list.d && \
-pushd /etc/ros/rosdep/sources.list.d && \
-wget https://raw.githubusercontent.com/ros/rosdistro/\
-master/rosdep/sources.list.d/20-default.list && \
-popd
-
-sudo apt update
+sudo apt-get -y install python3-pip \
+                        wget \
+                        nano
 \end{verbatim}
 \end{tcolorbox}
 
@@ -463,7 +483,7 @@ ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
 
 
 From there we will need some configuration files specifically for
-our Cortex R5F. Both configuration files will be downloaded from my repository;
+our Cortex R5F. Both configuration files\footnote{Both files are also visible in the appendixes \ref{sec:toolchainsettings} and \ref{sec:colconsettings} at the end of this report.} will be downloaded from my repository;
 we also are going to copy the cross-compiler into the microros workspace,
 then we can build the library with the following ros2 command:
 \begin{tcolorbox}
@@ -474,8 +494,8 @@ documentation/-/raw/main/src/custom_r5f_toolchain.cmake
 wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
 documentation/-/raw/main/src/custom_r5f_colcon.meta
 
-cp -r /armr5-toolchain/ $(pwd)/toolchain && \
-export PATH=$PATH:$(pwd)/toolchain/bin
+cp -r /armr5-toolchain/ $(pwd)/firmware/toolchain && \
+export PATH=$PATH:$(pwd)/firmware/toolchain/bin
 
 ros2 run micro_ros_setup build_firmware.sh \
 $(pwd)/custom_r5f_toolchain.cmake $(pwd)/\
@@ -485,14 +505,7 @@ exit
 \end{verbatim}
 \end{tcolorbox}
 
-\pagebreak
-\subsection{WIP::: Static library warnings}
-\label{sec:stat-libr-warn}
-In this extra section, I want to take notes about the large amount of warning that appears
-whe building the micro-ROS static library.
-
-
-% -------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 \section{Vitis IDE}
 \label{sec:vitis-ide}
 This is the recommended IDE used to build software for the Xilinx boards.
@@ -546,7 +559,7 @@ The directory chosen for the rest of this guide for the \verb|Xilinx| directory
 is directly the \verb|\$HOME|, but the installation can be set elsewhere is needed.
 
 
-% -------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 \section{Building an example firmware for the Cortex R5F}
 \label{sec:bulding-an-example}
 As visible on the official \href{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1837006921/OpenAMP+Base+Hardware+Configurations\#Build-RPU-firmware}{Xilinx documentation about building a demo firmware}, this section will present the required steps for building a new firmware for the R5F core of our Kria board. The goal
@@ -580,7 +593,7 @@ make platform PLATFORM=k26_base_starter_kit
 \end{tcolorbox}
 
 
-%\pagebreak
+\pagebreak
 \subsection{Setting up a new IDE project for the Kria board}
 \label{sec:setting-up-new}
 With the platform configuration files available, we can now use the IDE to generate a
@@ -596,14 +609,14 @@ captions.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{./img/vitis_new/project2}
+  \includegraphics[width=0.6\textwidth]{./img/vitis_new/project2}
   \caption{For the platform, we need to get our build Kria configuration. In the ``Create a new platform...'' tab, click the ``Browse...'' button.}
   \label{fig:project2}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{./img/vitis_new/project3}
+  \includegraphics[width=0.6\textwidth]{./img/vitis_new/project3}
   \caption{In the file explorer, we should navigate in the ``k26'' directory, where the configuration file was build.
     From here we are looking for a ``.xsa'' file, located in a ``hw'' directory, as visible.}
   \label{fig:project3}
@@ -611,7 +624,7 @@ captions.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{./img/vitis_new/project4}
+  \includegraphics[width=0.6\textwidth]{./img/vitis_new/project4}
   \caption{With the configuration file loaded, we can now select a name for our platform, but most importantly, we have to select the ``psu\_cortex5\_0'' core
     as a target. The other, Cortex 53 is the APU running Linux.}
   \label{fig:project4}
@@ -619,7 +632,7 @@ captions.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{./img/vitis_new/project5}
+  \includegraphics[width=0.6\textwidth]{./img/vitis_new/project5}
   \caption{In this next window, we can give a name to our firmware project. It is also critical here to select the core we want to build for.
     Once again, we want to use the ``psu\_cortex5\_0''.}
   \label{fig:project5}
@@ -627,14 +640,14 @@ captions.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{./img/vitis_new/project6}
+  \includegraphics[width=0.6\textwidth]{./img/vitis_new/project6}
   \caption{Here, we want to select ``freertos10\_xilinx'' as our Operating System. The rest can remain unchanged.}
   \label{fig:project6}
 \end{figure}
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{./img/vitis_new/project7}
+  \includegraphics[width=0.6\textwidth]{./img/vitis_new/project7}
   \caption{Finally, we can select the demonstration template we are going to use; here we go with ``OpenAMP echo-test'' since we want to
     have some simple try of the RPMsg system. Finish.}
   \label{fig:project7}
@@ -654,29 +667,7 @@ psu_r5_tcm_ram_1_S_AXI_BASEADDR    0x00020000
 \end{tcolorbox}
 
 
-
-% -------------------------------------------------------------------------------
-\section{WIP::: Loading a new firmware from Linux}
-\label{sec:loading-new-firmware}
-This is a work in progress.
-
-These instructions are useful to upload and start the firmware
-on the R5F from the Linux, but there are some issues.
-This will be fixed eventually.
-\begin{tcolorbox}
-\begin{verbatim}
-sudo -s
-cp image_echo_test /lib/firmware
-echo image_echo_test  > /sys/class/remoteproc/\
-remoteproc0/firmware
-echo start > /sys/class/remoteproc/remoteproc0/state
-echo_test
-echo stop > /sys/class/remoteproc/remoteproc0/state
-\end{verbatim}
-\end{tcolorbox}
-
-
-% -------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 \section{Including the micro-ROS static library in a project}
 Now we have a Vitis demonstration project available and the \verb|libmicroros| static library
 available, we can combine both by including this library into our Kria project.
@@ -687,8 +678,8 @@ Here, we assume your Vitis IDE workspace sits in you home directory.
 \begin{verbatim}
 mkdir /home/$USER/workspace/microros_lib
 
-docker cp ros_build:/microros_ws/firmware/build/libmicroros.a\
- /home/$USER/workspace/microros_lib/
+docker cp ros_build:/microros_ws/firmware/build/\
+  libmicroros.a /home/$USER/workspace/microros_lib/
 
 docker cp ros_build:/microros_ws/firmware/build/include \
 /home/$USER/workspace/microros_lib/
@@ -702,7 +693,7 @@ for compiling the firmware.
 \label{sec:including-micro-ros}
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{./img/vitis_new/include}
+  \includegraphics[width=0.6\textwidth]{./img/vitis_new/include}
   \caption{Firstly, in the ``C/C++ Build'' settings of your firmware project, under the ``Settings'' menu, you should find the gcc compiler
     ``Directories''. In here you should add the ``include'' directory of your library. Be careful however, if your include files are in
   a second layer of directory (as it is the case for libmicroros) you will need to include each sub-directory individually.}
@@ -711,7 +702,7 @@ for compiling the firmware.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.7\textwidth]{./img/vitis_new/include2}
+  \includegraphics[width=0.6\textwidth]{./img/vitis_new/include2}
   \caption{Secondly, in the gcc linkers ``Libraries'', you can add the top level directory of your library. In our case, it is the
     directory that contains both the ``include'' directory added earlier, and also the ``libmicroros.a'' file.}
   \label{fig:include2}
@@ -727,15 +718,80 @@ With both of these setup in your project, you should be able to include the foll
 \end{verbatim}
 \end{tcolorbox}
 
-
+The details for the inclusions and the use-case of the library will depend on the implementation of the firmware
+itself.
+But in general, as the firmware is successfully built and an \verb|.elf| file is available, one can upload said
+firmware to the Kria board (or any remote server accessible through SSH, for that matter) with the following
+command.
+Note that in that case, we are retrieving the binary for a project named ``rpmsg\_pingpong\_microros\_lib''.
+You own path will vary depending on how your project was named in the first place.
 \begin{tcolorbox}
 \begin{verbatim}
-scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/Debug/rpmsg_pingpong_microros_lib.elf  kria:/home/ubuntu/
+scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
+  Debug/rpmsg_pingpong_microros_lib.elf  kria:/home/ubuntu/
 \end{verbatim}
 \end{tcolorbox}
 
+% ------------------------------------------------------------------------------
+\section{WIP:: Using micro-ROS in a Kria demonstration project}
+\label{sec:kriademomicroros}
+Beyond the inclusion of the library, actually using the micro-ROS system
+within an external project require more than just importing the needed
+functions.
+
+Indeed, if you would be just adding the various function for sending messages to the
+general ROS2 network, you would face issues with three key aspects, namely:
+\begin{itemize}
+\item Time-related functions, in particular \verb|clock_gettime|.
+\item Memory allocation functions.
+\item Communication function.
+\end{itemize}
+
+All three points requires some custom function, specific for the board.
+In our case, I will present the implementation of these functions for the
+Kria board.
+
+\subsection{Custom time-related functions}
+\label{sec:timefuncs}
+
+The end result is visible in the appendix \ref{sec:timefunctions}.
+
+
+\subsection{Custom memory allocator functions}
+\label{sec:memallocators}
+
+\subsection{Custom transport layer functions}
+\label{sec:transportlayer}
+
+
+
 
 % -------------------------------------------------------------------------------
+%\pagebreak
+\section{Loading a new firmware from Linux}
+\label{sec:loading-new-firmware}
+Having now the latest version of our firmware (with or without the included micro-ROS library) loaded onto our Kria's Linux, we want to load and run it
+on the Cortex micro-controller side.
+
+Here are the instructions used to upload and start the firmware
+on the R5F from the Linux.
+In this sequence, we are entering a root shell with \verb|sudo -s|, but this can
+also be archived by putting the commands in a script to be executed with \verb|sudo|.
+It is also important to note that the \verb|echo_test| part is specific for the RPMsg base
+demonstration firmware. It is not to be used for other firmware (including the one involving micro-ROS).
+\begin{tcolorbox}
+\begin{verbatim}
+sudo -s
+cp image_echo_test /lib/firmware
+echo image_echo_test  > /sys/class/remoteproc/\
+remoteproc0/firmware
+echo start > /sys/class/remoteproc/remoteproc0/state
+echo_test
+echo stop > /sys/class/remoteproc/remoteproc0/state
+\end{verbatim}
+\end{tcolorbox}
+
+% ------------------------------------------------------------------------------
 \pagebreak
 \section{ROS2}
 \label{sec:ros2}
@@ -748,7 +804,7 @@ ROS2 on a Ubuntu system\footnote{The curl command from the guide does not work t
   but the command wget used instead does work. The key is then moved to the correct spot with mv}.
 We will follow this guide here.
 
-Firstly, we need to update the locals,  enable the universe Ubuntu repository, get the key and add the repository for ROS2. This can be done as follow:
+Firstly, we need to update the locals, enable the universe Ubuntu repository, get the key and add the repository for ROS2. This can be done as follow:
 
 \begin{tcolorbox}
 \begin{verbatim}
@@ -815,7 +871,7 @@ ros2 run demo_nodes_py listener
 You should be able to see the first terminal sending "Hello world" messages, and the second one receiving then.
 
 
-% -------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------
 \section{ROS2 in a container}
 \label{sec:ros2-container}
 As it is used to test and build micro-ROS configurations, running ROS2 in a Docker container is a great way to have a reproducible configuration
@@ -832,8 +888,8 @@ The last command is meant to test the install. If everything went smoothly, you 
 \begin{tcolorbox}
 \begin{verbatim}
 sudo apt-get update
-sudo apt-get install ca-certificates curl gnupg
-sudo install -m 0755 -d /etc/apt/keyrings
+sudo apt-get install ca-certificates curl sudo
+gnupg install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
 sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
@@ -859,7 +915,7 @@ docker run hello-world
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.9\textwidth]{./img/hello-docker.png}
+  \includegraphics[width=0.7\textwidth]{./img/hello-docker.png}
   \caption{The return of a successful run of the ``hello world'' test Docker container}
   \label{fig:hello-docker}
 \end{figure}
@@ -873,12 +929,98 @@ in a production environment to map only the devices that are actually in use.}
 With the second command, we can execute \verb|bash|, as a way to open a terminal to the ``inside'' of the container.
 \begin{tcolorbox}
 \begin{verbatim}
-sudo docker run -d --name ros_build -it --net=host -v \
-     /dev:/dev --privileged ros:humble
-sudo docker exec -it ros_build bash
+sudo docker run -d --name ros_agent -it --net=host -v \
+     /dev:/dev --privileged ros:iron
+sudo docker exec -it ros_agent bash
 \end{verbatim}
 \end{tcolorbox}
 
 From there, it becomes possible to simply use ROS2 as you would for a bare-metal install, and as presented in the section \ref{sec:ros2}.
+The following lines show the whole procedure on how to enable a micro-ROS agent that will listen and talk using UART on the \verb|/dev/ttyUSB1| port.
+\begin{tcolorbox}
+\begin{verbatim}
+  source /opt/ros/$ROS_DISTRO/setup.bash
+
+  # Create a workspace and download the micro-ROS tools
+  mkdir microros_ws
+  cd microros_ws
+  git clone -b $ROS_DISTRO https://github.com/micro-ROS/\
+  micro_ros_setup.git src/micro_ros_setup
+
+  # Update dependencies using rosdep
+  sudo apt update && rosdep update
+  rosdep install --from-paths src --ignore-src -y
+
+  # Install pip
+  sudo apt-get install python3-pip
+
+  # Build micro-ROS tools and source them
+  colcon build
+  source install/local_setup.bash
+\end{verbatim}
+\end{tcolorbox}
+
+\begin{tcolorbox}
+\begin{verbatim}
+# Download micro-ROS-Agent packages
+source install/local_setup.bash
+ros2 run micro_ros_setup create_agent_ws.sh
+
+# Build step
+ros2 run micro_ros_setup build_agent.sh
+source install/local_setup.bash
+
+# Run a micro-ROS agent
+ros2 run micro_ros_agent micro_ros_agent serial \
+--dev /dev/ttyUSB1
+\end{verbatim}
+\end{tcolorbox}
+
+Samewise, from a different shell, it is possible to run a demonstration ping-pong topic communication.
+Note that you need to be careful to have you shell in the ``correct'' space: these command need to be run inside
+the container in which the previous setup were install, not on the host running the container system.
+\begin{tcolorbox}
+\begin{verbatim}
+  source /opt/ros/$ROS_DISTRO/setup.bash
+  
+  # Subscribe to micro-ROS ping topic
+  ros2 topic echo /microROS/ping
+\end{verbatim}
+\end{tcolorbox}
+
+% ==============================================================================
+\pagebreak
+\appendix
+% ------------------------------------------------------------------------------
+\section{DTO patch file}
+\label{sec:DTO patch file}
+\inputminted[linenos]{diff}{./src/system.patch}
+
+% ------------------------------------------------------------------------------
+\pagebreak
+\section{Custom toolchain CMake settings}
+\label{sec:toolchainsettings}
+\inputminted[linenos]{cmake}{./src/custom_r5f_toolchain.cmake}
+
+% ------------------------------------------------------------------------------
+\pagebreak
+\section{Custom Colcon meta settings}
+\label{sec:colconsettings}
+\inputminted[linenos]{yaml}{./src/custom_r5f_colcon.meta}
+
+% ------------------------------------------------------------------------------
+\pagebreak
+\section{Firmware time functions}
+\label{sec:timefunctions}
+
+\subsection{Main function}
+\inputminted[linenos]{c}{./src/clock.c}
+
+\subsection{Header file with definitions}
+\begin{minted}[linenos]{c}
+#define MICROSECONDS_PER_SECOND    ( 1000000LL )                                   /**< Microseconds per second. */
+#define NANOSECONDS_PER_SECOND     ( 1000000000LL )                                /**< Nanoseconds per second. */
+#define NANOSECONDS_PER_TICK       ( NANOSECONDS_PER_SECOND / configTICK_RATE_HZ ) /**< Nanoseconds per FreeRTOS tick. */  
+\end{minted}
 
 \end{document}

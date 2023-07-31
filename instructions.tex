@@ -847,6 +847,33 @@ echo stop > /sys/class/remoteproc/remoteproc0/state
 \end{minted}
 \end{tcolorbox}
 
+This was put in a script that can be run as a admin.
+It is to be noted that as for the current testing, it is more convenient
+to run the firmware and to stop it manually afterward.
+Thus the script would look like this:
+\begin{tcolorbox}
+\begin{minted}{sh}
+#!/bin/sh
+rm -f /lib/firmware/firmware.elf
+mv firmware.elf /lib/firmware
+echo firmware.elf > /sys/class/remoteproc/remoteproc0/firmware
+echo start > /sys/class/remoteproc/remoteproc0/state
+\end{minted}
+\end{tcolorbox}
+
+And the sequence to run to start, test, stop and restart the script would be
+as follow:
+\begin{tcolorbox}
+\begin{minted}{sh}
+  sudo -s
+  bash firmware_script.sh
+  echo_test
+  echo stop > /sys/class/remoteproc/remoteproc0/state
+  echo start > /sys/class/remoteproc/remoteproc0/state
+\end{minted}
+\end{tcolorbox}
+
+
 % ------------------------------------------------------------------------------
 \pagebreak
 \section{ROS2}

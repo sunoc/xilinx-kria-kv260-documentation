@@ -767,6 +767,26 @@ scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
 \end{minted}
 \end{tcolorbox}
 
+\subsection{WIP:: Stream Buffer system enabled}
+This is a subpart in the general configuration in the project, but this
+point in particular created so much pain I needed to include in early in this
+guide for not to forget about it and how to do it.
+
+Indeed, two settings need to be enabled in order to be able to call
+functions such as \verb|xMessageBufferCreate|:
+
+\begin{itemize}
+\item \textbf{Enableling Stream Buffer in the Vitis IDE setting}: as show in the
+  figure below, it is needed to tick the settings in the 
+\item \textbf{Enableling callbacks for the buffers}: this is a setting that must
+  be changed in your header file in the project. If you need to use a callback
+  function such as \verb|xMessageBufferCreateWithCallback|, you must include
+  \verb|#define configUSE_SB_COMPLETED_CALLBACK 1| on the top of you header
+  file, before the \verb|#include "FreeRTOS.h"| to override the setting.
+\end{itemize}
+
+TODO ADD THE FIGURE FOR THE STREAM BUFFER SETTING HERE !!!!
+
 % ------------------------------------------------------------------------------
 \section{Using micro-ROS in a Kria demonstration project}
 %\label{sec:kriademomicroros}
@@ -817,6 +837,8 @@ properly yet and some further test and modification will be needed.
 This part is the key translation layer that needs to happen in order for the
 DDS system from the micro-ROS library to be using the communication channel we
 want it to.
+
+
 
 
 

@@ -1099,7 +1099,7 @@ the container in which the previous setup were install, not on the host running 
 \end{tcolorbox}
 
 % ------------------------------------------------------------------------------
-\section{micro-ROS custom agent}
+\section{WIP:: micro-ROS custom agent}
 %\label{sec:agent}
 
 \url{https://github.com/micro-ROS/micro_ros_setup/issues/383}
@@ -1111,6 +1111,19 @@ the container in which the previous setup were install, not on the host running 
 \url{https://github.com/eProsima/Micro-XRCE-DDS-Agent/blob/develop/src/cpp/transport/custom/CustomAgent.cpp}
 
 \verb|/microros_ws/build/micro_ros_agent/agent/src/xrceagent/src/cpp/transport/custom/CustomAgent.cpp|
+
+
+Running the XRCE-DDS container from eProsima directly:
+\begin{tcolorbox}
+  \begin{minted}{sh}
+    git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+    cd Micro-XRCE-DDS-Agent
+    docker build -t xrce-dds-agent .
+    docker run -it --privileged -v /dev:/dev xrce-dds-agent serial \
+    --dev /dev/ttyACM0
+  \end{minted}
+\end{tcolorbox}
+
 
 % ==============================================================================
 \pagebreak

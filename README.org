@@ -33,19 +33,20 @@
 #+LATEX_HEADER:    \href{#1}{GitLab \faGitlab}}
 
 #+begin_src emacs-lisp :exports results :results none :eval export
-    (make-variable-buffer-local 'org-latex-title-command)
-    (setq org-latex-title-command (concat
-       "\\begin{titlepage}\n"
-       "\\centering\n"
-       "{\\LARGE %t \\par }\n"
-       "\\vspace{5mm}\n"
-       "{\\large %s \\par}\n"
-       "\\vspace{2cm}\n"
-       "{\\large %a -  Source available at \\gitlab{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation} \\par}\n"
-       "\\vspace{3cm}\n"
-  ;;     "{\\huge %D \\par}\n"
-       "\\includegraphics[width=0.8\\textwidth]{./img/board}"
-       "\\end{titlepage}\n"))
+  (make-variable-buffer-local 'org-latex-title-command)
+  (setq org-latex-title-command (concat
+     "\\begin{titlepage}\n"
+     "\\centering\n"
+     "{\\LARGE %t \\par }\n"
+     "\\vspace{5mm}\n"
+     "{\\large %s \\par}\n"
+     "\\vspace{1cm}\n"
+     "{\\large %D \\par}\n"
+     "\\vspace{2cm}\n"
+     "{\\large %a -  Source available at \\gitlab{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation} \\par}\n"
+     "\\vspace{3cm}\n"
+     "\\includegraphics[width=0.8\\textwidth]{./img/board}"
+     "\\end{titlepage}\n"))
 #+end_src
 
 #+begin_src emacs-lisp :exports results :results none :eval export
@@ -56,9 +57,16 @@
 #+end_src
 
 * Introduction
-#+LATEX:  \includegraphics[width=0.8\textwidth]{./img/board.png}
 
-* Build instructions
+** Motivation
+This guide will present how to setup and use Xilinx's KRIA board, in particular
+for running ROS on a host Ubuntu system, as well as for deploying
+micro-ROS as a firmware on the MCU part of this board's chip.
+
+** Build instructions for this report
+The base file for this report is actually this README.org file itself.
+However, upon local build, this file is regularaly exported as
+a ~.tex~ file that can be built normaly.
 On a moderately recent Ubuntu-base distribution, the following packages seemed to be required to build the
 report:
 
@@ -74,10 +82,17 @@ Then, the actual build can be made with a simple:
 
 No fancy Lua or theme at the moment !
 
-* Automatic build with CI/CD pipeline
+** Automatic build with CI/CD pipeline
 If you don't want to build the report yourself, a CI pipeline is used to make it on GitLab.
 
 You can check the steps in the .gitlab-ci.yml file.
 This build uses a base Ubuntu image and basically takes the same steps as presented above for a local build.
 
 A PDF artifact can be downloaded.
+
+* Boot firmware
+In order to be able to boot a newer version of Linux, the
+boot image of the board must be updated.
+
+The procedure is available in [[https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Firmware-Update][the official documentation]],
+but I will present it step by step here.

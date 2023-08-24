@@ -1,4 +1,4 @@
-% Created 2023-08-24 木 16:48
+% Created 2023-08-24 木 16:53
 % Intended LaTeX compiler: pdflatex
 \documentclass[10pt]{article}
 \usepackage[utf8]{inputenc}
@@ -45,6 +45,8 @@
 {\LARGE Setting up and using Xilinx KRIA KV260 \par }
 \vspace{5mm}
 {\large \begin{CJK}{UTF8}{min}南山大学\end{CJK} \par}
+\vspace{1cm}
+{\large 2023-8-24 \par}
 \vspace{2cm}
 {\large Vincent Conus -  Source available at \gitlab{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation} \par}
 \vspace{3cm}
@@ -52,11 +54,11 @@
 \tableofcontents
 \pagebreak
 \section{Introduction}
-\label{sec:orgb4c4546}
+\label{sec:org9fa8d2b}
 \includegraphics[width=0.8\textwidth]{./img/board.png}
 
 \section{Build instructions}
-\label{sec:org75a877d}
+\label{sec:orgde831ee}
 On a moderately recent Ubuntu-base distribution, the following packages seemed to be required to build the
 report:
 
@@ -73,7 +75,7 @@ pdflatex instructions.tex
 No fancy Lua or theme at the moment !
 
 \section{Automatic build with CI/CD pipeline}
-\label{sec:orgd342161}
+\label{sec:org900edbb}
 If you don't want to build the report yourself, a CI pipeline is used to make it on GitLab.
 
 You can check the steps in the .gitlab-ci.yml file.

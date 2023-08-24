@@ -1,4 +1,4 @@
-% Created 2023-08-24 木 16:53
+% Created 2023-08-24 木 17:49
 % Intended LaTeX compiler: pdflatex
 \documentclass[10pt]{article}
 \usepackage[utf8]{inputenc}
@@ -54,11 +54,19 @@
 \tableofcontents
 \pagebreak
 \section{Introduction}
-\label{sec:org9fa8d2b}
-\includegraphics[width=0.8\textwidth]{./img/board.png}
+\label{sec:orgad1986e}
 
-\section{Build instructions}
-\label{sec:orgde831ee}
+\subsection{Motivation}
+\label{sec:org673d9dc}
+This guide will present how to setup and use Xilinx's KRIA board, in particular
+for running ROS on a host Ubuntu system, as well as for deploying
+micro-ROS as a firmware on the MCU part of this board's chip.
+
+\subsection{Build instructions for this report}
+\label{sec:org40c49ec}
+The base file for this report is actually this README.org file itself.
+However, upon local build, this file is regularly exported as
+a \texttt{.tex} file that can be built normally.
 On a moderately recent Ubuntu-base distribution, the following packages seemed to be required to build the
 report:
 
@@ -74,12 +82,68 @@ pdflatex instructions.tex
 
 No fancy Lua or theme at the moment !
 
-\section{Automatic build with CI/CD pipeline}
-\label{sec:org900edbb}
+\subsection{Automatic build with CI/CD pipeline}
+\label{sec:org805eeb6}
 If you don't want to build the report yourself, a CI pipeline is used to make it on GitLab.
 
 You can check the steps in the .gitlab-ci.yml file.
 This build uses a base Ubuntu image and basically takes the same steps as presented above for a local build.
 
 A PDF artifact can be downloaded.
+
+\section{Boot firmware}
+\label{sec:org22dac04}
+The goal for the Linux side of the deployment is to
+have the latest LTS version of Ubuntu up and running.
+In order to be able to boot such a newer version of Linux, the
+boot image of the board must first be updated.
+
+The procedure is available in \href{https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Firmware-Update}{the official documentation},
+but I will present it step by step here.
+
+\subsection{Getting the new firmware}
+\label{sec:org76cabda}
+A 2022 version of the board firmware is required in order to run the latest
+version of Ubuntu properly.
+
+The image can be downloaded at \href{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+K26+ SOMoot-FW-update-with-xmutil}{the atlassian page} on the topic,
+or even directly with the following command:
+
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
+wget https://www.xilinx.com/member/forms/download/\
+     design-license-xef.html?filename=BOOT-k26-starter-kit-20230516185703.bin
+\end{minted}
+
+
+\subsection{Reaching the board recovery tool}
+\label{sec:orgbbdb9d5}
+Now the firmware \texttt{.bin} image is available, it is possible to update it using the
+boards recovery tool. Here are the steps that must be taken in order to reach
+this tool and update the board:
+
+\begin{itemize}
+\item Connect the board to your machine via a Ethernet cable.
+This will obviously cut you internet access, so you should be set for that.
+\item Select the wired network as your connection (must be "forced", since it
+doesn't have internet access).
+\item Set a fixed IP address for your machine, in the \texttt{192.168.0.1/24}
+range, except the specific \texttt{192.168.0.111}, which will be used by the
+board.
+\item Using a web browser on your host machine, access
+\texttt{http://192.168.0.111}. Thou shall now see the interface, as visible on
+the figure \ref{fig:org004f0b2} below.
+\end{itemize}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1\textwidth]{img/recovery.png}
+\caption{\label{fig:org004f0b2}The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
+\end{figure}
+
+\subsection{Updating the boot firmware}
+\label{sec:org399f7af}
+From this "recovery" page, it is possible to upload the \texttt{.bin} file downloaded previously onto
+the board using the "Recover Image" section at the bottom right of the page.
+
+The board can be re-booted afterwards.
 \end{document}

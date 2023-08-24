@@ -8,7 +8,7 @@
 #+author: Vincent Conus
 #+date: 2023-8-24
 #+DESCRIPTION: A report presenting how to use and set Xilinx's Kria board
-#+LANGUAGE: english
+#+LANGUAGE: English
 
 #+OPTIONS: toc:t date:t title:t
 
@@ -65,8 +65,8 @@ micro-ROS as a firmware on the MCU part of this board's chip.
 
 ** Build instructions for this report
 The base file for this report is actually this README.org file itself.
-However, upon local build, this file is regularaly exported as
-a ~.tex~ file that can be built normaly.
+However, upon local build, this file is regularly exported as
+a ~.tex~ file that can be built normally.
 On a moderately recent Ubuntu-base distribution, the following packages seemed to be required to build the
 report:
 
@@ -91,8 +91,53 @@ This build uses a base Ubuntu image and basically takes the same steps as presen
 A PDF artifact can be downloaded.
 
 * Boot firmware
-In order to be able to boot a newer version of Linux, the
-boot image of the board must be updated.
+The goal for the Linux side of the deployment is to
+have the latest LTS version of Ubuntu up and running.
+In order to be able to boot such a newer version of Linux, the
+boot image of the board must first be updated.
 
 The procedure is available in [[https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Firmware-Update][the official documentation]],
 but I will present it step by step here.
+
+** Getting the new firmware
+A 2022 version of the board firmware is required in order to run the latest
+version of Ubuntu properly.
+
+The image can be downloaded at [[https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+K26+
+SOMoot-FW-update-with-xmutil][the atlassian page]] on the topic,
+or even directly with the following command:
+
+#+BEGIN_SRC sh
+  wget https://www.xilinx.com/member/forms/download/\
+       design-license-xef.html?filename=BOOT-k26-starter-kit-20230516185703.bin
+#+END_SRC
+
+
+** Reaching the board recovery tool
+Now the firmware ~.bin~ image is available, it is possible to update it using the
+boards recovery tool. Here are the steps that must be taken in order to reach
+this tool and update the board:
+
++ Connect the board to your machine via a Ethernet cable.
+  This will obviously cut you internet access, so you should be set for that.
++ Select the wired network as your connection (must be "forced", since it
+  doesn't have internet access).
++ Set a fixed IP address for your machine, in the ~192.168.0.1/24~
+  range, except the specific ~192.168.0.111~, which will be used by the
+  board.
++ Using a web browser on your host machine, access
+  ~http://192.168.0.111~. Thou shall now see the interface, as visible on
+  the figure [[fig:recovery]] below.
+
+#+ATTR_LATEX: :width 1\textwidth
+#+CAPTION: The recovery tool for the board, access from Firefox. We can see
+#+CAPTION: board information at the center, and the tools to upload the firmware at
+#+CAPTION:   the bottom of the page.
+#+NAME: fig:recovery
+[[file:img/recovery.png]]
+
+** Updating the boot firmware
+From this "recovery" page, it is possible to upload the ~.bin~ file downloaded previously onto
+the board using the "Recover Image" section at the bottom right of the page.
+
+The board can be re-booted afterwards.

@@ -1,6 +1,62 @@
+:PROPERTIES:
+:ID:       ac338634-949e-4e3a-8d75-45bed92243c6
+:END:
+#+title: Setting up and using 
 #+title: Xilinx KRIA KV260
+#+filetags: :export:
+#+subtitle: \begin{CJK}{UTF8}{min}南山大学\end{CJK}
+#+author: Vincent Conus
+#+date: 2023-8-24
+#+DESCRIPTION: A report presenting how to use and set Xilinx's Kria board
+#+LANGUAGE: english
+
+#+OPTIONS: toc:t date:t title:t
+
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS:[10pt]
+#+LATEX_HEADER: \usepackage[a4paper, total={6.5in, 9in}]{geometry}
+
+#+LATEX_HEADER: \usepackage{minted}
+#+LATEX_HEADER: \setminted{breaklines}
+#+LATEX_HEADER: \usepackage[AUTO]{inputenc}
+#+LATEX_HEADER: \renewcommand{\familydefault}{\sfdefault}
+#+LATEX_HEADER: \usemintedstyle{vs}
+
+#+LATEX_HEADER: \usepackage{CJKutf8}
+#+LATEX_HEADER: \usepackage{xurl}
+#+LATEX_HEADER: \usepackage{fontawesome5}
+#+LATEX_HEADER: \usepackage{hyperref}
+#+LATEX_HEADER: \usepackage{graphicx}
+#+LATEX_HEADER: \usepackage{float}
+
+#+LATEX_HEADER: \newcommand{\gitlab}[1]{%
+#+LATEX_HEADER:    \href{#1}{GitLab \faGitlab}}
+
+#+begin_src emacs-lisp :exports results :results none :eval export
+    (make-variable-buffer-local 'org-latex-title-command)
+    (setq org-latex-title-command (concat
+       "\\begin{titlepage}\n"
+       "\\centering\n"
+       "{\\LARGE %t \\par }\n"
+       "\\vspace{5mm}\n"
+       "{\\large %s \\par}\n"
+       "\\vspace{2cm}\n"
+       "{\\large %a -  Source available at \\gitlab{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation} \\par}\n"
+       "\\vspace{3cm}\n"
+  ;;     "{\\huge %D \\par}\n"
+       "\\includegraphics[width=0.8\\textwidth]{./img/board}"
+       "\\end{titlepage}\n"))
+#+end_src
+
+#+begin_src emacs-lisp :exports results :results none :eval export
+    (make-variable-buffer-local 'org-latex-toc-command)
+    (setq org-latex-toc-command (concat
+       "\\tableofcontents\n"
+       "\\pagebreak\n"))
+#+end_src
 
 * Introduction
+#+LATEX:  \includegraphics[width=0.8\textwidth]{./img/board.png}
 
 * Build instructions
 On a moderately recent Ubuntu-base distribution, the following packages seemed to be required to build the

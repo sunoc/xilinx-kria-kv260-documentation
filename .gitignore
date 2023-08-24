@@ -7,4 +7,5 @@
 *.pyg
 *.gz
 _minted-instructions/
+_minted*
 auto/

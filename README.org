@@ -8,51 +8,15 @@
 #+author: Vincent Conus
 #+date: 2023-8-24
 
-* Introduction
 
-** Motivation
-This guide will present how to setup and use Xilinx's KRIA board, in particular
-for running ROS on a host Ubuntu system, as well as for deploying
-micro-ROS as a firmware on the MCU part of this board's chip.
 
-The use of this device in particular is interesting because of the presence
-of a CPU comprising both a general purpose ARM core, capable of running
-a Linux distribution, as well as another ARM core, real-time enabled,
-capable to run a RTOS.
-
-** Build instructions for this report
-The base file for this report is actually this README.org file itself.
-However, upon local build, this file is regularly exported as
-a ~.tex~ file that can be built normally.
-On a moderately recent Ubuntu-base distribution, the following packages seemed to be required to build the
-report:
-
-#+BEGIN_SRC bash
-  sudo apt-get install texlive-base texlive-latex-recommended texlive-lang-japanese
-#+END_SRC
-
-Then, the actual build can be made with a simple:
-
-#+BEGIN_SRC bash
-  pdflatex README.tex
-#+END_SRC
-
-No fancy Lua or theme at the moment !
-
-*** Automatic build with CI/CD pipeline
-If you don't want to build the report yourself, a CI pipeline is used to make it on GitLab.
-
-You can check the steps in the .gitlab-ci.yml file.
-This build uses a base Ubuntu image and basically takes the same steps as presented above for a local build.
-
-A PDF artifact can be downloaded.
-
-*** Headers and LaTeX settings for export
+* Headers and LaTeX settings for export                               :noexport:
 A large amount of headers and parameters are needed in order
 to have this "README" document being exportable as a LaTeX
 document formatted the way I wanted it to be.
 
-The detail can be seen in the raw ~.org~ version of this README.
+The detail can be seen in the raw ~.org~ version of this README
+and stays hidden in a :noexport: section in this report.
 
 #+DESCRIPTION: A report presenting how to use and set Xilinx's Kria board
 #+LANGUAGE: English
@@ -104,6 +68,33 @@ The detail can be seen in the raw ~.org~ version of this README.
        "\\tableofcontents\n"
        "\\pagebreak\n"))
 #+end_src
+
+* Building this report from the LaTeX file                            :noexport:
+The base file for this report is actually this README.org file itself.
+However, upon local build, this file is regularly exported as
+a ~.tex~ file that can be built normally.
+On a moderately recent Ubuntu-base distribution, the following packages seemed to be required to build the
+report:
+
+#+BEGIN_SRC bash
+  sudo apt-get install texlive-base texlive-latex-recommended texlive-lang-japanese
+#+END_SRC
+
+Then, the actual build can be made with a simple:
+
+#+BEGIN_SRC bash
+  pdflatex README.tex
+#+END_SRC
+
+* Introduction & motivation
+This guide will present how to setup and use Xilinx's KRIA board, in particular
+for running ROS on a host Ubuntu system, as well as for deploying
+micro-ROS as a firmware on the MCU part of this board's chip.
+
+The use of this device in particular is interesting because of the presence
+of a CPU comprising both a general purpose ARM core, capable of running
+a Linux distribution, as well as another ARM core, real-time enabled,
+capable to run a RTOS.
 
 * Boot firmware
 The goal for the Linux side of the deployment is to
@@ -378,6 +369,10 @@ multiple types of core (APU, MCU, FPGA) on the same chip.
 
 The part in focus in this guide is the usage of both the APU, running
 a Linux distribution and ROS2; and the MCU, running FreeRTOS and micro-ROS.
+Online available guides also provide information on how to deploy these types
+of systems and enabeling ~remoteproc~ for the Kria boad, but this guide
+will show a step-by-step, tried process to have a heterogeneous system
+up and running.[[id:8286a41d-6da4-46a4-81a8-3c3126f156b8][DDS over RPMsg on HMP]]
 
 The communication between both side is meant to be done using shared memory, but
 some extra setup is required in order to be running the real-time firmware, in particular

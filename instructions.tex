@@ -426,7 +426,7 @@ to be built, we need to setup Xilinx preferred IDE: Vitis.
 
 
 % ------------------------------------------------------------------------------
-\section{Building and running an example program on the Linux side}
+\section{Building and running an example program from the Linux side}
 %\label{sec:building-running-an}
 In order to test the deployment of the firmware on the R5F side, and in particular
 to test the RPMsg function, we need some program on the Linux side of the Kria
@@ -539,6 +539,7 @@ $(pwd)/custom_r5f_toolchain.cmake $(pwd)/\
 custom_r5f_colcon.meta
 
 exit
+
 \end{minted}
 \end{tcolorbox}
 
@@ -565,22 +566,24 @@ LTS from Ubuntu. For other Linux distributions or operating system, please refer
 Some packages are required to be installed in order for the installation process to happen successfully:
 \begin{tcolorbox}
 \begin{minted}{sh}
-sudo apt-get update
-sudo apt-get install libncurses-dev \
-ncurses-term \
-ncurses-base \
-ncurses-bin \
-libncurses5 \
-libtinfo5 \
-libncurses5-dev \
-libncursesw5-dev
+  sudo apt-get update
+  sudo apt-get install libncurses-dev \
+  ncurses-term \
+  ncurses-base \
+  ncurses-bin \
+  libncurses5 \
+  libtinfo5 \
+  libncurses5-dev \
+  libncursesw5-dev
+
 \end{minted}
 \end{tcolorbox}
 
 Once this is done, the downloaded binary installer can be executed:
 \begin{tcolorbox}
 \begin{minted}{sh}
-./Xilinx_Unified_2022.2_1014_8888_Lin64.bin
+  ./Xilinx_Unified_2022.2_1014_8888_Lin64.bin
+  
 \end{minted}
 \end{tcolorbox}
 
@@ -941,6 +944,7 @@ signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
 http://packages.ros.org/ros2/ubuntu $(. \
 /etc/os-release && echo $UBUNTU_CODENAME) main" | \
 sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
 \end{minted}
 \end{tcolorbox}
 
@@ -954,6 +958,7 @@ sudo apt install -y ros-humble-desktop \
 ros-humble-ros-base \
 python3-argcomplete \
 ros-dev-tools
+
 \end{minted}
 \end{tcolorbox}
 
@@ -965,6 +970,7 @@ respectively:
 \begin{minted}{sh}
 source /opt/ros/humble/setup.bash
 ros2 run demo_nodes_cpp talker
+
 \end{minted}
 \end{tcolorbox}
 
@@ -974,6 +980,7 @@ ros2 run demo_nodes_cpp talker
 \begin{minted}{sh}
 source /opt/ros/humble/setup.bash
 ros2 run demo_nodes_py listener
+
 \end{minted}
 \end{tcolorbox}
 

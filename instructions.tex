@@ -40,414 +40,414 @@
 \pagebreak
 \tableofcontents
 
-\pagebreak
-%-------------------------------------------------------------------------------
-\section{Introduction and motivation}
-%\label{sec:intr-motiv}
-
-\subsection{Documentation and guides}
-%\label{sec:documentation-guides}
-
-% TODO: move these as library elemnts that can be cited !!
-
-\begin{itemize}
-\item Board product information:\\ 
-  \url{https://www.xilinx.com/products/som/kria/kv260-vision-starter-kit.html}
-\item SoC product information:\\ 
-  \url{https://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html}
-\item Download page for the official Canonical Ubuntu releases for the board:\\
-  \url{https://ubuntu.com/download/amd-xilinx}
-\item Xilinx official documentation:\\ 
-  \url{https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Summary}
-\item Atlassian documentation:\\ 
-  \url{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+K26+SOM}
-\item Fixstar presentation (JP):\\  
-  \url{https://speakerdeck.com/fixstars/fpga-seminar-12-fixstars-corporation-20220727}
-\item Xilinx OpenAMP demo documentation:\\ 
-  \url{https://xilinx.github.io/kria-apps-docs/openamp/build/html/openamp\_landing.html}
-\item Libmetal and OpenAMP official Xilinx documentation:\\ 
-  \url{https://docs.xilinx.com/r/en-US/ug1186-zynq-openamp-gsg/Introduction?tocId=GFruK4\_sY1eyu3jD9X1EuA}
-\item Guide for KV260 board setup (JP):\\ 
-  \url{https://zenn.dev/ryuz88/articles/kv260\_setup\_memo\_ubuntu22}
-\item Vitis IDE download page:\\ 
-  \url{https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vitis.html}
-\end{itemize}
-
-\pagebreak
-% ------------------------------------------------------------------------------
-\section{Boot Image Update}
-%\label{sec:boot-image-update}
-In order to be able to boot a newer version of Linux, the
-boot image of the board must be updated.
-
-The procedure is available in
-\href{https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Firmware-Update}
-{the official documentation}, but I will present it step by step here.
-
-\subsection{Getting the new firmware}
-%\label{sec:getting-new-firmware}
-A 2022 version of the board firmware is required in order to run the latest
-version of Ubuntu properly.
-
-The image can be downloaded at
-\href{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+K26+
-SOM#Boot-FW-update-with-xmutil}
-{the atlassian page on the topic}.
-
-\subsection{Reaching the board recovery tool}
-%\label{sec:reach-board-recov}
-Now the firmware image is available, it is possible to update it using the
-boards recovery tool. Here are the steps that must be taken in order to reach
-this tool and update the board:
-
-\begin{itemize}
-\item Connect the board to your machine via Ethernet.
-\item Select the wired network as your connection (must be ``forced'', since it
-  doesn't have internet access).
-\item Set a fixed IP address for your machine, in the \verb|192.168.0.1/24|
-  range, except the specific \verb|192.168.0.111|, which will be used by the
-  board.
-\item Using a web browser on your host machine, access
-  \url{http://192.168.0.111}. Thou shall now see the interface, as visible on
-  the figure \ref{fig:recovery} below.
-\item Now the downloaded file can be uploaded as a recovery image in the
-  bottom-right section.
-\end{itemize}
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=1\textwidth]{./img/recovery.png}
-  \caption{The recovery tool for the board, access from Firefox. We can see
-    board information at the center, and the tools to upload the firmware at
-    the bottom of the page.}
-  \label{fig:recovery}
-\end{figure}
-
-
-
-%-------------------------------------------------------------------------------
-\section{Ubuntu 22.04}
-%\label{sec:ubuntu-22.04}
-\href{https://ubuntu.com/download/amd-xilinx}{An official Ubuntu image} is
-provided by Xilinx that allows the OS installation to be quick and
-straightforward. Ubuntu is a common and easy to use distribution. Furthermore,
-it allows to install ROS2 as a package, which is most convenient and will be
-done later in this guide.
-
-One the image has been downloaded at Canonical's page
-(\url{https://ubuntu.com/download/amd-xilinx}),
-we can flash it onto the SD card.
-
-\begin{tcolorbox}[colback=red!5!white,colframe=red!75!black]
-  WARNING: The next part involve the \verb|dd| command writing on disks!!! \\
-  As always with the dd command, thou have to be VERY careful on what arguments
-  thou give. Selecting the wrong disk will result on the destruction of
-  thy data !! \\
-  \underline{If thou art unsure of what to do, seek assistance !}
-\end{tcolorbox}
-
-
-With the image available on thy machine and a SD card visible as \verb|/dev/sda|
-\footnote{Again, it is critical to be 100\% certain that you are working with
-  the correct device!}, one can simply run the \verb|dd| command as follow to
-write the image to a previously formatted drive (here \verb|/dev/sda|):
-
-\begin{tcolorbox}
-\begin{minted}{sh}
-sudo dd if=iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img
-of=/dev/sda status=progress bs=8M && sync
-\end{minted}
-\end{tcolorbox}
-
-Once the SD card was flash, put back on the board and a micro-USB cable has been
-connected from the PC to the board, it is possible to
-connect to the board in serial with an appropriate tool, for example picocom,
-as in the following example:
-\begin{tcolorbox}
-\begin{minted}{sh}
-sudo picocom /dev/ttyUSB1 -b 115200
-\end{minted}
-\end{tcolorbox}
-
-Once logged in, it is typically easier and more convenient to connect the board
-using SSH. When the board is connected to the network, it is possible to know
-it's IP address with the \verb|ip| command; then it is possible to connect to
-the board with ssh, as follow (example):
-\begin{tcolorbox}
-\begin{minted}{sh}
-kria# ip addr
-
-host# ssh ubuntu@192.168.4.11
-\end{minted}
-\end{tcolorbox}
-
-\subsection{Proxy, DNS and root password}
-%\label{sec:proxy-dns}
-An issue that can occur when connecting the board to the internet is the
-conflicting situation with the school proxy. Indeed, as the network at Nanzan
-University requires to go through a proxy, some DNS errors appeared.
-
-Firstly, it is possible to set a DNS IP address in \verb|/etc/resolv.conf| by
-editing it and adding your favorite DNS, for example \verb|nameserver 1.1.1.1|
-next to the other \verb|nameserver| entry.
-\begin{tcolorbox}
-\begin{minted}{sh}
-sudo nano /etc/resolv.conf
-
-sudo systemctl restart systemd-resolved
-\end{minted}
-\end{tcolorbox}
-
-Secondly, it might become needed to setup the proxy for the school.
-
-This can be done as follow, by exporting a https base proxy configuration
-containing you AXIA credentials, then by consolidating the configuration for
-other types of connections in the \verb|bashrc|:
-\begin{tcolorbox}
-\begin{minted}{sh}
-export https_proxy="http://<AXIA_username>:\
-<AXIA_psw>@proxy.ic.nanzan-u.ac.jp:8080"
-
-echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc \
-echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc \
-echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc \
-echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" \
->> ~/.bashrc
-\end{minted}
-\end{tcolorbox}
-
-Finally, it might be convenient for the \verb|sudo| tool to not ask for the
-password all the time. This change can be done by editing the sudoers file, and
-adding the parameter \verb|NOPASSWD|
-at the ``sudo'' line:
-\begin{tcolorbox}
-\begin{minted}{sh}
-sudo visudo
-
-%sudo   ALL=(ALL:ALL) NOPASSWD: ALL
-\end{minted}
-\end{tcolorbox}
-
-This is merely a convenience setup for devices staying at you desk. If
-the board is meant to be used in any king of production setup, a password
-should be set for making administration tasks.
-
-With all of these settings, you should be able to update the software of your
-board without any issues:
-\begin{tcolorbox}
-\begin{minted}{sh}
-sudo apt-get update
-sudo apt-get dist-upgrade
-sudo reboot now
-\end{minted}
-\end{tcolorbox}
-
-
-\subsection{Setting a static IP address}
-%\label{sec:setting-static-ip}
-A static IP can be set by writing the following
-configuration into your \verb|netplan| configuration file.
-
-The name of the files might vary:
-\begin{tcolorbox}
-\begin{minted}{sh}
-sudo nano /etc/netplan/50-cloud-init.yaml
-\end{minted}
-\end{tcolorbox}
-
-You can then set the wanted IP as follow:
-\begin{tcolorbox}
-\begin{minted}{yaml}
-network:
-  renderer: NetworkManager
-  version: 2
-  ethernets:
-    eth0:
-      addresses:
-        - 192.168.11.103/24
-      routes:
-        - to: default
-          via: 192.168.11.1
-      nameservers:
-        addresses:
-          - 8.8.8.8
-          - 1.1.1.1
-\end{minted}
-\end{tcolorbox}
-
-Finally, the change in settings can be applied
-as follow:
-\begin{tcolorbox}
-\begin{minted}{sh}
-sudo netplan apply
-\end{minted}
-\end{tcolorbox}
-
-
-
-
-\subsection{Extra: removing useless stuff}
-%\label{sec:extr-remov-usel}
-As the desktop part is not used at all, there are some packages
-that can be purges in order for the system to become more lightweight.
-
-In particular, the main issue with Ubuntu systems is the forced integration of
-Snap. Here are some step to try and remove all of that. These steps
-take a lot of time though, but the system fan runs sensibly slower
-without all of this stuff:
-\begin{tcolorbox}
-\begin{minted}{sh}
-sudo systemctl disable snapd.service
-sudo systemctl disable snapd.socket
-sudo systemctl disable snapd.seeded.service
-sudo snap list #show installed package, remove then all:
-sudo snap remove --purge firefox
-sudo snap remove --purge gnome-3-38-2004
-sudo snap remove --purge gnome-42-2204
-sudo snap remove --purge gtk-common-themes
-sudo snap remove --purge snapd-desktop-integration
-sudo snap remove --purge snap-store
-sudo snap remove --purge bare
-sudo snap remove --purge core20
-sudo snap remove --purge core22
-sudo snap remove --purge snapd
-sudo snap list # check that everything is uninstalled
-
-sudo rm -rf /var/cache/snapd/
-sudo rm -rf ~/snap
-sudo apt autoremove --purge snapd
-
-systemctl list-units | grep snapd
-\end{minted}
-\end{tcolorbox}
-
-And here are some other stuff that can safely be removed too is the desktop is
-not to be used:
-\begin{tcolorbox}
-\begin{minted}{sh}
-sudo apt-get autoremove --purge yaru-theme-icon \
-fonts-noto-cjk yaru-theme-gtk vim-runtime \
-ubuntu-wallpapers-jammy humanity-icon-theme
-
-sudo apt-get autoclean
-sudo reboot now
-\end{minted}
-\end{tcolorbox}
-
-% ------------------------------------------------------------------------------
-\pagebreak
-\section{Starting remoteproc}
-%\label{sec:starting-remoteproc}
-One of the advantage of this board, as cited previously, is the presence of
-multiple types of core (APU, MCU, FPGA) on the same chip.
-
-The part we are focusing in this guide is the usage of both the APU, running
-a Linux distribution and ROS2; and the MCU, running FreeRTOS and micro-ROS.
-
-The communication between both side is meant to be done using shared memory, but
-some extra setup is required.
-This section will present how to setup and use as an example the
-\verb|remoteproc| and RPMsg system.
-
-\subsection{References}
-%\label{sec:referances}
-This exact use-case is not exactly presented in the official documentation,
-but some guides were found to eventually put together this procedure.
-
-\begin{itemize}
-\item A slideshow (JP) from Fixstar employees presents how to use the device
-  tree to enable the communication between the cores. \\
-  \url{https://speakerdeck.com/fixstars/fpga-seminar-12-fixstars-corporation-20220727}
-\item This blog article (JP) shows all major steps on how to enable the \verb|remoteproc|. \\
-  \url{https://zenn.dev/ryuz88/articles/kv260_setup_memo_ubuntu22}
-\end{itemize}
-
-
-\subsection{DTO patching}
-%\label{sec:dto-patching}
-The communication system and interaction from the Linux side towards the real-time capable core
-is not enabled by default within the Ubuntu image provided by Xilinx.
-
-Because of that, some modification of the device tree is required in order to have
-the \verb|remoteproc| system to start.
-
-Firstly, we need to get the original firmware device tree, converted
-into a readable format (DTS):
-\begin{tcolorbox}
-\begin{minted}{sh}
-sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
-\end{minted}
-\end{tcolorbox}
-
-Then we can download and apply the patch\footnote{The file is also visible in the appendix \ref{sec:DTO patch file} at the end of this report.} that will allow us to use the \verb|remoteproc|:
-\begin{tcolorbox}
-\begin{minted}{sh}
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
-documentation/-/raw/main/src/system.patch
-
-patch system.dts < system.patch
-\end{minted}
-\end{tcolorbox}
-
-As for the board to be able to reserve the correct amount of memory with the new settings, some
-\verb|cma| kernel configuration is needed\footnote{The overlapping memory will not prevent the board to boot,
-  but it disables the PWM for the CPU fan, which will then run at full speed, making noise.}:
-\begin{tcolorbox}
-\begin{minted}{sh}
-sudo nano /etc/default/flash-kernel
-LINUX_KERNEL_CMDLINE="quiet splash cma=512M cpuidle.off=1"
-LINUX_KERNEL_CMDLINE_DEFAULTS=""
-sudo flash-kernel
-\end{minted}
-\end{tcolorbox}
-
-Now the DTS file has been modified, one can regenerate the binary and place it on the \verb|/boot| partition
-and reboot the board:
-\begin{tcolorbox}
-\begin{minted}{sh}
-dtc -I dts -O dtb system.dts -o user-override.dtb
-sudo mv user-override.dtb /boot/firmware/
-sudo reboot now
-\end{minted}
-\end{tcolorbox}
-
-After rebooting, you can check the content of the \verb|remoteproc| system directory,
-and a \verb|remoteproc0| device should be visible, as follow:
-\begin{tcolorbox}
-\begin{minted}{sh}
-ls /sys/class/remoteproc/
-#  remoteproc0
-\end{minted}
-\end{tcolorbox}
-
-If it is the case, it means that the patch was successful and RPMsg is
-ready to test with some example; however, in order for these examples
-to be built, we need to setup Xilinx preferred IDE: Vitis.
-
-
-% ------------------------------------------------------------------------------
-\section{Building and running an example program from the Linux side}
-%\label{sec:building-running-an}
-In order to test the deployment of the firmware on the R5F side, and in particular
-to test the RPMsg function, we need some program on the Linux side of the Kria
-board to ``talk'' with the real-time side.
-
-Some source is provided by Xilinx to build a demonstration software that does
-this purpose: specifically interact with the demonstration firmware.
-
-Here are the steps required to obtain the sources, and build the program.
-As a reminder, this is meant to be done on the Linux running on the
-Kria board, NOT on your host machine !
-\begin{tcolorbox}
-\begin{minted}{sh}
-git clone https://github.com/Xilinx/meta-openamp.git
-cd  meta-openamp
-git checkout xlnx-rel-v2022.2
-cd  .//recipes-openamp/rpmsg-examples/rpmsg-echo-test
-make
-sudo ln -s $(pwd)/echo_test /usr/bin/
-\end{minted}
-\end{tcolorbox}
+% \pagebreak
+% %-------------------------------------------------------------------------------
+% \section{Introduction and motivation}
+% %\label{sec:intr-motiv}
+
+% \subsection{Documentation and guides}
+% %\label{sec:documentation-guides}
+
+% % TODO: move these as library elemnts that can be cited !!
+
+% \begin{itemize}
+% \item Board product information:\\ 
+%   \url{https://www.xilinx.com/products/som/kria/kv260-vision-starter-kit.html}
+% \item SoC product information:\\ 
+%   \url{https://www.xilinx.com/products/silicon-devices/soc/zynq-ultrascale-mpsoc.html}
+% \item Download page for the official Canonical Ubuntu releases for the board:\\
+%   \url{https://ubuntu.com/download/amd-xilinx}
+% \item Xilinx official documentation:\\ 
+%   \url{https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Summary}
+% \item Atlassian documentation:\\ 
+%   \url{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+K26+SOM}
+% \item Fixstar presentation (JP):\\  
+%   \url{https://speakerdeck.com/fixstars/fpga-seminar-12-fixstars-corporation-20220727}
+% \item Xilinx OpenAMP demo documentation:\\ 
+%   \url{https://xilinx.github.io/kria-apps-docs/openamp/build/html/openamp\_landing.html}
+% \item Libmetal and OpenAMP official Xilinx documentation:\\ 
+%   \url{https://docs.xilinx.com/r/en-US/ug1186-zynq-openamp-gsg/Introduction?tocId=GFruK4\_sY1eyu3jD9X1EuA}
+% \item Guide for KV260 board setup (JP):\\ 
+%   \url{https://zenn.dev/ryuz88/articles/kv260\_setup\_memo\_ubuntu22}
+% \item Vitis IDE download page:\\ 
+%   \url{https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vitis.html}
+% \end{itemize}
+
+% \pagebreak
+% % ------------------------------------------------------------------------------
+% \section{Boot Image Update}
+% %\label{sec:boot-image-update}
+% In order to be able to boot a newer version of Linux, the
+% boot image of the board must be updated.
+
+% The procedure is available in
+% \href{https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Firmware-Update}
+% {the official documentation}, but I will present it step by step here.
+
+% \subsection{Getting the new firmware}
+% %\label{sec:getting-new-firmware}
+% A 2022 version of the board firmware is required in order to run the latest
+% version of Ubuntu properly.
+
+% The image can be downloaded at
+% \href{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+K26+
+% SOM#Boot-FW-update-with-xmutil}
+% {the atlassian page on the topic}.
+
+% \subsection{Reaching the board recovery tool}
+% %\label{sec:reach-board-recov}
+% Now the firmware image is available, it is possible to update it using the
+% boards recovery tool. Here are the steps that must be taken in order to reach
+% this tool and update the board:
+
+% \begin{itemize}
+% \item Connect the board to your machine via Ethernet.
+% \item Select the wired network as your connection (must be ``forced'', since it
+%   doesn't have internet access).
+% \item Set a fixed IP address for your machine, in the \verb|192.168.0.1/24|
+%   range, except the specific \verb|192.168.0.111|, which will be used by the
+%   board.
+% \item Using a web browser on your host machine, access
+%   \url{http://192.168.0.111}. Thou shall now see the interface, as visible on
+%   the figure \ref{fig:recovery} below.
+% \item Now the downloaded file can be uploaded as a recovery image in the
+%   bottom-right section.
+% \end{itemize}
+
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=1\textwidth]{./img/recovery.png}
+%   \caption{The recovery tool for the board, access from Firefox. We can see
+%     board information at the center, and the tools to upload the firmware at
+%     the bottom of the page.}
+%   \label{fig:recovery}
+% \end{figure}
+
+
+
+% %-------------------------------------------------------------------------------
+% \section{Ubuntu 22.04}
+% %\label{sec:ubuntu-22.04}
+% \href{https://ubuntu.com/download/amd-xilinx}{An official Ubuntu image} is
+% provided by Xilinx that allows the OS installation to be quick and
+% straightforward. Ubuntu is a common and easy to use distribution. Furthermore,
+% it allows to install ROS2 as a package, which is most convenient and will be
+% done later in this guide.
+
+% One the image has been downloaded at Canonical's page
+% (\url{https://ubuntu.com/download/amd-xilinx}),
+% we can flash it onto the SD card.
+
+% \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black]
+%   WARNING: The next part involve the \verb|dd| command writing on disks!!! \\
+%   As always with the dd command, thou have to be VERY careful on what arguments
+%   thou give. Selecting the wrong disk will result on the destruction of
+%   thy data !! \\
+%   \underline{If thou art unsure of what to do, seek assistance !}
+% \end{tcolorbox}
+
+
+% With the image available on thy machine and a SD card visible as \verb|/dev/sda|
+% \footnote{Again, it is critical to be 100\% certain that you are working with
+%   the correct device!}, one can simply run the \verb|dd| command as follow to
+% write the image to a previously formatted drive (here \verb|/dev/sda|):
+
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% sudo dd if=iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img
+% of=/dev/sda status=progress bs=8M && sync
+% \end{minted}
+% \end{tcolorbox}
+
+% Once the SD card was flash, put back on the board and a micro-USB cable has been
+% connected from the PC to the board, it is possible to
+% connect to the board in serial with an appropriate tool, for example picocom,
+% as in the following example:
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% sudo picocom /dev/ttyUSB1 -b 115200
+% \end{minted}
+% \end{tcolorbox}
+
+% Once logged in, it is typically easier and more convenient to connect the board
+% using SSH. When the board is connected to the network, it is possible to know
+% it's IP address with the \verb|ip| command; then it is possible to connect to
+% the board with ssh, as follow (example):
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% kria# ip addr
+
+% host# ssh ubuntu@192.168.4.11
+% \end{minted}
+% \end{tcolorbox}
+
+% \subsection{Proxy, DNS and root password}
+% %\label{sec:proxy-dns}
+% An issue that can occur when connecting the board to the internet is the
+% conflicting situation with the school proxy. Indeed, as the network at Nanzan
+% University requires to go through a proxy, some DNS errors appeared.
+
+% Firstly, it is possible to set a DNS IP address in \verb|/etc/resolv.conf| by
+% editing it and adding your favorite DNS, for example \verb|nameserver 1.1.1.1|
+% next to the other \verb|nameserver| entry.
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% sudo nano /etc/resolv.conf
+
+% sudo systemctl restart systemd-resolved
+% \end{minted}
+% \end{tcolorbox}
+
+% Secondly, it might become needed to setup the proxy for the school.
+
+% This can be done as follow, by exporting a https base proxy configuration
+% containing you AXIA credentials, then by consolidating the configuration for
+% other types of connections in the \verb|bashrc|:
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% export https_proxy="http://<AXIA_username>:\
+% <AXIA_psw>@proxy.ic.nanzan-u.ac.jp:8080"
+
+% echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc \
+% echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc \
+% echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc \
+% echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" \
+% >> ~/.bashrc
+% \end{minted}
+% \end{tcolorbox}
+
+% Finally, it might be convenient for the \verb|sudo| tool to not ask for the
+% password all the time. This change can be done by editing the sudoers file, and
+% adding the parameter \verb|NOPASSWD|
+% at the ``sudo'' line:
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% sudo visudo
+
+% %sudo   ALL=(ALL:ALL) NOPASSWD: ALL
+% \end{minted}
+% \end{tcolorbox}
+
+% This is merely a convenience setup for devices staying at you desk. If
+% the board is meant to be used in any king of production setup, a password
+% should be set for making administration tasks.
+
+% With all of these settings, you should be able to update the software of your
+% board without any issues:
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% sudo apt-get update
+% sudo apt-get dist-upgrade
+% sudo reboot now
+% \end{minted}
+% \end{tcolorbox}
+
+
+% \subsection{Setting a static IP address}
+% %\label{sec:setting-static-ip}
+% A static IP can be set by writing the following
+% configuration into your \verb|netplan| configuration file.
+
+% The name of the files might vary:
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% sudo nano /etc/netplan/50-cloud-init.yaml
+% \end{minted}
+% \end{tcolorbox}
+
+% You can then set the wanted IP as follow:
+% \begin{tcolorbox}
+% \begin{minted}{yaml}
+% network:
+%   renderer: NetworkManager
+%   version: 2
+%   ethernets:
+%     eth0:
+%       addresses:
+%         - 192.168.11.103/24
+%       routes:
+%         - to: default
+%           via: 192.168.11.1
+%       nameservers:
+%         addresses:
+%           - 8.8.8.8
+%           - 1.1.1.1
+% \end{minted}
+% \end{tcolorbox}
+
+% Finally, the change in settings can be applied
+% as follow:
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% sudo netplan apply
+% \end{minted}
+% \end{tcolorbox}
+
+
+
+
+% \subsection{Extra: removing useless stuff}
+% %\label{sec:extr-remov-usel}
+% As the desktop part is not used at all, there are some packages
+% that can be purges in order for the system to become more lightweight.
+
+% In particular, the main issue with Ubuntu systems is the forced integration of
+% Snap. Here are some step to try and remove all of that. These steps
+% take a lot of time though, but the system fan runs sensibly slower
+% without all of this stuff:
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% sudo systemctl disable snapd.service
+% sudo systemctl disable snapd.socket
+% sudo systemctl disable snapd.seeded.service
+% sudo snap list #show installed package, remove then all:
+% sudo snap remove --purge firefox
+% sudo snap remove --purge gnome-3-38-2004
+% sudo snap remove --purge gnome-42-2204
+% sudo snap remove --purge gtk-common-themes
+% sudo snap remove --purge snapd-desktop-integration
+% sudo snap remove --purge snap-store
+% sudo snap remove --purge bare
+% sudo snap remove --purge core20
+% sudo snap remove --purge core22
+% sudo snap remove --purge snapd
+% sudo snap list # check that everything is uninstalled
+
+% sudo rm -rf /var/cache/snapd/
+% sudo rm -rf ~/snap
+% sudo apt autoremove --purge snapd
+
+% systemctl list-units | grep snapd
+% \end{minted}
+% \end{tcolorbox}
+
+% And here are some other stuff that can safely be removed too is the desktop is
+% not to be used:
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% sudo apt-get autoremove --purge yaru-theme-icon \
+% fonts-noto-cjk yaru-theme-gtk vim-runtime \
+% ubuntu-wallpapers-jammy humanity-icon-theme
+
+% sudo apt-get autoclean
+% sudo reboot now
+% \end{minted}
+% \end{tcolorbox}
+
+% % ------------------------------------------------------------------------------
+% \pagebreak
+% \section{Starting remoteproc}
+% %\label{sec:starting-remoteproc}
+% One of the advantage of this board, as cited previously, is the presence of
+% multiple types of core (APU, MCU, FPGA) on the same chip.
+
+% The part we are focusing in this guide is the usage of both the APU, running
+% a Linux distribution and ROS2; and the MCU, running FreeRTOS and micro-ROS.
+
+% The communication between both side is meant to be done using shared memory, but
+% some extra setup is required.
+% This section will present how to setup and use as an example the
+% \verb|remoteproc| and RPMsg system.
+
+% \subsection{References}
+% %\label{sec:referances}
+% This exact use-case is not exactly presented in the official documentation,
+% but some guides were found to eventually put together this procedure.
+
+% \begin{itemize}
+% \item A slideshow (JP) from Fixstar employees presents how to use the device
+%   tree to enable the communication between the cores. \\
+%   \url{https://speakerdeck.com/fixstars/fpga-seminar-12-fixstars-corporation-20220727}
+% \item This blog article (JP) shows all major steps on how to enable the \verb|remoteproc|. \\
+%   \url{https://zenn.dev/ryuz88/articles/kv260_setup_memo_ubuntu22}
+% \end{itemize}
+
+
+% \subsection{DTO patching}
+% %\label{sec:dto-patching}
+% The communication system and interaction from the Linux side towards the real-time capable core
+% is not enabled by default within the Ubuntu image provided by Xilinx.
+
+% Because of that, some modification of the device tree is required in order to have
+% the \verb|remoteproc| system to start.
+
+% Firstly, we need to get the original firmware device tree, converted
+% into a readable format (DTS):
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
+% \end{minted}
+% \end{tcolorbox}
+
+% Then we can download and apply the patch\footnote{The file is also visible in the appendix \ref{sec:DTO patch file} at the end of this report.} that will allow us to use the \verb|remoteproc|:
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
+% documentation/-/raw/main/src/system.patch
+
+% patch system.dts < system.patch
+% \end{minted}
+% \end{tcolorbox}
+
+% As for the board to be able to reserve the correct amount of memory with the new settings, some
+% \verb|cma| kernel configuration is needed\footnote{The overlapping memory will not prevent the board to boot,
+%   but it disables the PWM for the CPU fan, which will then run at full speed, making noise.}:
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% sudo nano /etc/default/flash-kernel
+% LINUX_KERNEL_CMDLINE="quiet splash cma=512M cpuidle.off=1"
+% LINUX_KERNEL_CMDLINE_DEFAULTS=""
+% sudo flash-kernel
+% \end{minted}
+% \end{tcolorbox}
+
+% Now the DTS file has been modified, one can regenerate the binary and place it on the \verb|/boot| partition
+% and reboot the board:
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% dtc -I dts -O dtb system.dts -o user-override.dtb
+% sudo mv user-override.dtb /boot/firmware/
+% sudo reboot now
+% \end{minted}
+% \end{tcolorbox}
+
+% After rebooting, you can check the content of the \verb|remoteproc| system directory,
+% and a \verb|remoteproc0| device should be visible, as follow:
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% ls /sys/class/remoteproc/
+% #  remoteproc0
+% \end{minted}
+% \end{tcolorbox}
+
+% If it is the case, it means that the patch was successful and RPMsg is
+% ready to test with some example; however, in order for these examples
+% to be built, we need to setup Xilinx preferred IDE: Vitis.
+
+
+% % ------------------------------------------------------------------------------
+% \section{Building and running an example program from the Linux side}
+% %\label{sec:building-running-an}
+% In order to test the deployment of the firmware on the R5F side, and in particular
+% to test the RPMsg function, we need some program on the Linux side of the Kria
+% board to ``talk'' with the real-time side.
+
+% Some source is provided by Xilinx to build a demonstration software that does
+% this purpose: specifically interact with the demonstration firmware.
+
+% Here are the steps required to obtain the sources, and build the program.
+% As a reminder, this is meant to be done on the Linux running on the
+% Kria board, NOT on your host machine !
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% git clone https://github.com/Xilinx/meta-openamp.git
+% cd  meta-openamp
+% git checkout xlnx-rel-v2022.2
+% cd  .//recipes-openamp/rpmsg-examples/rpmsg-echo-test
+% make
+% sudo ln -s (pwd)/echo_test /usr/bin/
+% \end{minted}
+% \end{tcolorbox}
 
 % ------------------------------------------------------------------------------
 \section{Building the micro-ROS static library}
@@ -464,7 +464,7 @@ The cross-compilation tool can then be extracted, set as our ``toolchain'' varia
 Here is how to do all of this and then opening a \verb|bash| shell in the container:
 \begin{tcolorbox}
 \begin{minted}{sh}
-pushd /home/$USER/Downloads
+pushd /home/\$USER/Downloads
 wget https://developer.arm.com/-/media/Files/downloads/\
 gnu/12.2.mpacbti-rel1/binrel/arm-gnu-toolchain-12.2\
 .mpacbti-rel1-x86_64-arm-none-eabi.tar.xz
@@ -472,14 +472,14 @@ tar -xvf arm-gnu-toolchain-12.2.mpacbti-rel1-x86_64-\
 arm-none-eabi.tar.xz
 popd
 
-toolchain="/home/$USER/Downloads/arm-gnu-toolchain-\
+toolchain="/home/\$USER/Downloads/arm-gnu-toolchain-\
 12.2.mpacbti-rel1-x86_64-arm-none-eabi/"
 
 
 docker run -d --name ros_build -it --net=host \
 --hostname ros_build \
 -v /dev:/dev \
--v $toolchain:/armr5-toolchain \
+-v \$toolchain:/armr5-toolchain \
 --privileged ros:iron
 
 docker exec -it ros_build bash
@@ -499,11 +499,11 @@ sudo apt-get -y install python3-pip \
 
 \begin{tcolorbox}
 \begin{minted}{sh}
-. /opt/ros/$ROS_DISTRO/setup.bash
+. /opt/ros/\$ROS_DISTRO/setup.bash
 
 mkdir microros_ws
 cd microros_ws
-git clone -b $ROS_DISTRO \
+git clone -b \$ROS_DISTRO \
 https://github.com/micro-ROS/micro_ros_setup.git \
 src/micro_ros_setup
 
@@ -531,11 +531,11 @@ documentation/-/raw/main/src/custom_r5f_toolchain.cmake
 wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
 documentation/-/raw/main/src/custom_r5f_colcon.meta
 
-cp -r /armr5-toolchain/ $(pwd)/firmware/toolchain && \
-export PATH=$PATH:$(pwd)/firmware/toolchain/bin
+cp -r /armr5-toolchain/ \$(pwd)/firmware/toolchain && \
+export PATH=\$PATH:\$(pwd)/firmware/toolchain/bin
 
 ros2 run micro_ros_setup build_firmware.sh \
-$(pwd)/custom_r5f_toolchain.cmake $(pwd)/\
+\$(pwd)/custom_r5f_toolchain.cmake \$(pwd)/\
 custom_r5f_colcon.meta
 
 exit

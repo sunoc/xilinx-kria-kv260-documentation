@@ -446,7 +446,6 @@ core of our Kria board.
 The goal here is to have a demonstration firmware running,
 able to use the RPMsg system to communicate with the Linux APU.
 
-
 ** Setting up the IDE
 Xilinx's Vitis IDE is the recommended tool used to build software for the Xilinx boards.
 It also include the tools to interact with the FPGA part, making the whole
@@ -507,9 +506,42 @@ so your schedule should be arranged accordingly.
 #+LATEX: \end{tcolorbox}
 
 *** Platform configuration file generation
+In order to have the libraries and configurations in the IDE ready to be used for our board,
+we need to obtain some configuration files that are specific for the Kria KV260,
+as presented in the [[https://xilinx.github.io/kria-apps-docs/kv260/2022.1/build/html/docs/build_vitis_platform.html?highlight=xsa][Xilinx guide for Kria and Vitis]].
+
+A Xilix [[https://github.com/Xilinx/kria-vitis-platforms][dedicated repository]] is available for us to download  such configurations,
+but they required to be built.
+
+As for the dependencies, ~Cmake~, ~tcl~ and ~idn~ will become needed in order to build the firmware.
+Regarding ~idn~, some version issue can happen, but as discussed [[https://support.xilinx.com/s/question/0D52E00006jrzsYSAQ/platform-project-cannot-be-created-on-vitis?language=en\_US][in a thread on Xilinx's forum]],
+if ~libidn11~ is specifically required but not available (it is the case for Ubuntu 22.04),
+creating a symbolic link from the current, 12 version works as a workaround.
+
+Here are the steps for installing the dependencies and building this configuration file:
+
+#+BEGIN_SRC sh
+  sudo apt-get update
+  sudo apt-get install cmake tcl libidn11-dev \
+  libidn-dev libidn12 idn
+  sudo ln -s /usr/lib/x86_64-linux-gnu/libidn.so.12 \
+  /usr/lib/x86_64-linux-gnu/libidn.so.11
+
+  cd ~/Xilinx
+  git clone --recursive \
+  https://github.com/Xilinx/kria-vitis-platforms.git
+  cd kria-vitis-platforms/k26/platforms
+  export XILINX_VIVADO=/home/$USER/Xilinx/Vivado/2022.2/
+  export XILINX_VITIS=/home/$USER/Xilinx/Vitis/2022.2/
+  make platform PLATFORM=k26_base_starter_kit
+#+END_SRC
+
 
 ** Setting up and building a new project for the Kria board
 
+* Building a real-time firmware
+
+** Setting up Vitis IDE
 
 * RPMsg ~echo_test~ software
 In order to test the deployment of the firmware on the R5F side, and in particular
@@ -536,11 +568,6 @@ Kria board, NOT on your host machine !
 Once this is done, it it possible to run the test program from the Kria board's Ubuntu
 by running the ~echo_test~ command.
 
-
-* Building a real-time firmware
-
-** Setting up Vitis IDE
-
 * Building micro-ROS as a static library
 
 
@@ -565,7 +592,6 @@ by running the ~echo_test~ command.
 
   docker exec -it ros_build bash
 #+END_SRC
-
 
 * Adding micro-ROS to a firmware project
 

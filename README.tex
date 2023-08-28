@@ -1,4 +1,4 @@
-% Created 2023-08-28 月 11:08
+% Created 2023-08-28 月 11:24
 % Intended LaTeX compiler: pdflatex
 \documentclass[10pt]{article}
 \usepackage[utf8]{inputenc}
@@ -19,6 +19,7 @@
 \usepackage[utf8]{inputenc}
 \renewcommand{\familydefault}{\sfdefault}
 \usemintedstyle{vs}
+\usepackage[most]{tcolorbox}
 \usepackage{CJKutf8}
 \usepackage{xurl}
 \usepackage{fontawesome5}
@@ -54,10 +55,10 @@
 \tableofcontents
 \pagebreak
 \section{Introduction}
-\label{sec:org4dc4560}
+\label{sec:orgdedcfe0}
 
 \subsection{Motivation}
-\label{sec:org4d7a3e9}
+\label{sec:org46bb604}
 This guide will present how to setup and use Xilinx's KRIA board, in particular
 for running ROS on a host Ubuntu system, as well as for deploying
 micro-ROS as a firmware on the MCU part of this board's chip.
@@ -68,7 +69,7 @@ a Linux distribution, as well as another ARM core, real-time enabled,
 capable to run a RTOS.
 
 \subsection{Build instructions for this report}
-\label{sec:org332102a}
+\label{sec:orge612cea}
 The base file for this report is actually this README.org file itself.
 However, upon local build, this file is regularly exported as
 a \texttt{.tex} file that can be built normally.
@@ -88,7 +89,7 @@ pdflatex instructions.tex
 No fancy Lua or theme at the moment !
 
 \subsubsection{Automatic build with CI/CD pipeline}
-\label{sec:org212d9d2}
+\label{sec:org6510b19}
 If you don't want to build the report yourself, a CI pipeline is used to make it on GitLab.
 
 You can check the steps in the .gitlab-ci.yml file.
@@ -97,15 +98,15 @@ This build uses a base Ubuntu image and basically takes the same steps as presen
 A PDF artifact can be downloaded.
 
 \subsubsection{Headers and \LaTeX{} settings for export}
-\label{sec:org7ee0e5d}
+\label{sec:orgdb75034}
 A large amount of headers and parameters are needed in order
 to have this "README" document being exportable as a \LaTeX{}
-document formated the way I wanted it to be.
+document formatted the way I wanted it to be.
 
 The detail can be seen in the raw \texttt{.org} version of this README.
 
 \section{Boot firmware}
-\label{sec:org4347c6d}
+\label{sec:orga38c67f}
 The goal for the Linux side of the deployment is to
 have the latest LTS version of Ubuntu up and running.
 In order to be able to boot such a newer version of Linux, the
@@ -115,7 +116,7 @@ The procedure is available in \href{https://docs.xilinx.com/r/en-US/ug1089-kv260
 but I will present it step by step here.
 
 \subsection{Getting the new firmware}
-\label{sec:orgc835d7d}
+\label{sec:orgfec388b}
 A 2022 version of the board firmware is required in order to run the latest
 version of Ubuntu properly.
 
@@ -129,7 +130,7 @@ wget https://www.xilinx.com/member/forms/download/\
 
 
 \subsection{Reaching the board recovery tool}
-\label{sec:org76aca8f}
+\label{sec:org02fa073}
 Now the firmware \texttt{.bin} image is available, it is possible to update it using the
 boards recovery tool. Here are the steps that must be taken in order to reach
 this tool and update the board:
@@ -144,87 +145,134 @@ range, except the specific \texttt{192.168.0.111}, which will be used by the
 board.
 \item Using a web browser on your host machine, access
 \texttt{http://192.168.0.111}. Thou shall now see the interface, as visible on
-the figure \ref{fig:org616c747} below.
+the figure \ref{fig:org92c221a} below.
 \end{itemize}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1\textwidth]{img/recovery.png}
-\caption{\label{fig:org616c747}The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
+\caption{\label{fig:org92c221a}The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
 \end{figure}
 
 \subsection{Updating the boot firmware}
-\label{sec:org43e01fa}
+\label{sec:org5c16868}
 From this "recovery" page, it is possible to upload the \texttt{.bin} file downloaded previously onto
 the board using the "Recover Image" section at the bottom right of the page.
 
 The board can be re-booted afterwards.
 
 \section{Installing Linux}
-\label{sec:org7b846a8}
+\label{sec:org3cff78f}
 Withe the boot firmware being up-to-date, we can proceed to install a Linux distribution
 on our Kria board. The step needed to archive a full installation of Ubuntu 22.04
 will be presented in this section.
 
-\section{Enabeling \texttt{remoteproc}}
-\label{sec:orga3c46a2}
+\subsection{Preparing and booting a Ubuntu 22.04 media}
+\label{sec:orgea42e47}
+An \href{https://ubuntu.com/download/amd-xilinx}{official Ubuntu image} exists and is
+provided by Xilinx, allowing the OS installation to be quick and
+straightforward.
+Ubuntu is a common and easy to use distribution. Furthermore,
+it allows to install ROS2 as a package, which is most convenient and will be
+done later in this guide.
+
+Once the image has been downloaded at \href{https://ubuntu.com/download/amd-xilinx}{Canonical's page}
+we can flash it onto the SD card, with the following instructions.
+
+\begin{tcolorbox}[colback=red!5!white,colframe=red!75!black]
+\textbf{WARNING}: The next part involve the \texttt{dd} command writing on disks!!!
+As always with the dd command, thou have to be \textbf{VERY} careful on what arguments
+thou give. Selecting the wrong disk will result on the destruction of
+thy data !!
+\uline{If you are unsure of what to do, seek assistance !}
+\end{tcolorbox}
+
+With the image available on thy machine and a SD card visible as \texttt{/dev/sda}
+Once the SD card is flashed and put back in the board, the micro-USB cable can be
+connected from the PC to the board. It is then possible to
+connect to the board in serial with an appropriate tool, for example \texttt{picocom},
+as in the following example (the serial port that "appeared" was the \texttt{/dev/ttyUSB1} in this case,
+and the 115200 bitrate is the default value for the board):
+
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
+sudo picocom /dev/ttyUSB1 -b 115200
+\end{minted}
+
+Once logged in, it is typically easier and more convenient to connect the board
+using SSH. When the board is connected to the network, it is possible to know
+it's IP address with the \texttt{ip} command; then it is possible to connect to
+the board with ssh, as follow (example, with the first command to be run on the board
+and the second one on the host PC, both without the first placeholder hostnames):
+
+
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
+kria# ip addr
+
+host# ssh ubuntu@192.168.4.11
+\end{minted}
+
+
+
+
+\section{Enabling \texttt{remoteproc}}
+\label{sec:org3dc7709}
 
 \section{Loading a real-time firmware}
-\label{sec:org22b0fae}
+\label{sec:org78baf27}
 
 \section{Building micro-ROS as a static library}
-\label{sec:orgc1953f0}
+\label{sec:org345d87f}
 
 \section{Building a real-time firmware}
-\label{sec:org8e73e48}
+\label{sec:org11f8af4}
 
 \subsection{Setting up Vitis IDE}
-\label{sec:orge2b32bc}
+\label{sec:orgba70921}
 
 \section{Adding micro-ROS to a firmware project}
-\label{sec:org894b116}
+\label{sec:org670a61a}
 
 \section{Loading a real-time firmware}
-\label{sec:org8bcde3b}
+\label{sec:org63f4f75}
 
 \section{Running a ROS2 node}
-\label{sec:orga12f3f9}
+\label{sec:org83038b9}
 
 \subsection{On the host Linux}
-\label{sec:org60c4145}
+\label{sec:org475f146}
 
 \subsection{In a container}
-\label{sec:orgaa21bdc}
+\label{sec:orge59ba94}
 
 \section{micro-ROS agent}
-\label{sec:org2ef27f6}
+\label{sec:orgbea9cf5}
 
 \pagebreak
 \appendix
 \section{DTO patch}
-\label{sec:org6b3256d}
+\label{sec:org8bbe32f}
 \inputminted[linenos, frame=single]{diff}{./src/system.patch}
 
 \pagebreak
 \section{Custom toolchain CMake settings}
-\label{sec:org018c1a0}
+\label{sec:org6932bfb}
 \inputminted[linenos, frame=single]{cmake}{./src/custom_r5f_toolchain.cmake}
 
 \pagebreak
 \section{Custom Colcon meta settings}
-\label{sec:orgde2f14f}
+\label{sec:org8dce447}
 \inputminted[linenos, frame=single]{yaml}{./src/custom_r5f_colcon.meta}
 
 \pagebreak
 \section{Firmware time functions}
-\label{sec:orgeab8f33}
+\label{sec:orgbf95aa8}
 
 \subsection{main}
-\label{sec:org499ec06}
+\label{sec:orgbceba22}
 \inputminted[linenos, frame=single]{c}{./src/clock.c}
 
 \subsection{header file}
-\label{sec:org29bb727}
+\label{sec:org7606769}
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{c}
 /**< Microseconds per second. */
 #define MICROSECONDS_PER_SECOND    ( 1000000LL )  
@@ -237,14 +285,14 @@ will be presented in this section.
 
 \pagebreak
 \section{Firmware memory allocation functions}
-\label{sec:org5128799}
+\label{sec:org9b92456}
 
 \subsection{main}
-\label{sec:org63611b1}
+\label{sec:orgeeb3b58}
 \inputminted[linenos, frame=single]{c}{./src/allocators.c}
 
 \subsection{header file}
-\label{sec:org8ce2305}
+\label{sec:org2aa0e40}
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{c}
 #ifndef _ALLOCATORS_H_
 #define _ALLOCATORS_H_

@@ -1,4 +1,4 @@
-% Created 2023-08-28 月 13:53
+% Created 2023-08-28 月 14:14
 % Intended LaTeX compiler: pdflatex
 \documentclass[10pt]{article}
 \usepackage[utf8]{inputenc}
@@ -55,7 +55,7 @@
 \tableofcontents
 \pagebreak
 \section{Introduction \& motivation}
-\label{sec:org9cfbe84}
+\label{sec:orge74ec7c}
 This guide will present how to setup and use Xilinx's KRIA board, in particular
 for running ROS on a host Ubuntu system, as well as for deploying
 micro-ROS as a firmware on the MCU part of this board's chip.
@@ -66,7 +66,7 @@ a Linux distribution, as well as another ARM core, real-time enabled,
 capable to run a RTOS.
 
 \section{Boot firmware}
-\label{sec:org736a5ba}
+\label{sec:org7783ad0}
 The goal for the Linux side of the deployment is to
 have the latest LTS version of Ubuntu up and running.
 In order to be able to boot such a newer version of Linux, the
@@ -76,7 +76,7 @@ The procedure is available in \href{https://docs.xilinx.com/r/en-US/ug1089-kv260
 but I will present it step by step here.
 
 \subsection{Getting the new firmware}
-\label{sec:orgf92b65e}
+\label{sec:org854b1dc}
 A 2022 version of the board firmware is required in order to run the latest
 version of Ubuntu properly.
 
@@ -90,7 +90,7 @@ wget https://www.xilinx.com/member/forms/download/\
 
 
 \subsection{Reaching the board recovery tool}
-\label{sec:org82a8b98}
+\label{sec:org1a99aa7}
 Now the firmware \texttt{.bin} image is available, it is possible to update it using the
 boards recovery tool. Here are the steps that must be taken in order to reach
 this tool and update the board:
@@ -105,30 +105,30 @@ range, except the specific \texttt{192.168.0.111}, which will be used by the
 board.
 \item Using a web browser on your host machine, access
 \texttt{http://192.168.0.111}. Thou shall now see the interface, as visible on
-the figure \ref{fig:org16012b5} below.
+the figure \ref{fig:orgbc0cc2f} below.
 \end{itemize}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1\textwidth]{img/recovery.png}
-\caption{\label{fig:org16012b5}The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
+\caption{\label{fig:orgbc0cc2f}The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
 \end{figure}
 
 \subsection{Updating the boot firmware}
-\label{sec:org61bb6b7}
+\label{sec:org383294f}
 From this "recovery" page, it is possible to upload the \texttt{.bin} file downloaded previously onto
 the board using the "Recover Image" section at the bottom right of the page.
 
 The board can be re-booted afterwards.
 
 \section{Installing Linux}
-\label{sec:org594a767}
+\label{sec:orgf251748}
 Withe the boot firmware being up-to-date, we can proceed to install a Linux distribution
 on our Kria board. The step needed to archive a full installation of Ubuntu 22.04
 will be presented in this section.
 
 \subsection{Preparing and booting a Ubuntu 22.04 media}
-\label{sec:org988029c}
+\label{sec:org745251e}
 An \href{https://ubuntu.com/download/amd-xilinx}{official Ubuntu image} exists and is
 provided by Xilinx, allowing the OS installation to be quick and
 straightforward.
@@ -172,12 +172,12 @@ host# ssh ubuntu@192.168.4.11
 \end{minted}
 
 \subsection{Network and admin setups}
-\label{sec:org104ec75}
+\label{sec:org9be223b}
 This section presents a variety of extra convenience configurations
 that can be used when setting-up the Kria board.
 
 \subsubsection{Proxy and DNS}
-\label{sec:org4b2a4cf}
+\label{sec:orge1aea9d}
 An issue that can occur when connecting the board to the internet is the
 conflicting situation with the university proxy.
 Indeed, as the network at Nanzan University requires to go through a proxy,
@@ -213,7 +213,7 @@ echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc \
 Eventually the board can be rebooted in order for the setup to get applied cleanly.
 
 \subsubsection{\texttt{root} password}
-\label{sec:org5e4e1b8}
+\label{sec:org5e27d51}
 \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 \textbf{WARNING}: Depending on your use-case, the setup presented in this
 subsection can be a critical security breach as it remove the need for a root
@@ -249,7 +249,7 @@ sudo reboot now
 
 
 \subsubsection{Static IP address}
-\label{sec:org8b13be3}
+\label{sec:org7e40257}
 A static IP can be set by writing the following
 configuration into your \texttt{netplan} configuration file.
 
@@ -285,7 +285,7 @@ sudo netplan apply
 \end{minted}
 
 \subsubsection{Purging \texttt{snap}}
-\label{sec:org6c12d91}
+\label{sec:org1192ed7}
 As the desktop-specific software are not used at all in the case
 of our project, there are some packages that can be purges in order for the
 system to become more lightweight.
@@ -322,7 +322,7 @@ systemctl list-units | grep snapd
 \end{minted}
 
 \subsubsection{Other unused heavy packages}
-\label{sec:orgfe490ba}
+\label{sec:org85f3af8}
 Some other pieces of software can safely be removed since the desktop is
 not to be used:
 
@@ -337,7 +337,7 @@ sudo reboot now
 
 
 \section{Enabling \texttt{remoteproc}}
-\label{sec:org9ed7eeb}
+\label{sec:org4b652aa}
 One of the advantage of this Kria board, as cited previously, is the presence of
 multiple types of core (APU, MCU, FPGA) on the same chip.
 
@@ -359,7 +359,7 @@ will present how to setup and use as an example firmware that utilizes the
 and communicate with the real-time firmware using the RPMsg system.
 
 \subsection{Device-Tree Overlay patching}
-\label{sec:org942c25c}
+\label{sec:org9a2bb51}
 The communication system and interaction from the Linux side towards the real-time capable core
 is not enabled by default within the Ubuntu image provided by Xilinx.
 
@@ -375,7 +375,7 @@ sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
 
 Then, a custom-made patch file can be downloaded and applied.
 This file is available at the URL visible in the command below
-but also in this report appendix \ref{sec:org676a26b}.
+but also in this report appendix \ref{sec:orgf12bb0e}.
 
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
 wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/\
@@ -414,71 +414,130 @@ ls /sys/class/remoteproc/
 \end{minted}
 
 If it is the case, it means that the patch was successful and  that the remote processor is
-ready to be used.
+ready to be used!
 
 
+\section{Building an example RPMsg real-time firmware}
+\label{sec:orgd13b37f}
+As visible on the official \href{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1837006921/OpenAMP+Base+Hardware+Configurations\\\#Build-RPU-firmware}{Xilinx documentation about building a demo firmware},
+this section will present the required steps for building a new firmware for the R5F
+core of our Kria board.
+
+The goal here is to have a demonstration firmware running,
+able to use the RPMsg system to communicate with the Linux APU.
 
 
-\section{Loading a real-time firmware}
-\label{sec:orgb9c8cfb}
+\subsection{Xilinx's Vitis IDE}
+\label{sec:orgc6e5df1}
 
-\section{Building micro-ROS as a static library}
-\label{sec:org0bd41f3}
+\section{RPMsg \texttt{echo\_test} software}
+\label{sec:orgb5d6c85}
+In order to test the deployment of the firmware on the R5F side, and in particular
+to test the RPMsg function, we need some program on the Linux side of the Kria
+board to "talk" with the real-time side.
+
+Some source is provided by Xilinx to build a demonstration software that does
+this purpose: specifically interact with the demonstration firmware.
+
+Here are the steps required to obtain the sources, and build the program.
+
+As a reminder, this is meant to be done on the Linux running on the
+Kria board, NOT on your host machine !
+
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
+git clone https://github.com/Xilinx/meta-openamp.git
+cd  meta-openamp
+git checkout xlnx-rel-v2022.2
+cd  ./recipes-openamp/rpmsg-examples/rpmsg-echo-test
+make
+sudo ln -s $(pwd)/echo_test /usr/bin/
+\end{minted}
+
+Once this is done, it it possible to run the test program from the Kria board's Ubuntu
+by running the \texttt{echo\_test} command.
+
 
 \section{Building a real-time firmware}
-\label{sec:org3ce0120}
+\label{sec:orgbfdac6f}
 
 \subsection{Setting up Vitis IDE}
-\label{sec:org06ad67f}
+\label{sec:orge408530}
+
+\section{Building micro-ROS as a static library}
+\label{sec:org7d8f2cb}
+
+
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
+pushd /home/$USER/Downloads
+wget https://developer.arm.com/-/media/Files/downloads/\
+gnu/12.2.mpacbti-rel1/binrel/arm-gnu-toolchain-12.2\
+.mpacbti-rel1-x86_64-arm-none-eabi.tar.xz
+tar -xvf arm-gnu-toolchain-12.2.mpacbti-rel1-x86_64-\
+arm-none-eabi.tar.xz
+popd
+
+toolchain="/home/$USER/Downloads/arm-gnu-toolchain-\
+12.2.mpacbti-rel1-x86_64-arm-none-eabi/"
+
+
+docker run -d --name ros_build -it --net=host \
+--hostname ros_build \
+-v /dev:/dev \
+-v $toolchain:/armr5-toolchain \
+--privileged ros:iron
+
+docker exec -it ros_build bash
+\end{minted}
+
 
 \section{Adding micro-ROS to a firmware project}
-\label{sec:orgaddbf1b}
+\label{sec:orge249209}
 
 \section{Loading a real-time firmware}
-\label{sec:orgc665e99}
+\label{sec:orgb8e96b6}
 
 \section{Running a ROS2 node}
-\label{sec:org9804614}
+\label{sec:orgc8885b7}
 
 \subsection{On the host Linux}
-\label{sec:orgbb82369}
+\label{sec:org524ea9d}
 
 \subsection{In a container}
-\label{sec:orgf14de3e}
+\label{sec:orgc06df0d}
 
 \section{micro-ROS agent}
-\label{sec:orgfcccd56}
+\label{sec:orgb63ff2f}
 
 \pagebreak
 \appendix
 \section{DTO patch}
-\label{sec:org676a26b}
+\label{sec:orgf12bb0e}
 This file is available in this repositroy: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch}{system.patch}
 \inputminted[linenos, frame=single]{diff}{./src/system.patch}
 
 \pagebreak
 \section{Custom toolchain CMake settings}
-\label{sec:orgc749b92}
+\label{sec:orgab83226}
 This file is available in this repositroy: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom\_r5f\_toolchain.cmake}{custom r5f toolchain.cmake}
 \inputminted[linenos, frame=single]{cmake}{./src/custom_r5f_toolchain.cmake}
 
 \pagebreak
 \section{Custom Colcon meta settings}
-\label{sec:org56d3e11}
+\label{sec:org12e7b99}
 This file is available in this repositroy: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom\_r5f\_colcon.meta}{custom r5f colcon.meta}
 \inputminted[linenos, frame=single]{yaml}{./src/custom_r5f_colcon.meta}
 
 \pagebreak
 \section{Firmware time functions}
-\label{sec:org875106b}
+\label{sec:org38f929a}
 
 \subsection{main}
-\label{sec:org4d46d8c}
+\label{sec:org1b77b4c}
 This file is available in this repositroy: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/clock.c}{clock.c}
 \inputminted[linenos, frame=single]{c}{./src/clock.c}
 
 \subsection{header file}
-\label{sec:org93db2cc}
+\label{sec:orgf2b1306}
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{c}
 /**< Microseconds per second. */
 #define MICROSECONDS_PER_SECOND    ( 1000000LL )  
@@ -491,15 +550,15 @@ This file is available in this repositroy: \href{https://gitlab.com/sunoc/xilinx
 
 \pagebreak
 \section{Firmware memory allocation functions}
-\label{sec:org1e0e36c}
+\label{sec:org80833c1}
 
 \subsection{main}
-\label{sec:org2a65345}
+\label{sec:orga685b5c}
 This file is available in this repositroy: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/allocators.c}{allocators.c}
 \inputminted[linenos, frame=single]{c}{./src/allocators.c}
 
 \subsection{header file}
-\label{sec:org6649dfd}
+\label{sec:org68ec276}
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{c}
 #ifndef _ALLOCATORS_H_
 #define _ALLOCATORS_H_

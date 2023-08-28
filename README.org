@@ -437,18 +437,75 @@ and a ~remoteproc0~ device should be visible, as follow:
 #+END_SRC
 
 If it is the case, it means that the patch was successful and  that the remote processor is
-ready to be used.
+ready to be used!
 
 
+* Building an example RPMsg real-time firmware
+As visible on the official [[https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1837006921/OpenAMP+Base+Hardware+Configurations\#Build-RPU-firmware][Xilinx documentation about building a demo firmware]],
+this section will present the required steps for building a new firmware for the R5F
+core of our Kria board.
+
+The goal here is to have a demonstration firmware running,
+able to use the RPMsg system to communicate with the Linux APU.
 
 
-* Loading a real-time firmware
+** Xilinx's Vitis IDE
 
-* Building micro-ROS as a static library
+* RPMsg ~echo_test~ software
+In order to test the deployment of the firmware on the R5F side, and in particular
+to test the RPMsg function, we need some program on the Linux side of the Kria
+board to "talk" with the real-time side.
+
+Some source is provided by Xilinx to build a demonstration software that does
+this purpose: specifically interact with the demonstration firmware.
+
+Here are the steps required to obtain the sources, and build the program.
+
+As a reminder, this is meant to be done on the Linux running on the
+Kria board, NOT on your host machine !
+
+#+BEGIN_SRC sh
+  git clone https://github.com/Xilinx/meta-openamp.git
+  cd  meta-openamp
+  git checkout xlnx-rel-v2022.2
+  cd  ./recipes-openamp/rpmsg-examples/rpmsg-echo-test
+  make
+  sudo ln -s $(pwd)/echo_test /usr/bin/
+#+END_SRC
+
+Once this is done, it it possible to run the test program from the Kria board's Ubuntu
+by running the ~echo_test~ command.
+
 
 * Building a real-time firmware
 
 ** Setting up Vitis IDE
+
+* Building micro-ROS as a static library
+
+
+#+BEGIN_SRC sh
+  pushd /home/$USER/Downloads
+  wget https://developer.arm.com/-/media/Files/downloads/\
+  gnu/12.2.mpacbti-rel1/binrel/arm-gnu-toolchain-12.2\
+  .mpacbti-rel1-x86_64-arm-none-eabi.tar.xz
+  tar -xvf arm-gnu-toolchain-12.2.mpacbti-rel1-x86_64-\
+  arm-none-eabi.tar.xz
+  popd
+
+  toolchain="/home/$USER/Downloads/arm-gnu-toolchain-\
+  12.2.mpacbti-rel1-x86_64-arm-none-eabi/"
+
+
+  docker run -d --name ros_build -it --net=host \
+  --hostname ros_build \
+  -v /dev:/dev \
+  -v $toolchain:/armr5-toolchain \
+  --privileged ros:iron
+
+  docker exec -it ros_build bash
+#+END_SRC
+
 
 * Adding micro-ROS to a firmware project
 

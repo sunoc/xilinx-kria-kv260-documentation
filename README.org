@@ -56,13 +56,7 @@
        "\\pagebreak\n"))
 #+end_src
 
-* Introduction
-
-** Motivation
-This guide will present how to setup and use Xilinx's KRIA board, in particular
-for running ROS on a host Ubuntu system, as well as for deploying
-micro-ROS as a firmware on the MCU part of this board's chip.
-
+* About this documents
 ** Build instructions for this report
 The base file for this report is actually this README.org file itself.
 However, upon local build, this file is regularly exported as
@@ -89,6 +83,16 @@ You can check the steps in the .gitlab-ci.yml file.
 This build uses a base Ubuntu image and basically takes the same steps as presented above for a local build.
 
 A PDF artifact can be downloaded.
+
+* Introduction & motivation
+This guide will present how to setup and use Xilinx's KRIA board, in particular
+for running ROS on a host Ubuntu system, as well as for deploying
+micro-ROS as a firmware on the MCU part of this board's chip.
+
+The use of this device in particular is interesting because of the presence
+of a CPU comprising both a general purpose ARM core, capable of running
+a Linux distribution, as well as another ARM core, real-time enabled,
+capable to run a RTOS.
 
 * Boot firmware
 The goal for the Linux side of the deployment is to
@@ -141,3 +145,29 @@ From this "recovery" page, it is possible to upload the ~.bin~ file downloaded p
 the board using the "Recover Image" section at the bottom right of the page.
 
 The board can be re-booted afterwards.
+
+* Installing Linux
+
+* Enabeling ~remoteproc~
+
+* Loading a real-time firmware
+
+* Building micro-ROS as a static library
+
+* Building a real-time firmware
+
+** Setting up Vitis IDE
+
+* Adding micro-ROS to a firmware project
+
+* Loading a real-time firmware 
+
+* Running a ROS2 node
+
+** On the host Linux
+
+** In a container
+
+
+#+LATEX: \appendix
+* DTO patch  

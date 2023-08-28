@@ -8,4 +8,5 @@
 *.gz
 _minted-instructions/
 _minted*
+_*.tex
 auto/

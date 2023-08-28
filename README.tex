@@ -1,4 +1,4 @@
-% Created 2023-08-24 木 23:14
+% Created 2023-08-28 月 10:48
 % Intended LaTeX compiler: pdflatex
 \documentclass[10pt]{article}
 \usepackage[utf8]{inputenc}
@@ -53,10 +53,22 @@
 \includegraphics[width=0.8\textwidth]{./img/board}\end{titlepage}
 \tableofcontents
 \pagebreak
-\section{About this documents}
-\label{sec:org3952ce8}
+\section{Introduction}
+\label{sec:org70d8d1a}
+
+\subsection{Motivation}
+\label{sec:orgefbf2f3}
+This guide will present how to setup and use Xilinx's KRIA board, in particular
+for running ROS on a host Ubuntu system, as well as for deploying
+micro-ROS as a firmware on the MCU part of this board's chip.
+
+The use of this device in particular is interesting because of the presence
+of a CPU comprising both a general purpose ARM core, capable of running
+a Linux distribution, as well as another ARM core, real-time enabled,
+capable to run a RTOS.
+
 \subsection{Build instructions for this report}
-\label{sec:orge38070b}
+\label{sec:orgd9dd5b2}
 The base file for this report is actually this README.org file itself.
 However, upon local build, this file is regularly exported as
 a \texttt{.tex} file that can be built normally.
@@ -75,8 +87,8 @@ pdflatex instructions.tex
 
 No fancy Lua or theme at the moment !
 
-\subsection{Automatic build with CI/CD pipeline}
-\label{sec:org96d47cb}
+\subsubsection{Automatic build with CI/CD pipeline}
+\label{sec:org58dc63c}
 If you don't want to build the report yourself, a CI pipeline is used to make it on GitLab.
 
 You can check the steps in the .gitlab-ci.yml file.
@@ -84,19 +96,16 @@ This build uses a base Ubuntu image and basically takes the same steps as presen
 
 A PDF artifact can be downloaded.
 
-\section{Introduction \& motivation}
-\label{sec:orge49a531}
-This guide will present how to setup and use Xilinx's KRIA board, in particular
-for running ROS on a host Ubuntu system, as well as for deploying
-micro-ROS as a firmware on the MCU part of this board's chip.
+\subsubsection{Headers and \LaTeX{} settings for export}
+\label{sec:orgad60a17}
+A large amount of headers and parameters are needed in order
+to have this "README" document being exportable as a \LaTeX{}
+document formated the way I wanted it to be.
 
-The use of this device in particular is interesting because of the presence
-of a CPU comprising both a general purpose ARM core, capable of running
-a Linux distribution, as well as another ARM core, real-time enabled,
-capable to run a RTOS.
+The detail can be seen in the raw \texttt{.org} version of this README.
 
 \section{Boot firmware}
-\label{sec:org60db204}
+\label{sec:org9a1b3b6}
 The goal for the Linux side of the deployment is to
 have the latest LTS version of Ubuntu up and running.
 In order to be able to boot such a newer version of Linux, the
@@ -106,7 +115,7 @@ The procedure is available in \href{https://docs.xilinx.com/r/en-US/ug1089-kv260
 but I will present it step by step here.
 
 \subsection{Getting the new firmware}
-\label{sec:org9bf8cb2}
+\label{sec:orgc7f419b}
 A 2022 version of the board firmware is required in order to run the latest
 version of Ubuntu properly.
 
@@ -120,7 +129,7 @@ wget https://www.xilinx.com/member/forms/download/\
 
 
 \subsection{Reaching the board recovery tool}
-\label{sec:org4e82238}
+\label{sec:org65acb26}
 Now the firmware \texttt{.bin} image is available, it is possible to update it using the
 boards recovery tool. Here are the steps that must be taken in order to reach
 this tool and update the board:
@@ -135,57 +144,62 @@ range, except the specific \texttt{192.168.0.111}, which will be used by the
 board.
 \item Using a web browser on your host machine, access
 \texttt{http://192.168.0.111}. Thou shall now see the interface, as visible on
-the figure \ref{fig:org5263359} below.
+the figure \ref{fig:org9f18033} below.
 \end{itemize}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1\textwidth]{img/recovery.png}
-\caption{\label{fig:org5263359}The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
+\caption{\label{fig:org9f18033}The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
 \end{figure}
 
 \subsection{Updating the boot firmware}
-\label{sec:orga85dbb7}
+\label{sec:orgaacdd5d}
 From this "recovery" page, it is possible to upload the \texttt{.bin} file downloaded previously onto
 the board using the "Recover Image" section at the bottom right of the page.
 
 The board can be re-booted afterwards.
 
 \section{Installing Linux}
-\label{sec:orgffb0e49}
+\label{sec:orga1dfecf}
+Withe the boot firmware being up-to-date, we can proceed to install a Linux distribution
+on our Kria board. The step needed to archive a full installation of Ubuntu 22.04
+will be presented in this section.
 
 \section{Enabeling \texttt{remoteproc}}
-\label{sec:org5e002bf}
+\label{sec:org59ca0f1}
 
 \section{Loading a real-time firmware}
-\label{sec:org592c9d4}
+\label{sec:org73db40c}
 
 \section{Building micro-ROS as a static library}
-\label{sec:org614c6bb}
+\label{sec:org9f85c56}
 
 \section{Building a real-time firmware}
-\label{sec:org8d40ae3}
+\label{sec:org6acd5b2}
 
 \subsection{Setting up Vitis IDE}
-\label{sec:org32198f0}
+\label{sec:orgcd7bde3}
 
 \section{Adding micro-ROS to a firmware project}
-\label{sec:org52988a4}
+\label{sec:org1dcd89e}
 
 \section{Loading a real-time firmware}
-\label{sec:orgc3ff4b7}
+\label{sec:orgedadcef}
 
 \section{Running a ROS2 node}
-\label{sec:org9ead220}
+\label{sec:orga90b350}
 
 \subsection{On the host Linux}
-\label{sec:orga58a0ee}
+\label{sec:orgbaa2213}
 
 \subsection{In a container}
-\label{sec:org04afd82}
+\label{sec:org5b6b267}
 
+\section{micro-ROS agent}
+\label{sec:org54771c1}
 
 \appendix
 \section{DTO patch}
-\label{sec:org37f2fd5}
+\label{sec:orge5fe6a6}
 \end{document}

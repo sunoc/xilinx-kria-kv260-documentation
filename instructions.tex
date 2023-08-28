@@ -543,60 +543,60 @@ exit
 \end{minted}
 \end{tcolorbox}
 
-% ------------------------------------------------------------------------------
-\section{Vitis IDE}
-%\label{sec:vitis-ide}
-This is the recommended IDE used to build software for the Xilinx boards.
-It also include the tools to interact with the FPGA part, making the whole
-software very large (around 200GB of disk usage).
+% % ------------------------------------------------------------------------------
+% \section{Vitis IDE}
+% %\label{sec:vitis-ide}
+% This is the recommended IDE used to build software for the Xilinx boards.
+% It also include the tools to interact with the FPGA part, making the whole
+% software very large (around 200GB of disk usage).
 
-The installer can be found on \href{https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vitis.html}{Xilinx download page}. You will need to get
-a file named something like ``Xilinx\_Unified\_2022.2\_1014\_8888\_Lin64.bin''.
+% The installer can be found on \href{https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vitis.html}{Xilinx download page}. You will need to get
+% a file named something like ``Xilinx\_Unified\_2022.2\_1014\_8888\_Lin64.bin''.
 
-Vitis IDE installer is compatible with versions of Ubuntu, among other distributions,
-but not officially yet for the 22.04 version.
-Furthermore, the current install was tested on Pop OS, a distribution derived from Ubuntu.
+% Vitis IDE installer is compatible with versions of Ubuntu, among other distributions,
+% but not officially yet for the 22.04 version.
+% Furthermore, the current install was tested on Pop OS, a distribution derived from Ubuntu.
 
-This guide will present a guide that supposedly works for all distributions based on the newest
-LTS from Ubuntu. For other Linux distributions or operating system, please refer to the official documentation.
+% This guide will present a guide that supposedly works for all distributions based on the newest
+% LTS from Ubuntu. For other Linux distributions or operating system, please refer to the official documentation.
 
 
-\subsection{Install dependencies}
-%\label{sec:install-dependencies}
-Some packages are required to be installed in order for the installation process to happen successfully:
-\begin{tcolorbox}
-\begin{minted}{sh}
-  sudo apt-get update
-  sudo apt-get install libncurses-dev \
-  ncurses-term \
-  ncurses-base \
-  ncurses-bin \
-  libncurses5 \
-  libtinfo5 \
-  libncurses5-dev \
-  libncursesw5-dev
+% \subsection{Install dependencies}
+% %\label{sec:install-dependencies}
+% Some packages are required to be installed in order for the installation process to happen successfully:
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+%   sudo apt-get update
+%   sudo apt-get install libncurses-dev \
+%   ncurses-term \
+%   ncurses-base \
+%   ncurses-bin \
+%   libncurses5 \
+%   libtinfo5 \
+%   libncurses5-dev \
+%   libncursesw5-dev
 
-\end{minted}
-\end{tcolorbox}
+% \end{minted}
+% \end{tcolorbox}
 
-Once this is done, the downloaded binary installer can be executed:
-\begin{tcolorbox}
-\begin{minted}{sh}
-  ./Xilinx_Unified_2022.2_1014_8888_Lin64.bin
+% Once this is done, the downloaded binary installer can be executed:
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+%   ./Xilinx_Unified_2022.2_1014_8888_Lin64.bin
   
-\end{minted}
-\end{tcolorbox}
+% \end{minted}
+% \end{tcolorbox}
 
-If it is not possible to execute it, make it executable with the \verb|chmod| command:
-\begin{tcolorbox}
-\begin{minted}{sh}
-sudo chmod +x ./Xilinx_Unified_2022.2_1014_8888_Lin64.bin
-\end{minted}
-\end{tcolorbox}
+% If it is not possible to execute it, make it executable with the \verb|chmod| command:
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% sudo chmod +x ./Xilinx_Unified_2022.2_1014_8888_Lin64.bin
+% \end{minted}
+% \end{tcolorbox}
 
-From there you can follow the step-by-step graphical installer.
-The directory chosen for the rest of this guide for the \verb|Xilinx| directory
-is directly the \verb|\$HOME|, but the installation can be set elsewhere is needed.
+% From there you can follow the step-by-step graphical installer.
+% The directory chosen for the rest of this guide for the \verb|Xilinx| directory
+% is directly the \verb|\$HOME|, but the installation can be set elsewhere is needed.
 
 
 % ------------------------------------------------------------------------------

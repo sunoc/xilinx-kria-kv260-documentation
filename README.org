@@ -362,7 +362,6 @@ not to be used:
   sudo reboot now
 #+END_SRC
 
-
 * Enabling ~remoteproc~
 One of the advantage of this Kria board, as cited previously, is the presence of
 multiple types of core (APU, MCU, FPGA) on the same chip.
@@ -370,7 +369,7 @@ multiple types of core (APU, MCU, FPGA) on the same chip.
 The part in focus in this guide is the usage of both the APU, running
 a Linux distribution and ROS2; and the MCU, running FreeRTOS and micro-ROS.
 Online available guides[fn:3] [fn:4] also provide information on how to deploy these types
-of systems and enabeling ~remoteproc~ for the Kria boad, but this guide
+of systems and enabling ~remoteproc~ for the Kria board, but this guide
 will show a step-by-step, tried process to have a heterogeneous system
 up and running.
 
@@ -388,7 +387,7 @@ The communication system and interaction from the Linux side towards the real-ti
 is not enabled by default within the Ubuntu image provided by Xilinx.
 
 In that regard, some modification of the device tree overlay (DTO) is required in order to have
-the ~remoteproc~ system startint.
+the ~remoteproc~ system starting.
 
 Firstly, we need to get the original firmware device tree, converted
 into a readable format (DTS):
@@ -439,7 +438,6 @@ and a ~remoteproc0~ device should be visible, as follow:
 If it is the case, it means that the patch was successful and  that the remote processor is
 ready to be used!
 
-
 * Building an example RPMsg real-time firmware
 As visible on the official [[https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1837006921/OpenAMP+Base+Hardware+Configurations\#Build-RPU-firmware][Xilinx documentation about building a demo firmware]],
 this section will present the required steps for building a new firmware for the R5F
@@ -449,7 +447,69 @@ The goal here is to have a demonstration firmware running,
 able to use the RPMsg system to communicate with the Linux APU.
 
 
-** Xilinx's Vitis IDE
+** Setting up the IDE
+Xilinx's Vitis IDE is the recommended tool used to build software for the Xilinx boards.
+It also include the tools to interact with the FPGA part, making the whole
+software very large (around 200GB of disk usage).
+
+However, this large tool-set allows for a convenient development environment, in particular
+in our case where some FreeRTOS system, with many dependencies is to be build.
+
+The installer can be found on [[https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vitis.html][Xilinx download page]]. You will need to get
+a file named something like ~Xilinx_Unified_2022.2_1014_8888_Lin64.bin~[fn:6].
+
+Vitis IDE installer is compatible with versions of Ubuntu, among other distributions,
+but not officially yet for the 22.04 version.
+Furthermore, the current install was tested on Pop OS, a distribution derived from Ubuntu.
+However, even with this more unstable status, no major problems were encountered
+with this tool during the development stages.
+
+This guide will present a setup procedure that supposedly works for all distributions based on the newest
+LTS from Ubuntu. For other Linux distributions or operating system, please refer to the official documentation.
+
+*** Dependencies & installation
+Some packages are required to be installed on the host system
+in order for the installation process to happen successfully:
+
+#+BEGIN_SRC sh
+  sudo apt-get -y update
+
+  sudo apt-get -y install libncurses-dev \
+       ncurses-term \
+       ncurses-base \
+       ncurses-bin \
+       libncurses5 \
+       libtinfo5 \
+       libncurses5-dev \
+       libncursesw5-dev
+#+END_SRC
+
+Once this is done, the previously downloaded binary installer can be executed:
+
+#+BEGIN_SRC sh
+  ./Xilinx_Unified_2022.2_1014_8888_Lin64.bin
+#+END_SRC
+
+If it is not possible to run the previous command, make the file executable with the ~chmod~ command:
+
+#+BEGIN_SRC sh
+  sudo chmod +x ./Xilinx_Unified_2022.2_1014_8888_Lin64.bin
+#+END_SRC
+
+From there you can follow the step-by-step graphical installer.
+The directory chosen for the rest of this guide for the Xilinx directory
+is directly the ~$HOME~, but the installation can be set elsewhere is needed.
+
+#+LATEX: \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
+*WARNING*: This whole procedure can take up to multiple hours to complete
+and is prone to failures (regarding missing dependencies, typically),
+so your schedule should be arranged accordingly.
+#+LATEX: \end{tcolorbox}
+
+*** Platform configuration file generation
+
+** Setting up and building a new project for the Kria board
+
 
 * RPMsg ~echo_test~ software
 In order to test the deployment of the firmware on the R5F side, and in particular
@@ -522,24 +582,24 @@ by running the ~echo_test~ command.
 #+LATEX: \pagebreak
 #+LATEX: \appendix
 * DTO patch
-This file is available in this repositroy: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch][system.patch]]
+This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch][system.patch]]
 #+LATEX: \inputminted[linenos, frame=single]{diff}{./src/system.patch}
 
 #+LATEX: \pagebreak
 * Custom toolchain CMake settings
-This file is available in this repositroy: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom_r5f_toolchain.cmake][custom r5f toolchain.cmake]]
+This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom_r5f_toolchain.cmake][custom r5f toolchain.cmake]]
 #+LATEX: \inputminted[linenos, frame=single]{cmake}{./src/custom_r5f_toolchain.cmake}
 
 #+LATEX: \pagebreak
 * Custom Colcon meta settings
-This file is available in this repositroy: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom_r5f_colcon.meta][custom r5f colcon.meta]]
+This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom_r5f_colcon.meta][custom r5f colcon.meta]]
 #+LATEX: \inputminted[linenos, frame=single]{yaml}{./src/custom_r5f_colcon.meta}
 
 #+LATEX: \pagebreak
 * Firmware time functions
 
 ** main
-This file is available in this repositroy: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/clock.c][clock.c]]
+This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/clock.c][clock.c]]
 #+LATEX: \inputminted[linenos, frame=single]{c}{./src/clock.c}
 
 ** header file
@@ -557,7 +617,7 @@ This file is available in this repositroy: [[https://gitlab.com/sunoc/xilinx-kri
 * Firmware memory allocation functions
 
 ** main
-This file is available in this repositroy: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/allocators.c][allocators.c]]
+This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/allocators.c][allocators.c]]
 #+LATEX: \inputminted[linenos, frame=single]{c}{./src/allocators.c}
 
 ** header file
@@ -581,6 +641,9 @@ This file is available in this repositroy: [[https://gitlab.com/sunoc/xilinx-kri
 #+END_SRC
 
 * Footnotes
+
+[fn:6] The name of the installer binary file might change as a new version of the IDE
+is release every year or so.
 
 [fn:5] The overlapping memory will not prevent the board to boot,
 but it disables the PWM for the CPU fan, which will then run at full speed, making noise. 

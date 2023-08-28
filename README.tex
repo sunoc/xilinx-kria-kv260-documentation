@@ -1,4 +1,4 @@
-% Created 2023-08-24 木 17:49
+% Created 2023-08-28 月 10:14
 % Intended LaTeX compiler: pdflatex
 \documentclass[10pt]{article}
 \usepackage[utf8]{inputenc}
@@ -54,16 +54,16 @@
 \tableofcontents
 \pagebreak
 \section{Introduction}
-\label{sec:orgad1986e}
+\label{sec:org17e3872}
 
 \subsection{Motivation}
-\label{sec:org673d9dc}
+\label{sec:orgcded301}
 This guide will present how to setup and use Xilinx's KRIA board, in particular
 for running ROS on a host Ubuntu system, as well as for deploying
 micro-ROS as a firmware on the MCU part of this board's chip.
 
 \subsection{Build instructions for this report}
-\label{sec:org40c49ec}
+\label{sec:org9b9c2c7}
 The base file for this report is actually this README.org file itself.
 However, upon local build, this file is regularly exported as
 a \texttt{.tex} file that can be built normally.
@@ -82,8 +82,8 @@ pdflatex instructions.tex
 
 No fancy Lua or theme at the moment !
 
-\subsection{Automatic build with CI/CD pipeline}
-\label{sec:org805eeb6}
+\subsubsection{Automatic build with CI/CD pipeline}
+\label{sec:orgac13f06}
 If you don't want to build the report yourself, a CI pipeline is used to make it on GitLab.
 
 You can check the steps in the .gitlab-ci.yml file.
@@ -91,8 +91,16 @@ This build uses a base Ubuntu image and basically takes the same steps as presen
 
 A PDF artifact can be downloaded.
 
+\subsubsection{Headers and \LaTeX{} settings for export}
+\label{sec:org2a87cc7}
+A large amount of headers and parameters are needed in order
+to have this "README" document being exportable as a \LaTeX{}
+document formated the way I wanted it to be.
+
+The detail can be seen in the raw \texttt{.org} version of this README.
+
 \section{Boot firmware}
-\label{sec:org22dac04}
+\label{sec:orgca045bc}
 The goal for the Linux side of the deployment is to
 have the latest LTS version of Ubuntu up and running.
 In order to be able to boot such a newer version of Linux, the
@@ -102,7 +110,7 @@ The procedure is available in \href{https://docs.xilinx.com/r/en-US/ug1089-kv260
 but I will present it step by step here.
 
 \subsection{Getting the new firmware}
-\label{sec:org76cabda}
+\label{sec:org0a14b48}
 A 2022 version of the board firmware is required in order to run the latest
 version of Ubuntu properly.
 
@@ -116,7 +124,7 @@ wget https://www.xilinx.com/member/forms/download/\
 
 
 \subsection{Reaching the board recovery tool}
-\label{sec:orgbbdb9d5}
+\label{sec:org78f9ba2}
 Now the firmware \texttt{.bin} image is available, it is possible to update it using the
 boards recovery tool. Here are the steps that must be taken in order to reach
 this tool and update the board:
@@ -131,19 +139,25 @@ range, except the specific \texttt{192.168.0.111}, which will be used by the
 board.
 \item Using a web browser on your host machine, access
 \texttt{http://192.168.0.111}. Thou shall now see the interface, as visible on
-the figure \ref{fig:org004f0b2} below.
+the figure \ref{fig:org5b7384f} below.
 \end{itemize}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1\textwidth]{img/recovery.png}
-\caption{\label{fig:org004f0b2}The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
+\caption{\label{fig:org5b7384f}The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
 \end{figure}
 
 \subsection{Updating the boot firmware}
-\label{sec:org399f7af}
+\label{sec:org4813304}
 From this "recovery" page, it is possible to upload the \texttt{.bin} file downloaded previously onto
 the board using the "Recover Image" section at the bottom right of the page.
 
 The board can be re-booted afterwards.
+
+\section{Linux}
+\label{sec:orgba8bf57}
+Withe the boot firmware being up-to-date, we can proceed to install a Linux distribution
+on our Kria board. The step needed to archive a full installation of Ubuntu 22.04
+will be presented in this section.
 \end{document}

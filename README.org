@@ -174,7 +174,7 @@ Once the image has been downloaded at [[https://ubuntu.com/download/amd-xilinx][
 we can flash it onto the SD card, with the following instructions.
 
 #+LATEX: \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black]
-*WARNING*: The next part involve the ~dd~ command writing on disks!!!
+*DANGER*: The next part involve the ~dd~ command writing on disks!!!
 As always with the dd command, thou have to be *VERY* careful on what arguments
 thou give. Selecting the wrong disk will result on the destruction of
 thy data !!
@@ -214,6 +214,162 @@ and the second one on the host PC, both without the first placeholder hostnames)
   host# ssh ubuntu@192.168.4.11
 #+END_SRC
 
+** Network and admin setups
+This section presents a variety of extra convenience configurations
+that can be used when setting-up the Kria board.
+
+*** Proxy and DNS
+An issue that can occur when connecting the board to the internet is the
+conflicting situation with the university proxy.
+Indeed, as the network at Nanzan University requires to go through a proxy,
+some DNS errors appeared.
+
+Firstly, it is possible to set a DNS IP address in ~/etc/resolv.conf~ by
+editing it and adding your favorite DNS, for example ~nameserver 1.1.1.1~
+next to the other ~nameserver~ entry. The resolver can then be restarted.
+
+#+BEGIN_SRC sh
+  sudo nano /etc/resolv.conf
+
+  sudo systemctl restart systemd-resolved
+#+END_SRC
+
+Secondly, it might become needed to setup the proxy for the school.
+
+This can be done as follow, by exporting a https base proxy configuration
+containing you AXIA credentials (this is specific to Nanzan University IT system),
+then by consolidating the configuration for other types of connections in the ~bashrc~:
+
+#+BEGIN_SRC sh
+  export https_proxy="http://<AXIA_username>:\
+         <AXIA_psw>@proxy.ic.nanzan-u.ac.jp:8080"
+
+  echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc \
+       echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc \
+       echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc \
+       echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" \
+       >> ~/.bashrc
+#+END_SRC
+
+Eventually the board can be rebooted in order for the setup to get applied cleanly.
+
+*** ~root~ password
+#+LATEX: \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
+*WARNING*: Depending on your use-case, the setup presented in this
+subsection can be a critical security breach as it remove the need for a root
+password to access the admin functions of the board's Linux.
+_When in doubt, do not apply this configuration!!_
+#+LATEX: \end{tcolorbox}
+
+If you board does not hold important data
+and is available to you only, for test or development,
+it might be convenient for the ~sudo~ tool to not ask for the
+password all the time.
+This change can be done by editing the sudoers file, and
+adding the parameter ~NOPASSWD~
+at the ~sudo~ line:
+
+#+BEGIN_SRC sh
+sudo visudo
+
+%sudo   ALL=(ALL:ALL) NOPASSWD: ALL
+#+END_SRC
+
+Again, this is merely a convenience setup for devices staying at you desk. If
+the board is meant to be used in any kind of production setup, a password
+should be set for making administration tasks.
+
+With all of these settings, you should be able to update the software of your
+board without any issues:
+#+BEGIN_SRC sh
+sudo apt-get update
+sudo apt-get dist-upgrade
+sudo reboot now
+#+END_SRC
+
+
+*** Static IP address
+A static IP can be set by writing the following
+configuration into your ~netplan~ configuration file.
+
+The name of the files might vary:
+#+BEGIN_SRC sh
+  sudo nano /etc/netplan/50-cloud-init.yaml
+#+END_SRC
+
+You can then set the wanted IP as follow. Note that a custom DNS was
+also set in that case.
+#+BEGIN_SRC yaml
+  network:
+    renderer: NetworkManager
+    version: 2
+    ethernets:
+      eth0:
+        addresses:
+          - 192.168.11.103/24
+        routes:
+          - to: default
+            via: 192.168.11.1
+        nameservers:
+          addresses:
+            - 8.8.8.8
+            - 1.1.1.1
+#+END_SRC
+
+Finally, the change in settings can be applied
+as follow:
+
+#+BEGIN_SRC sh
+  sudo netplan apply
+#+END_SRC
+
+*** Purging ~snap~
+As the desktop-specific software are not used at all in the case
+of our project, there are some packages that can be purges in order for the
+system to become more lightweight.
+
+In particular, the main issue with Ubuntu systems is the forced integration of
+Snap packages. Here are the command to use in order to remove all of that.
+These steps take a lot of time and need to be executed in that specific order[fn:2],
+but the system fan runs sensibly slower without all of this stuff:
+
+#+BEGIN_SRC sh
+  sudo systemctl disable snapd.service
+  sudo systemctl disable snapd.socket
+  sudo systemctl disable snapd.seeded.service
+
+  sudo snap list #show installed package, remove then all:
+  sudo snap remove --purge firefox
+  sudo snap remove --purge gnome-3-38-2004
+  sudo snap remove --purge gnome-42-2204
+  sudo snap remove --purge gtk-common-themes
+  sudo snap remove --purge snapd-desktop-integration
+  sudo snap remove --purge snap-store
+  sudo snap remove --purge bare
+  sudo snap remove --purge core20
+  sudo snap remove --purge core22
+  sudo snap remove --purge snapd
+  sudo snap list # check that everything is uninstalled
+
+  sudo rm -rf /var/cache/snapd/
+  sudo rm -rf ~/snap
+  sudo apt autoremove --purge snapd
+
+  systemctl list-units | grep snapd
+#+END_SRC
+
+*** Other unused heavy packages
+Some other pieces of software can safely be removed since the desktop is
+not to be used:
+
+#+BEGIN_SRC sh
+  sudo apt-get autoremove --purge yaru-theme-icon \
+  fonts-noto-cjk yaru-theme-gtk vim-runtime \
+  ubuntu-wallpapers-jammy humanity-icon-theme
+
+  sudo apt-get autoclean
+  sudo reboot now
+#+END_SRC
 
 
 
@@ -296,6 +452,8 @@ and the second one on the host PC, both without the first placeholder hostnames)
 #+END_SRC
 
 * Footnotes
+[fn:2] The ~snap~ package depends on each other. Thus dependencies
+cannot be remove before the package(s) that depends on them.
 
 [fn:1] Again, it is critical to be 100\% certain that you are working with
 the correct device! 

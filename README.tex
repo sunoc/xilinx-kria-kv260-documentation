@@ -1,4 +1,4 @@
-% Created 2023-08-28 月 11:24
+% Created 2023-08-28 月 12:07
 % Intended LaTeX compiler: pdflatex
 \documentclass[10pt]{article}
 \usepackage[utf8]{inputenc}
@@ -55,10 +55,10 @@
 \tableofcontents
 \pagebreak
 \section{Introduction}
-\label{sec:orgdedcfe0}
+\label{sec:org948556a}
 
 \subsection{Motivation}
-\label{sec:org46bb604}
+\label{sec:org6e7f51a}
 This guide will present how to setup and use Xilinx's KRIA board, in particular
 for running ROS on a host Ubuntu system, as well as for deploying
 micro-ROS as a firmware on the MCU part of this board's chip.
@@ -69,7 +69,7 @@ a Linux distribution, as well as another ARM core, real-time enabled,
 capable to run a RTOS.
 
 \subsection{Build instructions for this report}
-\label{sec:orge612cea}
+\label{sec:orgf5df166}
 The base file for this report is actually this README.org file itself.
 However, upon local build, this file is regularly exported as
 a \texttt{.tex} file that can be built normally.
@@ -89,7 +89,7 @@ pdflatex instructions.tex
 No fancy Lua or theme at the moment !
 
 \subsubsection{Automatic build with CI/CD pipeline}
-\label{sec:org6510b19}
+\label{sec:org5e87db0}
 If you don't want to build the report yourself, a CI pipeline is used to make it on GitLab.
 
 You can check the steps in the .gitlab-ci.yml file.
@@ -98,7 +98,7 @@ This build uses a base Ubuntu image and basically takes the same steps as presen
 A PDF artifact can be downloaded.
 
 \subsubsection{Headers and \LaTeX{} settings for export}
-\label{sec:orgdb75034}
+\label{sec:org139b7bb}
 A large amount of headers and parameters are needed in order
 to have this "README" document being exportable as a \LaTeX{}
 document formatted the way I wanted it to be.
@@ -106,7 +106,7 @@ document formatted the way I wanted it to be.
 The detail can be seen in the raw \texttt{.org} version of this README.
 
 \section{Boot firmware}
-\label{sec:orga38c67f}
+\label{sec:orgb11c064}
 The goal for the Linux side of the deployment is to
 have the latest LTS version of Ubuntu up and running.
 In order to be able to boot such a newer version of Linux, the
@@ -116,7 +116,7 @@ The procedure is available in \href{https://docs.xilinx.com/r/en-US/ug1089-kv260
 but I will present it step by step here.
 
 \subsection{Getting the new firmware}
-\label{sec:orgfec388b}
+\label{sec:org3a9cad1}
 A 2022 version of the board firmware is required in order to run the latest
 version of Ubuntu properly.
 
@@ -130,7 +130,7 @@ wget https://www.xilinx.com/member/forms/download/\
 
 
 \subsection{Reaching the board recovery tool}
-\label{sec:org02fa073}
+\label{sec:org6aaeb6e}
 Now the firmware \texttt{.bin} image is available, it is possible to update it using the
 boards recovery tool. Here are the steps that must be taken in order to reach
 this tool and update the board:
@@ -145,30 +145,30 @@ range, except the specific \texttt{192.168.0.111}, which will be used by the
 board.
 \item Using a web browser on your host machine, access
 \texttt{http://192.168.0.111}. Thou shall now see the interface, as visible on
-the figure \ref{fig:org92c221a} below.
+the figure \ref{fig:orgec01854} below.
 \end{itemize}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1\textwidth]{img/recovery.png}
-\caption{\label{fig:org92c221a}The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
+\caption{\label{fig:orgec01854}The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
 \end{figure}
 
 \subsection{Updating the boot firmware}
-\label{sec:org5c16868}
+\label{sec:org8912f73}
 From this "recovery" page, it is possible to upload the \texttt{.bin} file downloaded previously onto
 the board using the "Recover Image" section at the bottom right of the page.
 
 The board can be re-booted afterwards.
 
 \section{Installing Linux}
-\label{sec:org3cff78f}
+\label{sec:org6b51991}
 Withe the boot firmware being up-to-date, we can proceed to install a Linux distribution
 on our Kria board. The step needed to archive a full installation of Ubuntu 22.04
 will be presented in this section.
 
 \subsection{Preparing and booting a Ubuntu 22.04 media}
-\label{sec:orgea42e47}
+\label{sec:org7f8bb74}
 An \href{https://ubuntu.com/download/amd-xilinx}{official Ubuntu image} exists and is
 provided by Xilinx, allowing the OS installation to be quick and
 straightforward.
@@ -180,7 +180,7 @@ Once the image has been downloaded at \href{https://ubuntu.com/download/amd-xili
 we can flash it onto the SD card, with the following instructions.
 
 \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black]
-\textbf{WARNING}: The next part involve the \texttt{dd} command writing on disks!!!
+\textbf{DANGER}: The next part involve the \texttt{dd} command writing on disks!!!
 As always with the dd command, thou have to be \textbf{VERY} careful on what arguments
 thou give. Selecting the wrong disk will result on the destruction of
 thy data !!
@@ -211,68 +211,231 @@ kria# ip addr
 host# ssh ubuntu@192.168.4.11
 \end{minted}
 
+\subsection{Network and admin setups}
+\label{sec:org008ebb3}
+This section presents a variety of extra convenience configurations
+that can be used when setting-up the Kria board.
+
+\subsubsection{Proxy and DNS}
+\label{sec:org156bb6d}
+An issue that can occur when connecting the board to the internet is the
+conflicting situation with the university proxy.
+Indeed, as the network at Nanzan University requires to go through a proxy,
+some DNS errors appeared.
+
+Firstly, it is possible to set a DNS IP address in \texttt{/etc/resolv.conf} by
+editing it and adding your favorite DNS, for example \texttt{nameserver 1.1.1.1}
+next to the other \texttt{nameserver} entry. The resolver can then be restarted.
+
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
+sudo nano /etc/resolv.conf
+
+sudo systemctl restart systemd-resolved
+\end{minted}
+
+Secondly, it might become needed to setup the proxy for the school.
+
+This can be done as follow, by exporting a https base proxy configuration
+containing you AXIA credentials (this is specific to Nanzan University IT system),
+then by consolidating the configuration for other types of connections in the \texttt{bashrc}:
+
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
+export https_proxy="http://<AXIA_username>:\
+       <AXIA_psw>@proxy.ic.nanzan-u.ac.jp:8080"
+
+echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc \
+     echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc \
+     echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc \
+     echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" \
+     >> ~/.bashrc
+\end{minted}
+
+Eventually the board can be rebooted in order for the setup to get applied cleanly.
+
+\subsubsection{\texttt{root} password}
+\label{sec:orgdf0c901}
+\begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
+\textbf{WARNING}: Depending on your use-case, the setup presented in this
+subsection can be a critical security breach as it remove the need for a root
+password to access the admin functions of the board's Linux.
+\uline{When in doubt, do not apply this configuration!!}
+\end{tcolorbox}
+
+If you board does not hold important data
+and is available to you only, for test or development,
+it might be convenient for the \texttt{sudo} tool to not ask for the
+password all the time.
+This change can be done by editing the sudoers file, and
+adding the parameter \texttt{NOPASSWD}
+at the \texttt{sudo} line:
+
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
+sudo visudo
+
+%sudo   ALL=(ALL:ALL) NOPASSWD: ALL
+\end{minted}
+
+Again, this is merely a convenience setup for devices staying at you desk. If
+the board is meant to be used in any kind of production setup, a password
+should be set for making administration tasks.
+
+With all of these settings, you should be able to update the software of your
+board without any issues:
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
+sudo apt-get update
+sudo apt-get dist-upgrade
+sudo reboot now
+\end{minted}
+
+
+\subsubsection{Static IP address}
+\label{sec:org978ccb9}
+A static IP can be set by writing the following
+configuration into your \texttt{netplan} configuration file.
+
+The name of the files might vary:
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
+sudo nano /etc/netplan/50-cloud-init.yaml
+\end{minted}
+
+You can then set the wanted IP as follow. Note that a custom DNS was
+also set in that case.
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{yaml}
+network:
+  renderer: NetworkManager
+  version: 2
+  ethernets:
+    eth0:
+      addresses:
+        - 192.168.11.103/24
+      routes:
+        - to: default
+          via: 192.168.11.1
+      nameservers:
+        addresses:
+          - 8.8.8.8
+          - 1.1.1.1
+\end{minted}
+
+Finally, the change in settings can be applied
+as follow:
+
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
+sudo netplan apply
+\end{minted}
+
+\subsubsection{Purging \texttt{snap}}
+\label{sec:orgf6c81ff}
+As the desktop-specific software are not used at all in the case
+of our project, there are some packages that can be purges in order for the
+system to become more lightweight.
+
+In particular, the main issue with Ubuntu systems is the forced integration of
+Snap packages. Here are the command to use in order to remove all of that.
+These steps take a lot of time and need to be executed in that specific order\footnote{The \texttt{snap} package depends on each other. Thus dependencies
+cannot be remove before the package(s) that depends on them.},
+but the system fan runs sensibly slower without all of this stuff:
+
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
+sudo systemctl disable snapd.service
+sudo systemctl disable snapd.socket
+sudo systemctl disable snapd.seeded.service
+
+sudo snap list #show installed package, remove then all:
+sudo snap remove --purge firefox
+sudo snap remove --purge gnome-3-38-2004
+sudo snap remove --purge gnome-42-2204
+sudo snap remove --purge gtk-common-themes
+sudo snap remove --purge snapd-desktop-integration
+sudo snap remove --purge snap-store
+sudo snap remove --purge bare
+sudo snap remove --purge core20
+sudo snap remove --purge core22
+sudo snap remove --purge snapd
+sudo snap list # check that everything is uninstalled
+
+sudo rm -rf /var/cache/snapd/
+sudo rm -rf ~/snap
+sudo apt autoremove --purge snapd
+
+systemctl list-units | grep snapd
+\end{minted}
+
+\subsubsection{Other unused heavy packages}
+\label{sec:org0b803f1}
+Some other pieces of software can safely be removed since the desktop is
+not to be used:
+
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
+sudo apt-get autoremove --purge yaru-theme-icon \
+fonts-noto-cjk yaru-theme-gtk vim-runtime \
+ubuntu-wallpapers-jammy humanity-icon-theme
+
+sudo apt-get autoclean
+sudo reboot now
+\end{minted}
 
 
 
 \section{Enabling \texttt{remoteproc}}
-\label{sec:org3dc7709}
+\label{sec:org4688c81}
 
 \section{Loading a real-time firmware}
-\label{sec:org78baf27}
+\label{sec:org920dfa0}
 
 \section{Building micro-ROS as a static library}
-\label{sec:org345d87f}
+\label{sec:org4151b21}
 
 \section{Building a real-time firmware}
-\label{sec:org11f8af4}
+\label{sec:org6c879ec}
 
 \subsection{Setting up Vitis IDE}
-\label{sec:orgba70921}
+\label{sec:org05c6191}
 
 \section{Adding micro-ROS to a firmware project}
-\label{sec:org670a61a}
+\label{sec:org74e1bda}
 
 \section{Loading a real-time firmware}
-\label{sec:org63f4f75}
+\label{sec:org194a98e}
 
 \section{Running a ROS2 node}
-\label{sec:org83038b9}
+\label{sec:org3bcff3a}
 
 \subsection{On the host Linux}
-\label{sec:org475f146}
+\label{sec:orgae9a382}
 
 \subsection{In a container}
-\label{sec:orge59ba94}
+\label{sec:org25f3d50}
 
 \section{micro-ROS agent}
-\label{sec:orgbea9cf5}
+\label{sec:org1134c49}
 
 \pagebreak
 \appendix
 \section{DTO patch}
-\label{sec:org8bbe32f}
+\label{sec:org5027789}
 \inputminted[linenos, frame=single]{diff}{./src/system.patch}
 
 \pagebreak
 \section{Custom toolchain CMake settings}
-\label{sec:org6932bfb}
+\label{sec:org386fdee}
 \inputminted[linenos, frame=single]{cmake}{./src/custom_r5f_toolchain.cmake}
 
 \pagebreak
 \section{Custom Colcon meta settings}
-\label{sec:org8dce447}
+\label{sec:org77a6ad5}
 \inputminted[linenos, frame=single]{yaml}{./src/custom_r5f_colcon.meta}
 
 \pagebreak
 \section{Firmware time functions}
-\label{sec:orgbf95aa8}
+\label{sec:org14d678f}
 
 \subsection{main}
-\label{sec:orgbceba22}
+\label{sec:orga9e4def}
 \inputminted[linenos, frame=single]{c}{./src/clock.c}
 
 \subsection{header file}
-\label{sec:org7606769}
+\label{sec:org5fb526b}
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{c}
 /**< Microseconds per second. */
 #define MICROSECONDS_PER_SECOND    ( 1000000LL )  
@@ -285,14 +448,14 @@ host# ssh ubuntu@192.168.4.11
 
 \pagebreak
 \section{Firmware memory allocation functions}
-\label{sec:org9b92456}
+\label{sec:org2a2fd9c}
 
 \subsection{main}
-\label{sec:orgeeb3b58}
+\label{sec:orgb2f7951}
 \inputminted[linenos, frame=single]{c}{./src/allocators.c}
 
 \subsection{header file}
-\label{sec:org2aa0e40}
+\label{sec:org14311fa}
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{c}
 #ifndef _ALLOCATORS_H_
 #define _ALLOCATORS_H_

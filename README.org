@@ -34,7 +34,7 @@ report:
 Then, the actual build can be made with a simple:
 
 #+BEGIN_SRC bash
-  pdflatex instructions.tex
+  pdflatex README.tex
 #+END_SRC
 
 No fancy Lua or theme at the moment !
@@ -372,8 +372,21 @@ not to be used:
 #+END_SRC
 
 
-
 * Enabling ~remoteproc~
+One of the advantage of this Kria board, as cited previously, is the presence of
+multiple types of core (APU, MCU, FPGA) on the same chip.
+
+The part in focus in this guide is the usage of both the APU, running
+a Linux distribution and ROS2; and the MCU, running FreeRTOS and micro-ROS.
+
+The communication between both side is meant to be done using shared memory, but
+some extra setup is required in order to be running the real-time firmware, in particular
+for deploying micro-ROS on it.
+
+As a first step in that direction, this section of the report
+will present how to setup and use as an example firmware that utilizes the
+~remoteproc~ device in Linux in order to access shared memory
+and communicate with the real-time firmware using the RPMsg system.
 
 * Loading a real-time firmware
 
@@ -397,21 +410,25 @@ not to be used:
 
 #+LATEX: \pagebreak
 #+LATEX: \appendix
-* DTO patch  
+* DTO patch
+This file is available in this repositroy: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch][system.patch]]
 #+LATEX: \inputminted[linenos, frame=single]{diff}{./src/system.patch}
 
 #+LATEX: \pagebreak
 * Custom toolchain CMake settings
+This file is available in this repositroy: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom_r5f_toolchain.cmake][custom r5f toolchain.cmake]]
 #+LATEX: \inputminted[linenos, frame=single]{cmake}{./src/custom_r5f_toolchain.cmake}
 
 #+LATEX: \pagebreak
 * Custom Colcon meta settings
+This file is available in this repositroy: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom_r5f_colcon.meta][custom r5f colcon.meta]]
 #+LATEX: \inputminted[linenos, frame=single]{yaml}{./src/custom_r5f_colcon.meta}
 
 #+LATEX: \pagebreak
 * Firmware time functions
 
 ** main
+This file is available in this repositroy: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/clock.c][clock.c]]
 #+LATEX: \inputminted[linenos, frame=single]{c}{./src/clock.c}
 
 ** header file
@@ -429,6 +446,7 @@ not to be used:
 * Firmware memory allocation functions
 
 ** main
+This file is available in this repositroy: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/allocators.c][allocators.c]]
 #+LATEX: \inputminted[linenos, frame=single]{c}{./src/allocators.c}
 
 ** header file

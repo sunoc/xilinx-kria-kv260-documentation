@@ -1,4 +1,4 @@
-% Created 2023-08-28 月 12:07
+% Created 2023-08-28 月 13:11
 % Intended LaTeX compiler: pdflatex
 \documentclass[10pt]{article}
 \usepackage[utf8]{inputenc}
@@ -55,10 +55,10 @@
 \tableofcontents
 \pagebreak
 \section{Introduction}
-\label{sec:org948556a}
+\label{sec:orgf97e357}
 
 \subsection{Motivation}
-\label{sec:org6e7f51a}
+\label{sec:orgae777db}
 This guide will present how to setup and use Xilinx's KRIA board, in particular
 for running ROS on a host Ubuntu system, as well as for deploying
 micro-ROS as a firmware on the MCU part of this board's chip.
@@ -69,7 +69,7 @@ a Linux distribution, as well as another ARM core, real-time enabled,
 capable to run a RTOS.
 
 \subsection{Build instructions for this report}
-\label{sec:orgf5df166}
+\label{sec:org0f400d4}
 The base file for this report is actually this README.org file itself.
 However, upon local build, this file is regularly exported as
 a \texttt{.tex} file that can be built normally.
@@ -83,13 +83,13 @@ sudo apt-get install texlive-base texlive-latex-recommended texlive-lang-japanes
 Then, the actual build can be made with a simple:
 
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{bash}
-pdflatex instructions.tex
+pdflatex README.tex
 \end{minted}
 
 No fancy Lua or theme at the moment !
 
 \subsubsection{Automatic build with CI/CD pipeline}
-\label{sec:org5e87db0}
+\label{sec:orgbb6d28c}
 If you don't want to build the report yourself, a CI pipeline is used to make it on GitLab.
 
 You can check the steps in the .gitlab-ci.yml file.
@@ -98,7 +98,7 @@ This build uses a base Ubuntu image and basically takes the same steps as presen
 A PDF artifact can be downloaded.
 
 \subsubsection{Headers and \LaTeX{} settings for export}
-\label{sec:org139b7bb}
+\label{sec:org1a4f29d}
 A large amount of headers and parameters are needed in order
 to have this "README" document being exportable as a \LaTeX{}
 document formatted the way I wanted it to be.
@@ -106,7 +106,7 @@ document formatted the way I wanted it to be.
 The detail can be seen in the raw \texttt{.org} version of this README.
 
 \section{Boot firmware}
-\label{sec:orgb11c064}
+\label{sec:orgea33363}
 The goal for the Linux side of the deployment is to
 have the latest LTS version of Ubuntu up and running.
 In order to be able to boot such a newer version of Linux, the
@@ -116,7 +116,7 @@ The procedure is available in \href{https://docs.xilinx.com/r/en-US/ug1089-kv260
 but I will present it step by step here.
 
 \subsection{Getting the new firmware}
-\label{sec:org3a9cad1}
+\label{sec:org00affa0}
 A 2022 version of the board firmware is required in order to run the latest
 version of Ubuntu properly.
 
@@ -130,7 +130,7 @@ wget https://www.xilinx.com/member/forms/download/\
 
 
 \subsection{Reaching the board recovery tool}
-\label{sec:org6aaeb6e}
+\label{sec:org0139d77}
 Now the firmware \texttt{.bin} image is available, it is possible to update it using the
 boards recovery tool. Here are the steps that must be taken in order to reach
 this tool and update the board:
@@ -145,30 +145,30 @@ range, except the specific \texttt{192.168.0.111}, which will be used by the
 board.
 \item Using a web browser on your host machine, access
 \texttt{http://192.168.0.111}. Thou shall now see the interface, as visible on
-the figure \ref{fig:orgec01854} below.
+the figure \ref{fig:orgd34b983} below.
 \end{itemize}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1\textwidth]{img/recovery.png}
-\caption{\label{fig:orgec01854}The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
+\caption{\label{fig:orgd34b983}The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
 \end{figure}
 
 \subsection{Updating the boot firmware}
-\label{sec:org8912f73}
+\label{sec:org163c07f}
 From this "recovery" page, it is possible to upload the \texttt{.bin} file downloaded previously onto
 the board using the "Recover Image" section at the bottom right of the page.
 
 The board can be re-booted afterwards.
 
 \section{Installing Linux}
-\label{sec:org6b51991}
+\label{sec:org680a92b}
 Withe the boot firmware being up-to-date, we can proceed to install a Linux distribution
 on our Kria board. The step needed to archive a full installation of Ubuntu 22.04
 will be presented in this section.
 
 \subsection{Preparing and booting a Ubuntu 22.04 media}
-\label{sec:org7f8bb74}
+\label{sec:org14f39e4}
 An \href{https://ubuntu.com/download/amd-xilinx}{official Ubuntu image} exists and is
 provided by Xilinx, allowing the OS installation to be quick and
 straightforward.
@@ -212,12 +212,12 @@ host# ssh ubuntu@192.168.4.11
 \end{minted}
 
 \subsection{Network and admin setups}
-\label{sec:org008ebb3}
+\label{sec:org6f47199}
 This section presents a variety of extra convenience configurations
 that can be used when setting-up the Kria board.
 
 \subsubsection{Proxy and DNS}
-\label{sec:org156bb6d}
+\label{sec:org96776b1}
 An issue that can occur when connecting the board to the internet is the
 conflicting situation with the university proxy.
 Indeed, as the network at Nanzan University requires to go through a proxy,
@@ -253,7 +253,7 @@ echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc \
 Eventually the board can be rebooted in order for the setup to get applied cleanly.
 
 \subsubsection{\texttt{root} password}
-\label{sec:orgdf0c901}
+\label{sec:orgbbd73a4}
 \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 \textbf{WARNING}: Depending on your use-case, the setup presented in this
 subsection can be a critical security breach as it remove the need for a root
@@ -289,7 +289,7 @@ sudo reboot now
 
 
 \subsubsection{Static IP address}
-\label{sec:org978ccb9}
+\label{sec:orgc185f01}
 A static IP can be set by writing the following
 configuration into your \texttt{netplan} configuration file.
 
@@ -325,7 +325,7 @@ sudo netplan apply
 \end{minted}
 
 \subsubsection{Purging \texttt{snap}}
-\label{sec:orgf6c81ff}
+\label{sec:org3d85902}
 As the desktop-specific software are not used at all in the case
 of our project, there are some packages that can be purges in order for the
 system to become more lightweight.
@@ -362,7 +362,7 @@ systemctl list-units | grep snapd
 \end{minted}
 
 \subsubsection{Other unused heavy packages}
-\label{sec:org0b803f1}
+\label{sec:org76133d3}
 Some other pieces of software can safely be removed since the desktop is
 not to be used:
 
@@ -376,66 +376,83 @@ sudo reboot now
 \end{minted}
 
 
-
 \section{Enabling \texttt{remoteproc}}
-\label{sec:org4688c81}
+\label{sec:orgd6ad2ba}
+One of the advantage of this Kria board, as cited previously, is the presence of
+multiple types of core (APU, MCU, FPGA) on the same chip.
+
+The part in focus in this guide is the usage of both the APU, running
+a Linux distribution and ROS2; and the MCU, running FreeRTOS and micro-ROS.
+
+The communication between both side is meant to be done using shared memory, but
+some extra setup is required in order to be running the real-time firmware, in particular
+for deploying micro-ROS on it.
+
+As a first step in that direction, this section of the report
+will present how to setup and use as an example firmware that utilizes the
+\texttt{remoteproc} device in Linux in order to access shared memory
+and communicate with the real-time firmware using the RPMsg system.
 
 \section{Loading a real-time firmware}
-\label{sec:org920dfa0}
+\label{sec:org23db106}
 
 \section{Building micro-ROS as a static library}
-\label{sec:org4151b21}
+\label{sec:org736d2f8}
 
 \section{Building a real-time firmware}
-\label{sec:org6c879ec}
+\label{sec:orgeaff672}
 
 \subsection{Setting up Vitis IDE}
-\label{sec:org05c6191}
+\label{sec:orgd137f0d}
 
 \section{Adding micro-ROS to a firmware project}
-\label{sec:org74e1bda}
+\label{sec:orgdc7369c}
 
 \section{Loading a real-time firmware}
-\label{sec:org194a98e}
+\label{sec:org6e38364}
 
 \section{Running a ROS2 node}
-\label{sec:org3bcff3a}
+\label{sec:org34a5f11}
 
 \subsection{On the host Linux}
-\label{sec:orgae9a382}
+\label{sec:org2145e02}
 
 \subsection{In a container}
-\label{sec:org25f3d50}
+\label{sec:orgbc93b17}
 
 \section{micro-ROS agent}
-\label{sec:org1134c49}
+\label{sec:orgb824aba}
 
 \pagebreak
 \appendix
 \section{DTO patch}
-\label{sec:org5027789}
+\label{sec:org2018645}
+This file is available in this repositroy: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch}{system.patch}
 \inputminted[linenos, frame=single]{diff}{./src/system.patch}
 
 \pagebreak
 \section{Custom toolchain CMake settings}
-\label{sec:org386fdee}
+\label{sec:org3f5167d}
+This file is available in this repositroy: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom\_r5f\_toolchain.cmake}{custom r5f toolchain.cmake}
 \inputminted[linenos, frame=single]{cmake}{./src/custom_r5f_toolchain.cmake}
 
 \pagebreak
 \section{Custom Colcon meta settings}
-\label{sec:org77a6ad5}
+\label{sec:orgeff393a}
+This file is available in this repositroy: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom\_r5f\_colcon.meta}{custom r5f colcon.meta}
 \inputminted[linenos, frame=single]{yaml}{./src/custom_r5f_colcon.meta}
 
 \pagebreak
 \section{Firmware time functions}
-\label{sec:org14d678f}
+\label{sec:org10a5a97}
 
 \subsection{main}
-\label{sec:orga9e4def}
+\label{sec:orgc9c5d20}
+This file is available in this repositroy: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/clock.c}{clock.c}
 \inputminted[linenos, frame=single]{c}{./src/clock.c}
 
 \subsection{header file}
-\label{sec:org5fb526b}
+\label{sec:org2612fcc}
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{c}
 /**< Microseconds per second. */
 #define MICROSECONDS_PER_SECOND    ( 1000000LL )  
@@ -448,14 +465,15 @@ sudo reboot now
 
 \pagebreak
 \section{Firmware memory allocation functions}
-\label{sec:org2a2fd9c}
+\label{sec:org0297985}
 
 \subsection{main}
-\label{sec:orgb2f7951}
+\label{sec:org1dfef46}
+This file is available in this repositroy: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/allocators.c}{allocators.c}
 \inputminted[linenos, frame=single]{c}{./src/allocators.c}
 
 \subsection{header file}
-\label{sec:org14311fa}
+\label{sec:orge063d68}
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{c}
 #ifndef _ALLOCATORS_H_
 #define _ALLOCATORS_H_

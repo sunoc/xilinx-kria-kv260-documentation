@@ -369,10 +369,10 @@ multiple types of core (APU, MCU, FPGA) on the same chip.
 
 The part in focus in this guide is the usage of both the APU, running
 a Linux distribution and ROS2; and the MCU, running FreeRTOS and micro-ROS.
-Online available guides also provide information on how to deploy these types
+Online available guides[fn:3] [fn:4] also provide information on how to deploy these types
 of systems and enabeling ~remoteproc~ for the Kria boad, but this guide
 will show a step-by-step, tried process to have a heterogeneous system
-up and running.[[id:8286a41d-6da4-46a4-81a8-3c3126f156b8][DDS over RPMsg on HMP]]
+up and running.
 
 The communication between both side is meant to be done using shared memory, but
 some extra setup is required in order to be running the real-time firmware, in particular
@@ -382,6 +382,65 @@ As a first step in that direction, this section of the report
 will present how to setup and use as an example firmware that utilizes the
 ~remoteproc~ device in Linux in order to access shared memory
 and communicate with the real-time firmware using the RPMsg system.
+
+** Device-Tree Overlay patching
+The communication system and interaction from the Linux side towards the real-time capable core
+is not enabled by default within the Ubuntu image provided by Xilinx.
+
+In that regard, some modification of the device tree overlay (DTO) is required in order to have
+the ~remoteproc~ system startint.
+
+Firstly, we need to get the original firmware device tree, converted
+into a readable format (DTS):
+
+#+BEGIN_SRC sh
+  sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
+#+END_SRC
+
+Then, a custom-made patch file can be downloaded and applied.
+This file is available at the URL visible in the command below
+but also in this report appendix [[DTO patch]].
+
+#+BEGIN_SRC sh
+  wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/\
+       blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch
+
+  patch system.dts < system.patch
+#+END_SRC
+
+As for the board to be able to reserve the correct amount of memory with the new settings, some
+~cma~ kernel configuration is needed[fn:5]:
+
+#+BEGIN_SRC sh
+  sudo nano /etc/default/flash-kernel
+
+  LINUX_KERNEL_CMDLINE="quiet splash cma=512M cpuidle.off=1"
+  LINUX_KERNEL_CMDLINE_DEFAULTS=""
+  sudo flash-kernel
+#+END_SRC
+
+Now the DTS file has been modified, one can regenerate the binary and place it on the ~/boot~ partition
+and reboot the board:
+
+#+BEGIN_SRC sh
+  dtc -I dts -O dtb system.dts -o user-override.dtb
+  sudo mv user-override.dtb /boot/firmware/
+  sudo reboot now
+#+END_SRC
+
+After rebooting, you can check the content of the \verb|remoteproc| system directory,
+and a ~remoteproc0~ device should be visible, as follow:
+
+#+BEGIN_SRC sh
+  ls /sys/class/remoteproc/
+  #  remoteproc0
+#+END_SRC
+
+If it is the case, it means that the patch was successful and  that the remote processor is
+ready to be used.
+
+
+
 
 * Loading a real-time firmware
 
@@ -465,6 +524,15 @@ This file is available in this repositroy: [[https://gitlab.com/sunoc/xilinx-kri
 #+END_SRC
 
 * Footnotes
+
+[fn:5] The overlapping memory will not prevent the board to boot,
+but it disables the PWM for the CPU fan, which will then run at full speed, making noise. 
+
+[fn:4] A [[https://zenn.dev/ryuz88/articles/kv260_setup_memo_ubuntu22 ][blog post]] (JP) shows all major steps on how to enable the ~remoteproc~.
+
+[fn:3] A [[https://speakerdeck.com/fixstars/fpga-seminar-12-fixstars-corporation-20220727][slideshow]] (JP) from Fixstar employees presents how to use the device
+  tree to enable the communication between the cores.
+
 [fn:2] The ~snap~ package depends on each other. Thus dependencies
 cannot be remove before the package(s) that depends on them.
 

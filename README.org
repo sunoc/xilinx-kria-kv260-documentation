@@ -538,7 +538,72 @@ Here are the steps for installing the dependencies and building this configurati
 
 
 ** Setting up and building a new project for the Kria board
+With the platform configuration files available, we can now use the IDE to generate a
+new project for our board. The whole process will be described with screen captures and
+captions.
 
+#+ATTR_LATEX: :width .5\textwidth
+#+CAPTION: We are starting with creating a "New Application Project"
+#+CAPTION: You should be greeted with this wizard window. Next.
+#+NAME: fig:project1
+[[file:./img/vitis_new/project1.png]]
+
+#+ATTR_LATEX: :width .5\textwidth
+#+CAPTION: For the platform, we need to get our build Kria configuration.
+#+CAPTION: In the "Create a new platform" tab,
+#+CAPTION: click the "Browse..." button.
+#+NAME: fig:project2
+[[file:./img/vitis_new/project2.png]]
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: In the file explorer, we should navigate in the "k26" directory,
+#+CAPTION: where the configuration file was build.
+#+CAPTION: From here we are looking for a ".xsa" file, located in a "hw" directory, as visible.
+#+NAME: fig:project3
+[[file:./img/vitis_new/project3.png]]
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: With the configuration file loaded, we can now select a name for our
+#+CAPTION: platform, but most importantly, we have to select the "psu Cortex5 0" core as a target.
+#+CAPTION: The other, Cortex 53 is the APU running Linux.
+#+NAME: fig:project4
+[[file:./img/vitis_new/project4.png]]
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: In this next window, we can give a name to our firmware project.
+#+CAPTION: It is also critical here to select the core we want to build for.
+#+CAPTION: Once again, we want to use the "psu cortex5 0".
+#+NAME: fig:project5
+[[file:./img/vitis_new/project5.png]]
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: Here, we want to select "freertos10 xilinx" as our Operating System.
+#+CAPTION: The rest can remain unchanged.
+#+NAME: fig:project6
+[[file:./img/vitis_new/project6.png]]
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: Finally, we can select the demonstration template we are going to use;
+#+CAPTION: here we go with "OpenAMP echo-test" since we want to
+#+CAPTION: have some simple try of the RPMsg system. Finish.
+#+NAME: fig:project7
+[[file:./img/vitis_new/project7.png]]
+
+#+LATEX: \pagebreak
+In the Xilinx documentation, it is made mention of the addresses setting that should be checked in the ~script.ld~ file.
+These valued look different from what could be set in the DTO for the Linux side, but they appear to
+work for the example we are running:
+
+#+BEGIN_SRC sh
+  psu_ddr_S_AXI_BASEADDR                     0x3ed00000	
+  psu_ocm_ram_1_S_AXI_BASEADDR        0xfffc0000
+  psu_r5_tcm_ram_0_S_AXI_BASEADDR    0x00000000
+  psu_r5_tcm_ram_1_S_AXI_BASEADDR    0x00020000	
+#+END_SRC
+
+
+
+#+LATEX: \pagebreak
 * Building a real-time firmware
 
 ** Setting up Vitis IDE

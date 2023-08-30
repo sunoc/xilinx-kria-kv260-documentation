@@ -156,6 +156,7 @@ From this "recovery" page, it is possible to upload the ~.bin~ file downloaded p
 the board using the "Recover Image" section at the bottom right of the page.
 
 The board can be re-booted afterwards.
+#+LATEX: \pagebreak
 
 * Installing Linux
 Withe the boot firmware being up-to-date, we can proceed to install a Linux distribution
@@ -169,7 +170,6 @@ where this operating system sits in the general system we are implementing.
 #+CAPTION: It is the base layer for the ROS2 system.
 #+NAME: fig:map_linux
 [[file:./img/map_linux.png]]
-#+LATEX: \pagebreak
 
 ** Preparing and booting a Ubuntu 22.04 media
 An [[https://ubuntu.com/download/amd-xilinx][official Ubuntu image]] exists and is
@@ -455,6 +455,7 @@ and a ~remoteproc0~ device should be visible, as follow:
 
 If it is the case, it means that the patch was successful and  that the remote processor is
 ready to be used!
+#+LATEX: \pagebreak
 
 * Building an example RPMsg real-time firmware
 As visible on the official [[https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1837006921/OpenAMP+Base+Hardware+Configurations\#Build-RPU-firmware][Xilinx documentation about building a demo firmware]],
@@ -473,7 +474,6 @@ is positioned in the global project.
 #+CAPTION: be deployed in the same way.
 #+NAME: fig:map_microros
 [[file:./img/map_microros.png]]
-#+LATEX: \pagebreak
 
 ** Setting up the IDE
 Xilinx's Vitis IDE is the recommended tool used to build software for the Xilinx boards.
@@ -774,6 +774,7 @@ then we can build the library with the following ros2 command:
   \$(pwd)/custom_r5f_toolchain.cmake \$(pwd)/\
   custom_r5f_colcon.meta
 #+END_SRC
+#+LATEX: \pagebreak
 
 * Including micro-ROS to the real-time firmware
 Now we have a Vitis demonstration project available and the ~libmicroros~ static library
@@ -797,7 +798,7 @@ Many parameters are available to be set up in the IDE for the compilation toolch
 the figures [[fig:include]] and [[fig:include2]] below will show you a setup that worked to have the IDE
 to recognize the include files and to be able to use them for compiling the firmware.
 
-#+ATTR_LATEX: :width .6\textwidth
+#+ATTR_LATEX: :width .8\textwidth
 #+CAPTION: Firstly, in the "C/C++ Build" settings of your firmware project,
 #+CAPTION: under the "Settings" menu, you should find the gcc compiler "Directories".
 #+CAPTION: In here you should add the "include" directory of your library.
@@ -807,7 +808,7 @@ to recognize the include files and to be able to use them for compiling the firm
 #+NAME: fig:include
 [[file:./img/vitis_new/include.png]]
 
-#+ATTR_LATEX: :width .6\textwidth
+#+ATTR_LATEX: :width .8\textwidth
 #+CAPTION: Secondly, in the gcc linkers "Libraries", you can add the top level directory of your library.
 #+CAPTION: In our case, it is the directory that contains both the "include" directory added earlier,
 #+CAPTION: and also the "libmicroros.a" file.
@@ -834,6 +835,7 @@ command[fn:10]:
   scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
       Debug/rpmsg_pingpong_microros_lib.elf  ubuntu@192.168.1.10:/home/ubuntu/
 #+END_SRC
+#+LATEX: \pagebreak
 
 * micro-ROS adaptation for the firmware
 Beyond the inclusion of the library itself, actually using the micro-ROS system
@@ -1191,6 +1193,12 @@ The same file is available online as a reference, on [[https://github.com/eProsi
 
 
 ** Creating a custom transport agent
+
+
+#+LATEX: \pagebreak
+
+
+* Conclusion & future                                         :WORK_IN_PROGRESS:
 
 #+LATEX: \pagebreak
 #+LATEX: \appendix

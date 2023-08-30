@@ -897,211 +897,211 @@
 % \end{tcolorbox}
 
 
-% ------------------------------------------------------------------------------
-\pagebreak
-\section{ROS2}
-\label{sec:ros2}
-As an Ubuntu distribution is installed on the board, the installation of ROS2
-can be done in a standard way, using the repository.
+% % ------------------------------------------------------------------------------
+% \pagebreak
+% \section{ROS2}
+% \label{sec:ros2}
+% As an Ubuntu distribution is installed on the board, the installation of ROS2
+% can be done in a standard way, using the repository.
 
-An \href{https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html}{official documentation}
-is provided with ROS2 themselves with a step-by-step guide on how to install
-ROS2 on a Ubuntu system\footnote{The curl command from the guide does not work through the school proxy,
-  but the command wget used instead does work. The key is then moved to the correct spot with mv}.
-We will follow this guide here.
+% An \href{https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html}{official documentation}
+% is provided with ROS2 themselves with a step-by-step guide on how to install
+% ROS2 on a Ubuntu system\footnote{The curl command from the guide does not work through the school proxy,
+%   but the command wget used instead does work. The key is then moved to the correct spot with mv}.
+% We will follow this guide here.
 
-Firstly, we need to update the locals, enable the universe Ubuntu repository,
-get the key and add the repository for ROS2. This can be done as follow:
+% Firstly, we need to update the locals, enable the universe Ubuntu repository,
+% get the key and add the repository for ROS2. This can be done as follow:
 
-\begin{tcolorbox}
-\begin{minted}{sh}
-locale  # check for UTF-8
-sudo apt update && sudo apt install -y locales
-sudo locale-gen en_US en_US.UTF-8
-sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
-export LANG=en_US.UTF-8
-locale  # verify settings
-sudo apt install -y software-properties-common
-sudo add-apt-repository universe
-sudo apt update && sudo apt install -y curl wget
-wget https://raw.githubusercontent.com/ros/rosdistro/\
-master/ros.key
-sudo mv ros.key /usr/share/keyrings/ros-archive-keyring.gpg
-\end{minted}
-\end{tcolorbox}
-
-
-This is a one-liner to add the ROS2 repository:
-
-\begin{tcolorbox}
-\begin{minted}{sh}
-echo "deb [arch=$(dpkg --print-architecture) \
-signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
-http://packages.ros.org/ros2/ubuntu $(. \
-/etc/os-release && echo $UBUNTU_CODENAME) main" | \
-sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
-
-\end{minted}
-\end{tcolorbox}
-
-It is then possible to install ROS2\footnote{This command installs a complete ``desktop'' version of ROS2. If space is a constraint, different, less complete packages can be install. Please refer to the official documentation about it.} as follow:
-
-\begin{tcolorbox}
-\begin{minted}{sh}
-sudo apt update
-sudo apt upgrade -y
-sudo apt install -y ros-humble-desktop \
-ros-humble-ros-base \
-python3-argcomplete \
-ros-dev-tools
-
-\end{minted}
-\end{tcolorbox}
-
-Once installed, it is possible to test the system with a provided example.
-You need to open two terminals and log wish SSH onto the board, then running
-respectively:
-
-\begin{tcolorbox}
-\begin{minted}{sh}
-source /opt/ros/humble/setup.bash
-ros2 run demo_nodes_cpp talker
-
-\end{minted}
-\end{tcolorbox}
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% locale  # check for UTF-8
+% sudo apt update && sudo apt install -y locales
+% sudo locale-gen en_US en_US.UTF-8
+% sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+% export LANG=en_US.UTF-8
+% locale  # verify settings
+% sudo apt install -y software-properties-common
+% sudo add-apt-repository universe
+% sudo apt update && sudo apt install -y curl wget
+% wget https://raw.githubusercontent.com/ros/rosdistro/\
+% master/ros.key
+% sudo mv ros.key /usr/share/keyrings/ros-archive-keyring.gpg
+% \end{minted}
+% \end{tcolorbox}
 
 
+% This is a one-liner to add the ROS2 repository:
 
-\begin{tcolorbox}
-\begin{minted}{sh}
-source /opt/ros/humble/setup.bash
-ros2 run demo_nodes_py listener
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% echo "deb [arch=\$(dpkg --print-architecture) \
+% signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
+% http://packages.ros.org/ros2/ubuntu $(. \
+% /etc/os-release && echo $UBUNTU_CODENAME) main" | \
+% sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
-\end{minted}
-\end{tcolorbox}
+% \end{minted}
+% \end{tcolorbox}
+
+% It is then possible to install ROS2\footnote{This command installs a complete ``desktop'' version of ROS2. If space is a constraint, different, less complete packages can be install. Please refer to the official documentation about it.} as follow:
+
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% sudo apt update
+% sudo apt upgrade -y
+% sudo apt install -y ros-humble-desktop \
+% ros-humble-ros-base \
+% python3-argcomplete \
+% ros-dev-tools
+
+% \end{minted}
+% \end{tcolorbox}
+
+% Once installed, it is possible to test the system with a provided example.
+% You need to open two terminals and log wish SSH onto the board, then running
+% respectively:
+
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% source /opt/ros/humble/setup.bash
+% ros2 run demo_nodes_cpp talker
+
+% \end{minted}
+% \end{tcolorbox}
 
 
-You should be able to see the first terminal sending "Hello world" messages,
-and the second one receiving then.
+
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% source /opt/ros/humble/setup.bash
+% ros2 run demo_nodes_py listener
+
+% \end{minted}
+% \end{tcolorbox}
 
 
-% ------------------------------------------------------------------------------
-\section{ROS2 in a container}
-%\label{sec:ros2-container}
-As it is used to test and build micro-ROS configurations, running ROS2 in a
-Docker container is a great way to have a reproducible configuration
-of you system. This part of the guide will present how to install Docker on the
-Kria board and then how to use it to deploy the latest version of ROS2.
+% You should be able to see the first terminal sending "Hello world" messages,
+% and the second one receiving then.
 
-\subsection{Installing docker}
-%\label{sec:installing-docker}
-It is possible to have a version of Docker installed simply by using the available repository, but since we are on Ubuntu, a PPA is available
-from Docker in order to have the most up-to-date version.
-Following \href{https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository}{the official documentation}, the following steps can be taken to
-install the latest version of Docker on a Ubuntu system.
-The last command is meant to test the install. If everything went smoothly, you should see something similar to what is presented on the figure \ref{fig:hello-docker} below:
-\begin{tcolorbox}
-\begin{minted}{sh}
-sudo apt-get update
-sudo apt-get install ca-certificates curl sudo
-gnupg install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
+% % ------------------------------------------------------------------------------
+% \section{ROS2 in a container}
+% %\label{sec:ros2-container}
+% As it is used to test and build micro-ROS configurations, running ROS2 in a
+% Docker container is a great way to have a reproducible configuration
+% of you system. This part of the guide will present how to install Docker on the
+% Kria board and then how to use it to deploy the latest version of ROS2.
 
-echo \
-  "deb [arch="$(dpkg --print-architecture)" \
-  signed-by=/etc/apt/keyrings/docker.gpg] \
-  https://download.docker.com/linux/ubuntu \
-  "$(. /etc/os-release && \
-  echo "$VERSION_CODENAME")" stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+% \subsection{Installing docker}
+% %\label{sec:installing-docker}
+% It is possible to have a version of Docker installed simply by using the available repository, but since we are on Ubuntu, a PPA is available
+% from Docker in order to have the most up-to-date version.
+% Following \href{https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository}{the official documentation}, the following steps can be taken to
+% install the latest version of Docker on a Ubuntu system.
+% The last command is meant to test the install. If everything went smoothly, you should see something similar to what is presented on the figure \ref{fig:hello-docker} below:
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% sudo apt-get update
+% sudo apt-get install ca-certificates curl sudo
+% gnupg install -m 0755 -d /etc/apt/keyrings
+% curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+% sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
-sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli \
-  containerd.io docker-buildx-plugin docker-compose-plugin
-sudo usermod -aG docker $USER
-newgrp docker
+% sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
-docker run hello-world
-\end{minted}
-\end{tcolorbox}
+% echo \
+%   "deb [arch="$(dpkg --print-architecture)" \
+%   signed-by=/etc/apt/keyrings/docker.gpg] \
+%   https://download.docker.com/linux/ubuntu \
+%   "$(. /etc/os-release && \
+%   echo "$VERSION_CODENAME")" stable" | \
+%   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.7\textwidth]{./img/hello-docker.png}
-  \caption{The return of a successful run of the ``hello world'' test Docker container}
-  \label{fig:hello-docker}
-\end{figure}
+% sudo apt-get update
+% sudo apt-get install docker-ce docker-ce-cli \
+%   containerd.io docker-buildx-plugin docker-compose-plugin
+% sudo usermod -aG docker $USER
+% newgrp docker
 
-\subsection{Calling a ROS2 container}
-%\label{sec:call-ros2-cont}
-The following commands will pull a ROS container, version \verb|humble|, and name it \verb|ros_build|.
-A key part for having access to the interfaces (serial) is the mapping of whole the \verb|/dev| of  the host machine to the
-internal \verb|/dev|. \footnote{Note that this is an example and this situation can become a security issue. It would be a better practice
-in a production environment to map only the devices that are actually in use.}
-With the second command, we can execute \verb|bash|, as a way to open a terminal to the ``inside'' of the container.
-\begin{tcolorbox}
-\begin{minted}{sh}
-sudo docker run -d --name ros_agent -it --net=host -v \
-     /dev:/dev --privileged ros:iron
-sudo docker exec -it ros_agent bash
-\end{minted}
-\end{tcolorbox}
+% docker run hello-world
+% \end{minted}
+% \end{tcolorbox}
 
-From there, it becomes possible to simply use ROS2 as you would for a bare-metal install, and as presented in the section \ref{sec:ros2}.
-The following lines show the whole procedure on how to enable a micro-ROS agent that will listen and talk using UART on the \verb|/dev/ttyUSB1| port.
-\begin{tcolorbox}
-\begin{minted}{sh}
-  source /opt/ros/$ROS_DISTRO/setup.bash
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.7\textwidth]{./img/hello-docker.png}
+%   \caption{The return of a successful run of the ``hello world'' test Docker container}
+%   \label{fig:hello-docker}
+% \end{figure}
 
-  # Create a workspace and download the micro-ROS tools
-  mkdir microros_ws
-  cd microros_ws
-  git clone -b $ROS_DISTRO https://github.com/micro-ROS/\
-  micro_ros_setup.git src/micro_ros_setup
+% \subsection{Calling a ROS2 container}
+% %\label{sec:call-ros2-cont}
+% The following commands will pull a ROS container, version \verb|humble|, and name it \verb|ros_build|.
+% A key part for having access to the interfaces (serial) is the mapping of whole the \verb|/dev| of  the host machine to the
+% internal \verb|/dev|. \footnote{Note that this is an example and this situation can become a security issue. It would be a better practice
+% in a production environment to map only the devices that are actually in use.}
+% With the second command, we can execute \verb|bash|, as a way to open a terminal to the ``inside'' of the container.
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% sudo docker run -d --name ros_agent -it --net=host -v \
+%      /dev:/dev --privileged ros:iron
+% sudo docker exec -it ros_agent bash
+% \end{minted}
+% \end{tcolorbox}
 
-  # Update dependencies using rosdep
-  sudo apt update && rosdep update
-  rosdep install --from-paths src --ignore-src -y
+% From there, it becomes possible to simply use ROS2 as you would for a bare-metal install, and as presented in the section \ref{sec:ros2}.
+% The following lines show the whole procedure on how to enable a micro-ROS agent that will listen and talk using UART on the \verb|/dev/ttyUSB1| port.
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+%   source /opt/ros/$ROS_DISTRO/setup.bash
 
-  # Install pip
-  sudo apt-get install python3-pip
+%   # Create a workspace and download the micro-ROS tools
+%   mkdir microros_ws
+%   cd microros_ws
+%   git clone -b $ROS_DISTRO https://github.com/micro-ROS/\
+%   micro_ros_setup.git src/micro_ros_setup
 
-  # Build micro-ROS tools and source them
-  colcon build
-  source install/local_setup.bash
-\end{minted}
-\end{tcolorbox}
+%   # Update dependencies using rosdep
+%   sudo apt update && rosdep update
+%   rosdep install --from-paths src --ignore-src -y
 
-\begin{tcolorbox}
-\begin{minted}{sh}
-# Download micro-ROS-Agent packages
-source install/local_setup.bash
-ros2 run micro_ros_setup create_agent_ws.sh
+%   # Install pip
+%   sudo apt-get install python3-pip
 
-# Build step
-ros2 run micro_ros_setup build_agent.sh
-source install/local_setup.bash
+%   # Build micro-ROS tools and source them
+%   colcon build
+%   source install/local_setup.bash
+% \end{minted}
+% \end{tcolorbox}
 
-# Run a micro-ROS agent
-ros2 run micro_ros_agent micro_ros_agent serial \
---dev /dev/ttyUSB1
-\end{minted}
-\end{tcolorbox}
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% # Download micro-ROS-Agent packages
+% source install/local_setup.bash
+% ros2 run micro_ros_setup create_agent_ws.sh
 
-Samewise, from a different shell, it is possible to run a demonstration ping-pong topic communication.
-Note that you need to be careful to have you shell in the ``correct'' space: these command need to be run inside
-the container in which the previous setup were install, not on the host running the container system.
-\begin{tcolorbox}
-\begin{minted}{sh}
-  source /opt/ros/$ROS_DISTRO/setup.bash
+% # Build step
+% ros2 run micro_ros_setup build_agent.sh
+% source install/local_setup.bash
+
+% # Run a micro-ROS agent
+% ros2 run micro_ros_agent micro_ros_agent serial \
+% --dev /dev/ttyUSB1
+% \end{minted}
+% \end{tcolorbox}
+
+% Samewise, from a different shell, it is possible to run a demonstration ping-pong topic communication.
+% Note that you need to be careful to have you shell in the ``correct'' space: these command need to be run inside
+% the container in which the previous setup were install, not on the host running the container system.
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+%   source /opt/ros/$ROS_DISTRO/setup.bash
   
-  # Subscribe to micro-ROS ping topic
-  ros2 topic echo /microROS/ping
-\end{minted}
-\end{tcolorbox}
+%   # Subscribe to micro-ROS ping topic
+%   ros2 topic echo /microROS/ping
+% \end{minted}
+% \end{tcolorbox}
 
 % ------------------------------------------------------------------------------
 \section{WIP:: micro-ROS custom agent}

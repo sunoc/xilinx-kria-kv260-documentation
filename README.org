@@ -20,7 +20,7 @@ and stays hidden in a :noexport: section in this report.
 #+DESCRIPTION: A report presenting how to use and set Xilinx's Kria board
 #+LANGUAGE: English
 
-#+OPTIONS: toc:t date:t title:t email:t
+#+OPTIONS: H:3 toc:t date:t title:t email:t
 
 #+LATEX_CLASS: article
 #+LATEX_CLASS_OPTIONS:[10pt]
@@ -962,7 +962,6 @@ of the overall system we are talking about here.
 #+CAPTION: on the general-purpose core of the Kria board.
 #+NAME: fig:map_ros
 [[file:./img/map_ros.png]]
-#+LATEX: \pagebreak
 
 ** On the host Linux ("bare-metal")
 Since an Ubuntu distribution is installed on the board, the installation of ROS2
@@ -1149,7 +1148,7 @@ This part of the guide will focus on it.
 #+CAPTION: It is deployed on the Linux side, as a ROS2 node.
 #+NAME: fig:map_agent
 [[file:./img/map_agent.png]]
-#+LATEX: \pagebreak
+
 
 ** Building a eProsima agent bare-metal
 A key aspect to understand about modifying the agent (as
@@ -1160,8 +1159,6 @@ allow such modification[fn:18].
 In order to avoid that, one can get and run a ROS2 node design by eProsima,
 that can be deployed on it's own (without other ROS2 application and nodes)
 and eventually modified.
-
-
 
 
 #+BEGIN_SRC sh

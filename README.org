@@ -94,7 +94,15 @@ micro-ROS as a firmware on the MCU part of this board's chip.
 The use of this device in particular is interesting because of the presence
 of a CPU comprising both a general purpose ARM core, capable of running
 a Linux distribution, as well as another ARM core, real-time enabled,
-capable to run a RTOS.
+capable to run a RTOS. The figure [[fig:map]] below shows a schematic
+view of the overall system we are trying to archive.
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: The Linux and ROS2 environment (orange) will
+#+CAPTION: communicate with the real-time, FreeRTOS and micro-ROS
+#+CAPTION: side (blue) using RPMsg (shared memory).
+#+NAME: fig:map
+[[file:./img/map.png]]
 
 * Boot firmware
 The goal for the Linux side of the deployment is to
@@ -152,7 +160,16 @@ The board can be re-booted afterwards.
 * Installing Linux
 Withe the boot firmware being up-to-date, we can proceed to install a Linux distribution
 on our Kria board. The step needed to archive a full installation of Ubuntu LTS 22.04
-will be presented in this section[fn:7].
+will be presented in this section[fn:7]. The figure [[fig:map_linux]] below shows
+where this operating system sits in the general system we are implementing.
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: The Linux operating system (red border)runs on the
+#+CAPTION: APU (application, general purpose) side of the Kria board CPU.
+#+CAPTION: It is the base layer for the ROS2 system.
+#+NAME: fig:map_linux
+[[file:./img/map_linux.png]]
+#+LATEX: \pagebreak
 
 ** Preparing and booting a Ubuntu 22.04 media
 An [[https://ubuntu.com/download/amd-xilinx][official Ubuntu image]] exists and is
@@ -446,6 +463,17 @@ core of our Kria board.
 
 The goal here is to have a demonstration firmware running,
 able to use the RPMsg system to communicate with the Linux APU.
+The figure [[fig:map_microros]] below shows where the real-time firmware
+is positioned in the global project.
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: The FreeRTOS firmware and it's application (red border) are
+#+CAPTION: running on the real-time capable side of the Kria CPU.
+#+CAPTION: A micro-ROS application is shown here, but any real-time firmware will
+#+CAPTION: be deployed in the same way.
+#+NAME: fig:map_microros
+[[file:./img/map_microros.png]]
+#+LATEX: \pagebreak
 
 ** Setting up the IDE
 Xilinx's Vitis IDE is the recommended tool used to build software for the Xilinx boards.
@@ -536,7 +564,6 @@ Here are the steps for installing the dependencies and building this configurati
   export XILINX_VITIS=/home/$USER/Xilinx/Vitis/2022.2/
   make platform PLATFORM=k26_base_starter_kit
 #+END_SRC
-
 
 ** Setting up and building a new project for the Kria board
 With the platform configuration files available, we can now use the IDE to generate a
@@ -917,6 +944,7 @@ return of the board (typically a ~/dev/ttyUSB1~), but two things are to be noted
   or the new binary itself is impossible to run.
 + In general, if the ~echo_test~ runs, it means that everything is okay and that
   the RPMsg system worked successfully.
+#+LATEX: \pagebreak
 
   
 * Running a ROS2 node
@@ -925,6 +953,16 @@ they are focused on the ROS2 system being used on the Kria board.
 
 In this first section, the installation of ROS2 as a system will be presented, with
 two different ways of approaching the problem.
+
+As for the previous section, the figure [[fig:map_ros]] below shows what part
+of the overall system we are talking about here.
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: The ROS2 middle (red border) runs on top of the Linux,
+#+CAPTION: on the general-purpose core of the Kria board.
+#+NAME: fig:map_ros
+[[file:./img/map_ros.png]]
+#+LATEX: \pagebreak
 
 ** On the host Linux ("bare-metal")
 Since an Ubuntu distribution is installed on the board, the installation of ROS2
@@ -1095,11 +1133,22 @@ the ping-pong topic communication from a different shell[fn:17]:
 
 
 * micro-ROS agent
+The micro-ROS agent on the ROS2 side is the last piece of the puzzle needed to
+allow our DDS environment to use RPMsg as a mean of communication, as visible
+on the schematic of the figure [[fig:map_agent]] below.
 
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: The agent (red border) allows for a micro-ROS
+#+CAPTION: instance to communicate with a ROS2 system.
+#+CAPTION: It is deployed on the Linux side, as a ROS2 node.
+#+NAME: fig:map_agent
+[[file:./img/map_agent.png]]
 
 
 #+LATEX: \pagebreak
 #+LATEX: \appendix
+
+
 * DTO patch
 This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch][system.patch]]
 #+LATEX: \inputminted[linenos, frame=single]{diff}{./src/system.patch}

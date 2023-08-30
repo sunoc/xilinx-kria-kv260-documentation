@@ -6,9 +6,8 @@
 #+filetags: :export:
 #+subtitle: \begin{CJK}{UTF8}{min}南山大学\end{CJK}
 #+author: Vincent Conus
-#+date: 2023-8-24
-
-
+#+email: vincent.conus@protonmail.com
+#+date: 2023-8-30
 
 * Headers and LaTeX settings for export                               :noexport:
 A large amount of headers and parameters are needed in order
@@ -21,7 +20,7 @@ and stays hidden in a :noexport: section in this report.
 #+DESCRIPTION: A report presenting how to use and set Xilinx's Kria board
 #+LANGUAGE: English
 
-#+OPTIONS: toc:t date:t title:t
+#+OPTIONS: toc:t date:t title:t email:t
 
 #+LATEX_CLASS: article
 #+LATEX_CLASS_OPTIONS:[10pt]
@@ -99,6 +98,7 @@ capable to run a RTOS.
 * Boot firmware
 The goal for the Linux side of the deployment is to
 have the latest LTS version of Ubuntu up and running.
+
 In order to be able to boot such a newer version of Linux, the
 boot image of the board must first be updated.
 
@@ -150,8 +150,8 @@ The board can be re-booted afterwards.
 
 * Installing Linux
 Withe the boot firmware being up-to-date, we can proceed to install a Linux distribution
-on our Kria board. The step needed to archive a full installation of Ubuntu 22.04
-will be presented in this section.
+on our Kria board. The step needed to archive a full installation of Ubuntu LTS 22.04
+will be presented in this section[fn:7].
 
 ** Preparing and booting a Ubuntu 22.04 media
 An [[https://ubuntu.com/download/amd-xilinx][official Ubuntu image]] exists and is
@@ -510,7 +510,7 @@ In order to have the libraries and configurations in the IDE ready to be used fo
 we need to obtain some configuration files that are specific for the Kria KV260,
 as presented in the [[https://xilinx.github.io/kria-apps-docs/kv260/2022.1/build/html/docs/build_vitis_platform.html?highlight=xsa][Xilinx guide for Kria and Vitis]].
 
-A Xilix [[https://github.com/Xilinx/kria-vitis-platforms][dedicated repository]] is available for us to download  such configurations,
+A Xilinx [[https://github.com/Xilinx/kria-vitis-platforms][dedicated repository]] is available for us to download  such configurations,
 but they required to be built.
 
 As for the dependencies, ~Cmake~, ~tcl~ and ~idn~ will become needed in order to build the firmware.
@@ -604,10 +604,6 @@ work for the example we are running:
 
 
 #+LATEX: \pagebreak
-* Building a real-time firmware
-
-** Setting up Vitis IDE
-
 * RPMsg ~echo_test~ software
 In order to test the deployment of the firmware on the R5F side, and in particular
 to test the RPMsg function, we need some program on the Linux side of the Kria
@@ -634,8 +630,20 @@ Once this is done, it it possible to run the test program from the Kria board's 
 by running the ~echo_test~ command.
 
 * Building micro-ROS as a static library
+In this section, the goal is to build the micro-ROS library in order to be
+able to integrate it's functions into our Cortex R5F firmware.
 
+All of this should be done via cross-compiling on a host machine, however
+it is most common in the guides about micro-ROS to build the firmwares and libraries within a Docker,
+so we can have access of the ROS environment without installing it permanently.
 
+One can simply run this command to summon a ROS2 Docker[fn:8] with the wanted version,
+but first we also need to check the cross-compilation tools.
+
+We are downloading the latest ~arm-none-eabi~ gcc compiler directly from the ARM website.
+
+The cross-compilation tool can then be extracted, set as our ~toolchain~ variable,
+then passed as a parameter when creating the Docker container:
 #+BEGIN_SRC sh
   pushd /home/$USER/Downloads
   wget https://developer.arm.com/-/media/Files/downloads/\
@@ -654,13 +662,63 @@ by running the ~echo_test~ command.
   -v /dev:/dev \
   -v $toolchain:/armr5-toolchain \
   --privileged ros:iron
+#+END_SRC
 
+Now the container named "ros build" was created, it is possible to "enter" it, and having access
+to the tools in it by running the following command that will open a ~bash~ shell in said container:
+#+BEGIN_SRC sh
   docker exec -it ros_build bash
 #+END_SRC
 
-* Adding micro-ROS to a firmware project
+Now we are in the ROS2 container, we can build the micro-ROS firmware as presented
+in the [[https://micro.ros.org/docs/tutorials/advanced/create\_custom\_static\_library][dedicated micro-ROS guide]]:
+#+BEGIN_SRC sh
+  sudo apt update 
+  sudo apt-get -y install python3-pip \
+       wget \
+       nano
 
-* Loading a real-time firmware 
+  . /opt/ros/\$ROS_DISTRO/setup.bash
+
+  mkdir microros_ws
+  cd microros_ws
+  git clone -b \$ROS_DISTRO \
+      https://github.com/micro-ROS/micro_ros_setup.git \
+      src/micro_ros_setup
+
+  sudo rosdep fix-permissions &&\
+      rosdep update &&\
+      rosdep install --from-paths src --ignore-src -y
+
+  colcon build
+  . ./install/local_setup.bash
+
+  ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
+#+END_SRC
+
+From that point, we will need some extra configuration files for our Cortex R5F.
+
+Both configuration files[fn:9] will be downloaded from my repository;
+we also are going to copy the cross-compiler into the microros workspace,
+then we can build the library with the following ros2 command:
+#+BEGIN_SRC sh
+  wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
+  documentation/-/raw/main/src/custom_r5f_toolchain.cmake
+
+  wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
+  documentation/-/raw/main/src/custom_r5f_colcon.meta
+
+  cp -r /armr5-toolchain/ \$(pwd)/firmware/toolchain && \
+  export PATH=\$PATH:\$(pwd)/firmware/toolchain/bin
+
+  ros2 run micro_ros_setup build_firmware.sh \
+  \$(pwd)/custom_r5f_toolchain.cmake \$(pwd)/\
+  custom_r5f_colcon.meta
+#+END_SRC
+
+* Adding micro-ROS to the real-time firmware
+
+* Loading the firmware 
 
 * Running a ROS2 node
 
@@ -732,6 +790,16 @@ This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kri
 #+END_SRC
 
 * Footnotes
+
+[fn:9] Both files are also visible in the appendixes [[Custom toolchain CMake settings]]
+and [[Custom Colcon meta settings]] the end of this report.} 
+
+[fn:8] If Docker is not set up on your machine, you can follow the guide on [[https://docs.docker.com/engine/install/ubuntu/][the official website]].
+When you can successfully run the "hello-world" container, you are good to go.
+
+[fn:7] The same procedure should work for other versions of Ubuntu, as long as they
+support the Kria board, but for this report and project, only the LTS 22.04 was tested
+(as of 2023-08-30).
 
 [fn:6] The name of the installer binary file might change as a new version of the IDE
 is release every year or so.

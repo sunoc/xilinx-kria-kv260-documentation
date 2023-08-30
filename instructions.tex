@@ -707,90 +707,90 @@
 % \end{tcolorbox}
 
 
-% ------------------------------------------------------------------------------
-\section{Including the micro-ROS static library in a project}
-Now we have a Vitis demonstration project available and the \verb|libmicroros| static library
-available, we can combine both by including this library into our Kria project.
+% % ------------------------------------------------------------------------------
+% \section{Including the micro-ROS static library in a project}
+% Now we have a Vitis demonstration project available and the \verb|libmicroros| static library
+% available, we can combine both by including this library into our Kria project.
 
-On the host machine running the IDE, we can download the static library and the include files from the build Docker.
-Here, we assume your Vitis IDE workspace sits in you home directory.
-\begin{tcolorbox}
-\begin{minted}{sh}
-mkdir /home/$USER/workspace/microros_lib
+% On the host machine running the IDE, we can download the static library and the include files from the build Docker.
+% Here, we assume your Vitis IDE workspace sits in you home directory.
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% mkdir /home/$USER/workspace/microros_lib
 
-docker cp ros_build:/microros_ws/firmware/build/\
-  libmicroros.a /home/$USER/workspace/microros_lib/
+% docker cp ros_build:/microros_ws/firmware/build/\
+%   libmicroros.a /home/$USER/workspace/microros_lib/
 
-docker cp ros_build:/microros_ws/firmware/build/include \
-/home/$USER/workspace/microros_lib/
-\end{minted}
-\end{tcolorbox}
+% docker cp ros_build:/microros_ws/firmware/build/include \
+% /home/$USER/workspace/microros_lib/
+% \end{minted}
+% \end{tcolorbox}
 
-Many parameters are available to be set up in the IDE for the compilation toolchain, but here is
-a setup that worked to have the IDE to recognize the include files and to be able to use them
-for compiling the firmware.
+% Many parameters are available to be set up in the IDE for the compilation toolchain, but here is
+% a setup that worked to have the IDE to recognize the include files and to be able to use them
+% for compiling the firmware.
 
-%\label{sec:including-micro-ros}
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.6\textwidth]{./img/vitis_new/include}
-  \caption{Firstly, in the ``C/C++ Build'' settings of your firmware project, under the ``Settings'' menu, you should find the gcc compiler
-    ``Directories''. In here you should add the ``include'' directory of your library. Be careful however, if your include files are in
-  a second layer of directory (as it is the case for libmicroros) you will need to include each sub-directory individually.}
-%  \label{fig:include1}
-\end{figure}
+% %\label{sec:including-micro-ros}
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.6\textwidth]{./img/vitis_new/include}
+%   \caption{Firstly, in the ``C/C++ Build'' settings of your firmware project, under the ``Settings'' menu, you should find the gcc compiler
+%     ``Directories''. In here you should add the ``include'' directory of your library. Be careful however, if your include files are in
+%   a second layer of directory (as it is the case for libmicroros) you will need to include each sub-directory individually.}
+% %  \label{fig:include1}
+% \end{figure}
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.6\textwidth]{./img/vitis_new/include2}
-  \caption{Secondly, in the gcc linkers ``Libraries'', you can add the top level directory of your library. In our case, it is the
-    directory that contains both the ``include'' directory added earlier, and also the ``libmicroros.a'' file.}
-%  \label{fig:include2}
-\end{figure}
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.6\textwidth]{./img/vitis_new/include2}
+%   \caption{Secondly, in the gcc linkers ``Libraries'', you can add the top level directory of your library. In our case, it is the
+%     directory that contains both the ``include'' directory added earlier, and also the ``libmicroros.a'' file.}
+% %  \label{fig:include2}
+% \end{figure}
 
-With both of these setup in your project, you should be able to include the following micro-ROS libraries into your project:
-\begin{tcolorbox}
-\begin{minted}{c}
-#include <rcl/rcl.h>
-#include <rcl/error_handling.h>
-#include <rclc/rclc.h>
-#include <rclc/executor.h>
-\end{minted}
-\end{tcolorbox}
+% With both of these setup in your project, you should be able to include the following micro-ROS libraries into your project:
+% \begin{tcolorbox}
+% \begin{minted}{c}
+% #include <rcl/rcl.h>
+% #include <rcl/error_handling.h>
+% #include <rclc/rclc.h>
+% #include <rclc/executor.h>
+% \end{minted}
+% \end{tcolorbox}
 
-The details for the inclusions and the use-case of the library will depend on the implementation of the firmware
-itself.
-But in general, as the firmware is successfully built and an \verb|.elf| file is available, one can upload said
-firmware to the Kria board (or any remote server accessible through SSH, for that matter) with the following
-command.
-Note that in that case, we are retrieving the binary for a project named ``rpmsg\_pingpong\_microros\_lib''.
-You own path will vary depending on how your project was named in the first place.
-\begin{tcolorbox}
-\begin{minted}{sh}
-scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
-  Debug/rpmsg_pingpong_microros_lib.elf  kria:/home/ubuntu/
-\end{minted}
-\end{tcolorbox}
+% The details for the inclusions and the use-case of the library will depend on the implementation of the firmware
+% itself.
+% But in general, as the firmware is successfully built and an \verb|.elf| file is available, one can upload said
+% firmware to the Kria board (or any remote server accessible through SSH, for that matter) with the following
+% command.
+% Note that in that case, we are retrieving the binary for a project named ``rpmsg\_pingpong\_microros\_lib''.
+% You own path will vary depending on how your project was named in the first place.
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
+%   Debug/rpmsg_pingpong_microros_lib.elf  kria:/home/ubuntu/
+% \end{minted}
+% \end{tcolorbox}
 
-\subsection{WIP:: Stream Buffer system enabled}
-This is a subpart in the general configuration in the project, but this
-point in particular created so much pain I needed to include in early in this
-guide for not to forget about it and how to do it.
+% \subsection{WIP:: Stream Buffer system enabled}
+% This is a subpart in the general configuration in the project, but this
+% point in particular created so much pain I needed to include in early in this
+% guide for not to forget about it and how to do it.
 
-Indeed, two settings need to be enabled in order to be able to call
-functions such as \verb|xMessageBufferCreate|:
+% Indeed, two settings need to be enabled in order to be able to call
+% functions such as \verb|xMessageBufferCreate|:
 
-\begin{itemize}
-\item \textbf{Enableling Stream Buffer in the Vitis IDE setting}: as show in the
-  figure below, it is needed to tick the settings in the 
-\item \textbf{Enableling callbacks for the buffers}: this is a setting that must
-  be changed in your header file in the project. If you need to use a callback
-  function such as \verb|xMessageBufferCreateWithCallback|, you must include
-  \verb|#define configUSE_SB_COMPLETED_CALLBACK 1| on the top of you header
-  file, before the \verb|#include "FreeRTOS.h"| to override the setting.
-\end{itemize}
+% \begin{itemize}
+% \item \textbf{Enableling Stream Buffer in the Vitis IDE setting}: as show in the
+%   figure below, it is needed to tick the settings in the 
+% \item \textbf{Enableling callbacks for the buffers}: this is a setting that must
+%   be changed in your header file in the project. If you need to use a callback
+%   function such as \verb|xMessageBufferCreateWithCallback|, you must include
+%   \verb|#define configUSE_SB_COMPLETED_CALLBACK 1| on the top of you header
+%   file, before the \verb|#include "FreeRTOS.h"| to override the setting.
+% \end{itemize}
 
-TODO ADD THE FIGURE FOR THE STREAM BUFFER SETTING HERE !!!!
+% TODO ADD THE FIGURE FOR THE STREAM BUFFER SETTING HERE !!!!
 
 % ------------------------------------------------------------------------------
 \section{Using micro-ROS in a Kria demonstration project}

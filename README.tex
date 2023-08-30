@@ -1,4 +1,4 @@
-% Created 2023-08-30 水 10:45
+% Created 2023-08-30 水 11:48
 % Intended LaTeX compiler: pdflatex
 \documentclass[10pt]{article}
 \usepackage[utf8]{inputenc}
@@ -55,7 +55,7 @@
 \tableofcontents
 \pagebreak
 \section{Introduction \& motivation}
-\label{sec:org0d25999}
+\label{sec:org2ccffec}
 This guide will present how to setup and use Xilinx's KRIA board, in particular
 for running ROS on a host Ubuntu system, as well as for deploying
 micro-ROS as a firmware on the MCU part of this board's chip.
@@ -66,7 +66,7 @@ a Linux distribution, as well as another ARM core, real-time enabled,
 capable to run a RTOS.
 
 \section{Boot firmware}
-\label{sec:orgbe69aa4}
+\label{sec:org1923aa2}
 The goal for the Linux side of the deployment is to
 have the latest LTS version of Ubuntu up and running.
 
@@ -77,7 +77,7 @@ The procedure is available in \href{https://docs.xilinx.com/r/en-US/ug1089-kv260
 but I will present it step by step here.
 
 \subsection{Getting the new firmware}
-\label{sec:org3342733}
+\label{sec:org6dbbca6}
 A 2022 version of the board firmware is required in order to run the latest
 version of Ubuntu properly.
 
@@ -91,7 +91,7 @@ wget https://www.xilinx.com/member/forms/download/\
 
 
 \subsection{Reaching the board recovery tool}
-\label{sec:org9274fb4}
+\label{sec:org6e74c54}
 Now the firmware \texttt{.bin} image is available, it is possible to update it using the
 boards recovery tool. Here are the steps that must be taken in order to reach
 this tool and update the board:
@@ -106,24 +106,24 @@ range, except the specific \texttt{192.168.0.111}, which will be used by the
 board.
 \item Using a web browser on your host machine, access
 \texttt{http://192.168.0.111}. Thou shall now see the interface, as visible on
-the figure \ref{fig:org3a2ee8d} below.
+the figure \ref{fig:org09a6f31} below.
 \end{itemize}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1\textwidth]{img/recovery.png}
-\caption{\label{fig:org3a2ee8d}The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
+\caption{\label{fig:org09a6f31}The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
 \end{figure}
 
 \subsection{Updating the boot firmware}
-\label{sec:org71435c8}
+\label{sec:org6cdf1a1}
 From this "recovery" page, it is possible to upload the \texttt{.bin} file downloaded previously onto
 the board using the "Recover Image" section at the bottom right of the page.
 
 The board can be re-booted afterwards.
 
 \section{Installing Linux}
-\label{sec:org372310a}
+\label{sec:org5b6a858}
 Withe the boot firmware being up-to-date, we can proceed to install a Linux distribution
 on our Kria board. The step needed to archive a full installation of Ubuntu LTS 22.04
 will be presented in this section\footnote{The same procedure should work for other versions of Ubuntu, as long as they
@@ -131,7 +131,7 @@ support the Kria board, but for this report and project, only the LTS 22.04 was 
 (as of 2023-08-30).}.
 
 \subsection{Preparing and booting a Ubuntu 22.04 media}
-\label{sec:orgf5022ba}
+\label{sec:org26bca8f}
 An \href{https://ubuntu.com/download/amd-xilinx}{official Ubuntu image} exists and is
 provided by Xilinx, allowing the OS installation to be quick and
 straightforward.
@@ -175,12 +175,12 @@ host# ssh ubuntu@192.168.4.11
 \end{minted}
 
 \subsection{Network and admin setups}
-\label{sec:org1505ba8}
+\label{sec:orgddfd99a}
 This section presents a variety of extra convenience configurations
 that can be used when setting-up the Kria board.
 
 \subsubsection{Proxy and DNS}
-\label{sec:orgfe9e3e3}
+\label{sec:org4d8ab5d}
 An issue that can occur when connecting the board to the internet is the
 conflicting situation with the university proxy.
 Indeed, as the network at Nanzan University requires to go through a proxy,
@@ -216,7 +216,7 @@ echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc \
 Eventually the board can be rebooted in order for the setup to get applied cleanly.
 
 \subsubsection{\texttt{root} password}
-\label{sec:orgb8ed835}
+\label{sec:orga215a0e}
 \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 \textbf{WARNING}: Depending on your use-case, the setup presented in this
 subsection can be a critical security breach as it remove the need for a root
@@ -252,7 +252,7 @@ sudo reboot now
 
 
 \subsubsection{Static IP address}
-\label{sec:org06e68d7}
+\label{sec:org317c291}
 A static IP can be set by writing the following
 configuration into your \texttt{netplan} configuration file.
 
@@ -288,7 +288,7 @@ sudo netplan apply
 \end{minted}
 
 \subsubsection{Purging \texttt{snap}}
-\label{sec:org527dc5a}
+\label{sec:orge63a99c}
 As the desktop-specific software are not used at all in the case
 of our project, there are some packages that can be purges in order for the
 system to become more lightweight.
@@ -325,7 +325,7 @@ systemctl list-units | grep snapd
 \end{minted}
 
 \subsubsection{Other unused heavy packages}
-\label{sec:org3a064ba}
+\label{sec:orgf729296}
 Some other pieces of software can safely be removed since the desktop is
 not to be used:
 
@@ -339,7 +339,7 @@ sudo reboot now
 \end{minted}
 
 \section{Enabling \texttt{remoteproc}}
-\label{sec:org59de9bd}
+\label{sec:orgf3a4e4c}
 One of the advantage of this Kria board, as cited previously, is the presence of
 multiple types of core (APU, MCU, FPGA) on the same chip.
 
@@ -361,7 +361,7 @@ will present how to setup and use as an example firmware that utilizes the
 and communicate with the real-time firmware using the RPMsg system.
 
 \subsection{Device-Tree Overlay patching}
-\label{sec:org220404f}
+\label{sec:org72280e0}
 The communication system and interaction from the Linux side towards the real-time capable core
 is not enabled by default within the Ubuntu image provided by Xilinx.
 
@@ -377,7 +377,7 @@ sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
 
 Then, a custom-made patch file can be downloaded and applied.
 This file is available at the URL visible in the command below
-but also in this report appendix \ref{sec:orgc249152}.
+but also in this report appendix \ref{sec:org58d9bea}.
 
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
 wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/\
@@ -419,7 +419,7 @@ If it is the case, it means that the patch was successful and  that the remote p
 ready to be used!
 
 \section{Building an example RPMsg real-time firmware}
-\label{sec:org95de5f8}
+\label{sec:orgde0751f}
 As visible on the official \href{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1837006921/OpenAMP+Base+Hardware+Configurations\\\#Build-RPU-firmware}{Xilinx documentation about building a demo firmware},
 this section will present the required steps for building a new firmware for the R5F
 core of our Kria board.
@@ -428,7 +428,7 @@ The goal here is to have a demonstration firmware running,
 able to use the RPMsg system to communicate with the Linux APU.
 
 \subsection{Setting up the IDE}
-\label{sec:org4283e26}
+\label{sec:org1a446c3}
 Xilinx's Vitis IDE is the recommended tool used to build software for the Xilinx boards.
 It also include the tools to interact with the FPGA part, making the whole
 software very large (around 200GB of disk usage).
@@ -450,7 +450,7 @@ This guide will present a setup procedure that supposedly works for all distribu
 LTS from Ubuntu. For other Linux distributions or operating system, please refer to the official documentation.
 
 \subsubsection{Dependencies \& installation}
-\label{sec:org800d93b}
+\label{sec:org2087c8c}
 Some packages are required to be installed on the host system
 in order for the installation process to happen successfully:
 
@@ -490,7 +490,7 @@ so your schedule should be arranged accordingly.
 \end{tcolorbox}
 
 \subsubsection{Platform configuration file generation}
-\label{sec:orgf30e12a}
+\label{sec:org7047be8}
 In order to have the libraries and configurations in the IDE ready to be used for our board,
 we need to obtain some configuration files that are specific for the Kria KV260,
 as presented in the \href{https://xilinx.github.io/kria-apps-docs/kv260/2022.1/build/html/docs/build\_vitis\_platform.html?highlight=xsa}{Xilinx guide for Kria and Vitis}.
@@ -523,7 +523,7 @@ make platform PLATFORM=k26_base_starter_kit
 
 
 \subsection{Setting up and building a new project for the Kria board}
-\label{sec:org144d245}
+\label{sec:org4f72320}
 With the platform configuration files available, we can now use the IDE to generate a
 new project for our board. The whole process will be described with screen captures and
 captions.
@@ -531,43 +531,43 @@ captions.
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.5\textwidth]{./img/vitis_new/project1.png}
-\caption{\label{fig:orgd42161d}We are starting with creating a "New Application Project" You should be greeted with this wizard window. Next.}
+\caption{\label{fig:org0fac310}We are starting with creating a "New Application Project" You should be greeted with this wizard window. Next.}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.5\textwidth]{./img/vitis_new/project2.png}
-\caption{\label{fig:org7d91a95}For the platform, we need to get our build Kria configuration. In the "Create a new platform" tab, click the "Browse\ldots{}" button.}
+\caption{\label{fig:org1521d54}For the platform, we need to get our build Kria configuration. In the "Create a new platform" tab, click the "Browse\ldots{}" button.}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{./img/vitis_new/project3.png}
-\caption{\label{fig:orgbd222ab}In the file explorer, we should navigate in the "k26" directory, where the configuration file was build. From here we are looking for a ".xsa" file, located in a "hw" directory, as visible.}
+\caption{\label{fig:org9b58f10}In the file explorer, we should navigate in the "k26" directory, where the configuration file was build. From here we are looking for a ".xsa" file, located in a "hw" directory, as visible.}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{./img/vitis_new/project4.png}
-\caption{\label{fig:orga3b6aa8}With the configuration file loaded, we can now select a name for our platform, but most importantly, we have to select the "psu Cortex5 0" core as a target. The other, Cortex 53 is the APU running Linux.}
+\caption{\label{fig:org2304b72}With the configuration file loaded, we can now select a name for our platform, but most importantly, we have to select the "psu Cortex5 0" core as a target. The other, Cortex 53 is the APU running Linux.}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{./img/vitis_new/project5.png}
-\caption{\label{fig:orgcca90e2}In this next window, we can give a name to our firmware project. It is also critical here to select the core we want to build for. Once again, we want to use the "psu cortex5 0".}
+\caption{\label{fig:org39411dc}In this next window, we can give a name to our firmware project. It is also critical here to select the core we want to build for. Once again, we want to use the "psu cortex5 0".}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{./img/vitis_new/project6.png}
-\caption{\label{fig:orgebec082}Here, we want to select "freertos10 xilinx" as our Operating System. The rest can remain unchanged.}
+\caption{\label{fig:org1d58c4e}Here, we want to select "freertos10 xilinx" as our Operating System. The rest can remain unchanged.}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{./img/vitis_new/project7.png}
-\caption{\label{fig:org0aeb9fc}Finally, we can select the demonstration template we are going to use; here we go with "OpenAMP echo-test" since we want to have some simple try of the RPMsg system. Finish.}
+\caption{\label{fig:orgeb00837}Finally, we can select the demonstration template we are going to use; here we go with "OpenAMP echo-test" since we want to have some simple try of the RPMsg system. Finish.}
 \end{figure}
 
 \pagebreak
@@ -582,11 +582,34 @@ psu_r5_tcm_ram_0_S_AXI_BASEADDR    0x00000000
 psu_r5_tcm_ram_1_S_AXI_BASEADDR    0x00020000	
 \end{minted}
 
+\subsection{Enabling the Stream Buffer system}
+\label{sec:orgb190356}
+This is a subpart in the general configuration in the project related to some specific
+functions for FreeRTOS threads messaging system, however, this point in particular
+created so much pain I needed to include in early in this guide for not to forget about it
+and keeping a clear track on how to enable this setting.
+
+Indeed, two settings need to be enabled in order to be able to call
+functions such as \texttt{xMessageBufferCreate}, useful when working with tasks
+in FreeRTOS, as visible in the figure \ref{fig:org75dacfa} below:
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.8\textwidth]{./img/streambuffer.png}
+\caption{\label{fig:org75dacfa}Enableling Stream Buffer in the Vitis IDE setting: this is a setting that can be found in the "platform.spr" element of your project (the platform, not the firmware project itself). From that file, you can access the settings with the button "Modify BSP Settings", and then as visible, in the tab \texttt{freertos10\_xilinx}, it is needed to toggle here the \texttt{stream\_buffer} setting in the \texttt{kernel\_features}, from the default "false" to "true".}
+\end{figure}
+
+\pagebreak
+The second setting is useful in the case when a buffer callback function is used, such as\\[0pt]
+\texttt{xMessageBufferCreateWithCallback}.
+In that case, you must include \texttt{\#define configUSE\_SB\_COMPLETED\_CALLBACK 1} on the top of you header
+file (in our project, this will happen in the \texttt{microros.h} header file),
+before the \texttt{\#include "FreeRTOS.h"} in order to override the setting from this include.
 
 
 \pagebreak
 \section{RPMsg \texttt{echo\_test} software}
-\label{sec:orgb05d700}
+\label{sec:orgea2642f}
 In order to test the deployment of the firmware on the R5F side, and in particular
 to test the RPMsg function, we need some program on the Linux side of the Kria
 board to "talk" with the real-time side.
@@ -612,7 +635,7 @@ Once this is done, it it possible to run the test program from the Kria board's 
 by running the \texttt{echo\_test} command.
 
 \section{Building micro-ROS as a static library}
-\label{sec:orga132a8f}
+\label{sec:org130c90b}
 In this section, the goal is to build the micro-ROS library in order to be
 able to integrate it's functions into our Cortex R5F firmware.
 
@@ -648,7 +671,7 @@ docker run -d --name ros_build -it --net=host \
 --privileged ros:iron
 \end{minted}
 
-Now the container named "ros build" was created, it is possible to "enter" it, and having access
+Now the container named \texttt{ros\_build} was created, it is possible to "enter" it, and having access
 to the tools in it by running the following command that will open a \texttt{bash} shell in said container:
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
 docker exec -it ros_build bash
@@ -682,8 +705,8 @@ ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
 
 From that point, we will need some extra configuration files for our Cortex R5F.
 
-Both configuration files\footnote{Both files are also visible in the appendixes \ref{sec:orgffeb516}
-and \ref{sec:org7ca4aa4} the end of this report.\}} will be downloaded from my repository;
+Both configuration files\footnote{Both files are also visible in the appendixes \ref{sec:org507a5e7}
+and \ref{sec:org60ea4ae} the end of this report.\}} will be downloaded from my repository;
 we also are going to copy the cross-compiler into the microros workspace,
 then we can build the library with the following ros2 command:
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
@@ -701,55 +724,111 @@ ros2 run micro_ros_setup build_firmware.sh \
 custom_r5f_colcon.meta
 \end{minted}
 
+\section{Including micro-ROS to the real-time firmware}
+\label{sec:org1ae19f1}
+Now we have a Vitis demonstration project available and the \texttt{libmicroros} static library
+available, we can combine both by including this library into our Kria project.
 
-\section{Adding micro-ROS to the real-time firmware}
-\label{sec:org75fca6c}
+On the host machine running the IDE, we can download the static library
+and the include files from the Docker builder.
+Here, we assume your Vitis IDE workspace sits in you home directory, at \texttt{\textasciitilde{}/workspace},
+and that the Docker container is named \texttt{ros\_build}:
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
+mkdir /home/$USER/workspace/microros_lib
+
+docker cp ros_build:/microros_ws/firmware/build/\
+       libmicroros.a /home/$USER/workspace/microros_lib/
+
+docker cp ros_build:/microros_ws/firmware/build/include \
+       /home/$USER/workspace/microros_lib/
+\end{minted}
+
+Many parameters are available to be set up in the IDE for the compilation toolchain, but
+the figures \ref{fig:org47eab75} and \ref{fig:org47122ba} below will show you a setup that worked to have the IDE
+to recognize the include files and to be able to use them for compiling the firmware.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.6\textwidth]{./img/vitis_new/include.png}
+\caption{\label{fig:org47eab75}Firstly, in the "C/C++ Build" settings of your firmware project, under the "Settings" menu, you should find the gcc compiler "Directories". In here you should add the "include" directory of your library. Be careful however, if your include files are in a second layer of directory (as it is the case for libmicroros) you will need to include each sub-directory individually, as visible in this figure.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.6\textwidth]{./img/vitis_new/include2.png}
+\caption{\label{fig:org47122ba}Secondly, in the gcc linkers "Libraries", you can add the top level directory of your library. In our case, it is the directory that contains both the "include" directory added earlier, and also the "libmicroros.a" file.}
+\end{figure}
+
+\pagebreak
+With both of these setup in your project and as a minimal test to see if the setup was made correctly,
+you should be able to include the following micro-ROS libraries into your project:
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{c}
+#include <rcl/rcl.h>
+#include <rcl/error_handling.h>
+#include <rclc/rclc.h>
+#include <rclc/executor.h>
+\end{minted}
+
+The details for the inclusions and the use-case of the library will depend on the implementation
+of the firmware itself.
+
+But in general, as the firmware is successfully built and an \texttt{.elf} file is available and can be uploaded as a
+firmware to the Kria board (or any remote server accessible through \texttt{SSH}, for that matter) with the following
+command\footnote{Note that in that case, we are retrieving the binary for a project
+named \texttt{rpmsg\_pingpong\_microros\_lib}.
+You own path will vary depending on how your project was named in the first place.
+Obviously, the \texttt{SSH} connection parameters will also be specific to your case.
+The \texttt{ubuntu@192.168.1.10} set here are merely an example.}:
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
+scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
+    Debug/rpmsg_pingpong_microros_lib.elf  ubuntu@192.168.1.10:/home/ubuntu/
+\end{minted}
 
 \section{Loading the firmware}
-\label{sec:org93cbd7a}
+\label{sec:org20f5c38}
 
 \section{Running a ROS2 node}
-\label{sec:orgaebb96f}
+\label{sec:org14215dc}
 
 \subsection{On the host Linux}
-\label{sec:org9a58c0e}
+\label{sec:orgb28ebe6}
 
 \subsection{In a container}
-\label{sec:org455f17f}
+\label{sec:org9abb462}
 
 \section{micro-ROS agent}
-\label{sec:orge9b72c8}
+\label{sec:orgd920c4c}
 
 \pagebreak
 \appendix
 \section{DTO patch}
-\label{sec:orgc249152}
+\label{sec:org58d9bea}
 This file is available in this repository: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch}{system.patch}
 \inputminted[linenos, frame=single]{diff}{./src/system.patch}
 
 \pagebreak
 \section{Custom toolchain CMake settings}
-\label{sec:orgffeb516}
+\label{sec:org507a5e7}
 This file is available in this repository: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom\_r5f\_toolchain.cmake}{custom r5f toolchain.cmake}
 \inputminted[linenos, frame=single]{cmake}{./src/custom_r5f_toolchain.cmake}
 
 \pagebreak
 \section{Custom Colcon meta settings}
-\label{sec:org7ca4aa4}
+\label{sec:org60ea4ae}
 This file is available in this repository: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom\_r5f\_colcon.meta}{custom r5f colcon.meta}
 \inputminted[linenos, frame=single]{yaml}{./src/custom_r5f_colcon.meta}
 
 \pagebreak
 \section{Firmware time functions}
-\label{sec:orga018ee5}
+\label{sec:org68f9917}
 
 \subsection{main}
-\label{sec:org7131409}
+\label{sec:org9013f3f}
 This file is available in this repository: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/clock.c}{clock.c}
 \inputminted[linenos, frame=single]{c}{./src/clock.c}
 
 \subsection{header file}
-\label{sec:orga10d592}
+\label{sec:org5b9a944}
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{c}
 /**< Microseconds per second. */
 #define MICROSECONDS_PER_SECOND    ( 1000000LL )  
@@ -762,15 +841,15 @@ This file is available in this repository: \href{https://gitlab.com/sunoc/xilinx
 
 \pagebreak
 \section{Firmware memory allocation functions}
-\label{sec:orgd5dd064}
+\label{sec:org5d9f344}
 
 \subsection{main}
-\label{sec:org96229db}
+\label{sec:orgc5eb678}
 This file is available in this repository: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/allocators.c}{allocators.c}
 \inputminted[linenos, frame=single]{c}{./src/allocators.c}
 
 \subsection{header file}
-\label{sec:orge1dad63}
+\label{sec:org9dccc9a}
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{c}
 #ifndef _ALLOCATORS_H_
 #define _ALLOCATORS_H_

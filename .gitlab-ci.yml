@@ -8,6 +8,7 @@ report:
     - apt-get install -y python3 python3-pip
     - pip install pygments
     - pdflatex --shell-escape README.tex
+    - pdflatex --shell-escape README.tex
 
   artifacts:
     paths:

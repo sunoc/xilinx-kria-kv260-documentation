@@ -1139,6 +1139,9 @@ allow our DDS environment to use RPMsg as a mean of communication, as visible
 on the schematic of the figure [[fig:map_agent]] below.
 In particular, it will be useful to modify this agent in order to archive
 the full RPMsg communication for ROS2[fn:19].
+An [[https://micro.ros.org/docs/tutorials/advanced/create_custom_transports/][official documentation]] exists, but it gives little to no detail
+on how to deploy such modified, custom transport setup.
+This part of the guide will focus on it.
 
 #+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: The agent (red border) allows for a micro-ROS

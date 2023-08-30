@@ -882,6 +882,40 @@ and further modifications are expected when the system will be more thoroughly t
 
 #+LATEX: \pagebreak
 * Loading the firmware
+Having a version of our ~.elf~ firmware (with or without the included
+micro-ROS library) built and loaded onto our Kria's Linux, we want to load and run it
+on the Cortex micro-controller side.
+
+As a reminder, the firmware can be loaded from the host machine IDE workspace
+to the Kria board through ~SSH~ using the following command:
+#+BEGIN_SRC sh
+  scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
+      Debug/rpmsg_pingpong_microros_lib.elf  ubuntu@192.168.1.10:/home/ubuntu/
+#+END_SRC
+
+The following instructions will show how to use this binary file, and
+in particular how to upload and start the firmware on the R5F real time core
+from the Linux user-space[fn:11], to test a basic RPMsg setup[fn:12]:
+#+BEGIN_SRC sh
+  sudo -s
+  mv image_echo_test /lib/firmware
+  echo image_echo_test  > /sys/class/remoteproc/\
+       remoteproc0/firmware
+  echo start > /sys/class/remoteproc/remoteproc0/state
+  echo_test
+  echo stop > /sys/class/remoteproc/remoteproc0/state
+#+END_SRC
+
+In this setup you need to be careful for the name of the ~.elf~ binary to be exactly used
+in the first ~mv~ and ~echo~ command. In this example, the binary would be named
+~image_echo_test.elf~, and moved from ~$HOME~ to ~/lib/firmware~.
+
+The debug of the firmware itself is done by reading the "printf" visible from the serial
+return of the board (typically a ~/dev/ttyUSB1~), but two things are to be noted:
++ If the ~echo start~ command fails, either the previous firmware run was not stopped,
+  or the new binary itself is impossible to run.
++ In general, if the ~echo_test~ runs, it means that everything is okay and that
+  the RPMsg system worked successfully.
 
 * Running a ROS2 node
 
@@ -959,6 +993,14 @@ directly at the ~libmicroros_kv260~ repository: [[https://gitlab.com/sunoc/libmi
 #+END_SRC
 
 * Footnotes
+
+[fn:12] It is also important to note that the ~echo_test~ part is specific for the
+RPMsg base demonstration firmware. It is not to be used for other firmware.
+The instruction to build and use this particular program on the Kria Linux
+is visible in the section [[RPMsg ~echo_test~ software]]. 
+
+[fn:11] In this sequence, we are entering a root shell with ~sudo -s~, but this can
+also be archived by putting the commands in a script to be executed with ~sudo~. 
 
 [fn:10] Note that in that case, we are retrieving the binary for a project
 named ~rpmsg_pingpong_microros_lib~.

@@ -843,62 +843,58 @@
 % DDS system from the micro-ROS library to be using the communication channel we
 % want it to.
 
+% % -------------------------------------------------------------------------------
+% %\pagebreak
+% \section{Loading a new firmware from Linux}
+% %\label{sec:loading-new-firmware}
+% Having now the latest version of our firmware (with or without the included
+% micro-ROS library) loaded onto our Kria's Linux, we want to load and run it
+% on the Cortex micro-controller side.
 
+% Here are the instructions used to upload and start the firmware
+% on the R5F from the Linux.
+% In this sequence, we are entering a root shell with \verb|sudo -s|, but this can
+% also be archived by putting the commands in a script to be executed with \verb|sudo|.
+% It is also important to note that the \verb|echo_test| part is specific for the
+% RPMsg base demonstration firmware. It is not to be used for other firmware
+% (including the one involving micro-ROS).
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% sudo -s
+% cp image_echo_test /lib/firmware
+% echo image_echo_test  > /sys/class/remoteproc/\
+% remoteproc0/firmware
+% echo start > /sys/class/remoteproc/remoteproc0/state
+% echo_test
+% echo stop > /sys/class/remoteproc/remoteproc0/state
+% \end{minted}
+% \end{tcolorbox}
 
+% This was put in a script that can be run as a admin.
+% It is to be noted that as for the current testing, it is more convenient
+% to run the firmware and to stop it manually afterward.
+% Thus the script would look like this:
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+% #!/bin/sh
+% rm -f /lib/firmware/firmware.elf
+% mv firmware.elf /lib/firmware
+% echo firmware.elf > /sys/class/remoteproc/remoteproc0/firmware
+% echo start > /sys/class/remoteproc/remoteproc0/state
+% \end{minted}
+% \end{tcolorbox}
 
-
-% -------------------------------------------------------------------------------
-%\pagebreak
-\section{Loading a new firmware from Linux}
-%\label{sec:loading-new-firmware}
-Having now the latest version of our firmware (with or without the included
-micro-ROS library) loaded onto our Kria's Linux, we want to load and run it
-on the Cortex micro-controller side.
-
-Here are the instructions used to upload and start the firmware
-on the R5F from the Linux.
-In this sequence, we are entering a root shell with \verb|sudo -s|, but this can
-also be archived by putting the commands in a script to be executed with \verb|sudo|.
-It is also important to note that the \verb|echo_test| part is specific for the
-RPMsg base demonstration firmware. It is not to be used for other firmware
-(including the one involving micro-ROS).
-\begin{tcolorbox}
-\begin{minted}{sh}
-sudo -s
-cp image_echo_test /lib/firmware
-echo image_echo_test  > /sys/class/remoteproc/\
-remoteproc0/firmware
-echo start > /sys/class/remoteproc/remoteproc0/state
-echo_test
-echo stop > /sys/class/remoteproc/remoteproc0/state
-\end{minted}
-\end{tcolorbox}
-
-This was put in a script that can be run as a admin.
-It is to be noted that as for the current testing, it is more convenient
-to run the firmware and to stop it manually afterward.
-Thus the script would look like this:
-\begin{tcolorbox}
-\begin{minted}{sh}
-#!/bin/sh
-rm -f /lib/firmware/firmware.elf
-mv firmware.elf /lib/firmware
-echo firmware.elf > /sys/class/remoteproc/remoteproc0/firmware
-echo start > /sys/class/remoteproc/remoteproc0/state
-\end{minted}
-\end{tcolorbox}
-
-And the sequence to run to start, test, stop and restart the script would be
-as follow:
-\begin{tcolorbox}
-\begin{minted}{sh}
-  sudo -s
-  bash firmware_script.sh
-  echo_test
-  echo stop > /sys/class/remoteproc/remoteproc0/state
-  echo start > /sys/class/remoteproc/remoteproc0/state
-\end{minted}
-\end{tcolorbox}
+% And the sequence to run to start, test, stop and restart the script would be
+% as follow:
+% \begin{tcolorbox}
+% \begin{minted}{sh}
+%   sudo -s
+%   bash firmware_script.sh
+%   echo_test
+%   echo stop > /sys/class/remoteproc/remoteproc0/state
+%   echo start > /sys/class/remoteproc/remoteproc0/state
+% \end{minted}
+% \end{tcolorbox}
 
 
 % ------------------------------------------------------------------------------

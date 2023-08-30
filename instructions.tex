@@ -1115,33 +1115,33 @@
 
 \url{https://github.com/eProsima/Micro-XRCE-DDS-Agent/blob/develop/src/cpp/transport/custom/CustomAgent.cpp}
 
-\verb|/microros_ws/build/micro_ros_agent/agent/src/xrceagent/src/cpp/transport/custom/CustomAgent.cpp|
+% \verb|/microros_ws/build/micro_ros_agent/agent/src/xrceagent/src/cpp/transport/custom/CustomAgent.cpp|
 
 
-Running the XRCE-DDS container from eProsima directly:
-\begin{tcolorbox}
-  \begin{minted}{sh}
-    git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
-    cd Micro-XRCE-DDS-Agent
-    docker build -t xrce-dds-agent .
-    docker run -it --privileged -v /dev:/dev xrce-dds-agent serial \
-    --dev /dev/ttyACM0
-  \end{minted}
-\end{tcolorbox}
+% Running the XRCE-DDS container from eProsima directly:
+% \begin{tcolorbox}
+%   \begin{minted}{sh}
+%     git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+%     cd Micro-XRCE-DDS-Agent
+%     docker build -t xrce-dds-agent .
+%     docker run -it --privileged -v /dev:/dev xrce-dds-agent serial \
+%     --dev /dev/ttyACM0
+%   \end{minted}
+% \end{tcolorbox}
 
 
-Code from Honda sensei for building an eprosia agent
-\begin{tcolorbox}
-  \begin{minted}{sh}
-    git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
-    cd Micro-XRCE-DDS-Agent
-    mkdir build && cd build
-    cmake -DTHIRDPARTY=ON ..
-    make
-    sudo make install
-    sudo ldconfig /usr/local/lib/
-  \end{minted}
-\end{tcolorbox}
+% Code from Honda sensei for building an eprosia agent
+% \begin{tcolorbox}
+%   \begin{minted}{sh}
+%     git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+%     cd Micro-XRCE-DDS-Agent
+%     mkdir build && cd build
+%     cmake -DTHIRDPARTY=ON ..
+%     make
+%     sudo make install
+%     sudo ldconfig /usr/local/lib/
+%   \end{minted}
+% \end{tcolorbox}
 
 
 % % ==============================================================================

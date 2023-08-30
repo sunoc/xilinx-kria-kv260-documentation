@@ -867,7 +867,7 @@ As for now, the current version of the allocator function can be seen in the
 appendix [[Firmware memory allocation functions]], but the current setup is not
 completely "clean", some further formatting, test and modification will be needed.
 
-** Custom transport layer
+** Custom transport layer                                    :WORK_IN_PROGRESS:
 This part is the key translation layer that needs to happen in order for the
 DDS system from the micro-ROS library to be using the communication channel we
 want it to.
@@ -1130,9 +1130,10 @@ the ping-pong topic communication from a different shell[fn:17]:
   # Subscribe to micro-ROS ping topic
   ros2 topic echo /microROS/ping
 #+END_SRC
+#+LATEX: \pagebreak
 
 
-* micro-ROS agent
+* micro-ROS agent                                             :WORK_IN_PROGRESS:
 The micro-ROS agent on the ROS2 side is the last piece of the puzzle needed to
 allow our DDS environment to use RPMsg as a mean of communication, as visible
 on the schematic of the figure [[fig:map_agent]] below.
@@ -1156,6 +1157,14 @@ allow such modification[fn:18].
 In order to avoid that, one can get and run a ROS2 node design by eProsima,
 that can be deployed on it's own (without other ROS2 application and nodes)
 and eventually modified.
+
+
+
+
+#+BEGIN_SRC sh
+  sudo nano /microros_ws/build/micro_ros_agent/agent/src/xrceagent/src/cpp/transport/custom/CustomAgent.cpp
+#+END_SRC
+The same file is available online as a reference, on [[https://github.com/eProsima/Micro-XRCE-DDS-Agent/blob/develop/src/cpp/transport/custom/CustomAgent.cpp][eProsima XRCE-DDS-Agent GitHub repository]].
 
 
 #+BEGIN_SRC sh

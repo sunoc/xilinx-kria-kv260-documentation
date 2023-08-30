@@ -601,6 +601,11 @@ work for the example we are running:
   psu_r5_tcm_ram_1_S_AXI_BASEADDR    0x00020000	
 #+END_SRC
 
+Once your example project is built and you have a ~.elf~ file available, you can
+jump directly to the [[Loading the firmware]] section to see how to deploy and use your firmware.
+
+The section in between will present setup specifically needed for micro-ROS.
+
 ** Enabling the Stream Buffer system
 This is a subpart in the general configuration in the project related to some specific
 functions for FreeRTOS threads messaging system, however, this point in particular
@@ -612,7 +617,7 @@ functions such as ~xMessageBufferCreate~, useful when working with tasks
 in FreeRTOS, as visible in the figure [[fig:streambuffer]] below:
 
 #+ATTR_LATEX: :width .8\textwidth
-#+CAPTION: Enableling Stream Buffer in the Vitis IDE setting: this is a setting that can
+#+CAPTION: Enabling Stream Buffer in the Vitis IDE setting: this is a setting that can
 #+CAPTION: be found in the "platform.spr" element of your project (the platform, not the firmware
 #+CAPTION: project itself). From that file, you can access the settings with the button "Modify BSP Settings",
 #+CAPTION: and then as visible, in the tab ~freertos10_xilinx~, it is needed to toggle
@@ -802,7 +807,81 @@ command[fn:10]:
       Debug/rpmsg_pingpong_microros_lib.elf  ubuntu@192.168.1.10:/home/ubuntu/
 #+END_SRC
 
-* Loading the firmware 
+* micro-ROS adaptation for the firmware
+Beyond the inclusion of the library itself, actually using the micro-ROS system
+within an external project require more than just importing the needed
+functions.
+
+Indeed, if you would be just adding the various function for sending messages to
+the general ROS2 network, you would face issues with four key aspects.
+These are presented in the following dedicated sub-sections.
+
+** Time functions
+As micro-ROS can be used on a variety of board, it does not understand by itself
+what time functions are meant to be used.
+
+In that regard, some API-style function are being
+used in the library and it is then needed for the person using a new board
+to implement these function inner working using the board own time-related
+function calls.
+
+In particular for this part, the ~clock_gettime~ function is key, and could
+simply be implemented with some FreeRTOS time functions.
+
+The end result for these implementation are visible in the appendix [[Firmware time functions]],
+and can be reused as-if for the Kria board setups.
+
+** Memory allocators
+Similarly to the time function, it is required to re-implement some form of memory allocating
+functions in order for the library to be able to work with such functions in a formalized way.
+
+As for now, the current version of the allocator function can be seen in the
+appendix [[Firmware memory allocation functions]], but the current setup is not
+completely "clean", some further formatting, test and modification will be needed.
+
+** Custom transport layer
+This part is the key translation layer that needs to happen in order for the
+DDS system from the micro-ROS library to be using the communication channel we
+want it to.
+
+A problem that we had to figure out lives in the fact that the operation of micro-ROS DDS
+and the board's RPMsg communication system does not operate in the same fashion.
+
+The former expects to have four functions ("open", "read", "write" and "close") that can
+be called and used by the main system, while the latter relies on FreeRTOS callback
+system, waiting on the service interrupt routine to be trigger by an incoming message.
+
+This situation meant that we count not simple translate the communication layers from one
+to another: a non-blocking polling and buffer system needed to be put into places.
+The proposed solution that was implemented and that is currently being tested
+is showed and detailed in the figure [[fig:rpmsg_fw_tasks]] below.
+
+As this part of the firmware was developed and tested on it's own, the overall
+implementation within the "real" ping-pong application is still a work in progress,
+and further modifications are expected when the system will be more thoroughly tested.
+
+#+ATTR_LATEX: :width 1\textwidth
+#+CAPTION: Two tasks are being run concurrently in order to manage the
+#+CAPTION: communication situation, with binary semaphore-based lock-unlock system.\\
+#+CAPTION: The role of the micro-ROS task (right) is to make the four functions
+#+CAPTION: ("open", "read", "write" and "close")  available and running the actual
+#+CAPTION: software function. In this example, polling the read function and writing
+#+CAPTION: back when something is receive (ping-pong function).
+#+CAPTION: The use of the ~rpmsg_send()~ function is done directly from the micro-ROS task,
+#+CAPTION: bypassing the RPMsg task in this situation.\\
+#+CAPTION: In the libmicroros implementation currently being developed, the micro-ROS task
+#+CAPTION: holds all the DDS and micro-ROS system, including the mentioned allocators function.\\
+#+CAPTION: The RPMsg task (center) is used to firstly set the RPMsg communication
+#+CAPTION: with the Linux side (left), then it stays locked until the ISR (interrupt service routine)
+#+CAPTION: is triggered by an incoming message. The message is then passed to the micro-ROS
+#+CAPTION: task using a buffer.\\
+#+CAPTION: When a shutdown signal is received from the Linux, both functions will gracefully close
+#+CAPTION: and are getting killed.
+#+NAME: fig:rpmsg_fw_tasks
+[[file:./img/rpmsg_fw_tasks.png]]
+
+#+LATEX: \pagebreak
+* Loading the firmware
 
 * Running a ROS2 node
 
@@ -833,6 +912,9 @@ This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kri
 
 ** main
 This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/clock.c][clock.c]]
+but a potentially more up-to-date version is visible
+directly at the ~libmicroros_kv260~ repository: [[https://gitlab.com/sunoc/libmicroros_kv260/-/blob/4867e762f66af7b4647232eb4c0a31106db66e13/src/clock.c][clock.c]]
+
 #+LATEX: \inputminted[linenos, frame=single]{c}{./src/clock.c}
 
 ** header file
@@ -851,6 +933,9 @@ This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kri
 
 ** main
 This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/allocators.c][allocators.c]]
+but a potentially more up-to-date version is visible
+directly at the ~libmicroros_kv260~ repository: [[https://gitlab.com/sunoc/libmicroros_kv260/-/blob/4867e762f66af7b4647232eb4c0a31106db66e13/src/allocators.c][allocators.c]]
+
 #+LATEX: \inputminted[linenos, frame=single]{c}{./src/allocators.c}
 
 ** header file

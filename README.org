@@ -1143,7 +1143,11 @@ on the schematic of the figure [[fig:map_agent]] below.
 #+CAPTION: It is deployed on the Linux side, as a ROS2 node.
 #+NAME: fig:map_agent
 [[file:./img/map_agent.png]]
+#+LATEX: \pagebreak
 
+** Building and running eProsima agent
+
+** Creating a custom transport agent
 
 #+LATEX: \pagebreak
 #+LATEX: \appendix

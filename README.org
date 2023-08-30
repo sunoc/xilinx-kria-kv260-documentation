@@ -1136,6 +1136,8 @@ the ping-pong topic communication from a different shell[fn:17]:
 The micro-ROS agent on the ROS2 side is the last piece of the puzzle needed to
 allow our DDS environment to use RPMsg as a mean of communication, as visible
 on the schematic of the figure [[fig:map_agent]] below.
+In particular, it will be useful to modify this agent in order to archive
+the full RPMsg communication for ROS2[fn:19].
 
 #+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: The agent (red border) allows for a micro-ROS
@@ -1145,7 +1147,39 @@ on the schematic of the figure [[fig:map_agent]] below.
 [[file:./img/map_agent.png]]
 #+LATEX: \pagebreak
 
-** Building and running eProsima agent
+** Building a eProsima agent bare-metal
+A key aspect to understand about modifying the agent (as
+this will be needed later on to support our new communication system),
+is that the default system and instruction provided by micro-ROS does not
+allow such modification[fn:18].
+
+In order to avoid that, one can get and run a ROS2 node design by eProsima,
+that can be deployed on it's own (without other ROS2 application and nodes)
+and eventually modified.
+
+
+#+BEGIN_SRC sh
+  git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+  cd Micro-XRCE-DDS-Agent
+  mkdir build && cd build
+  cmake -DTHIRDPARTY=ON ..
+  make
+  sudo make install
+  sudo ldconfig /usr/local/lib/
+#+END_SRC
+
+
+** Building a eProsima agent in a Docker
+
+
+#+BEGIN_SRC sh
+  git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+  cd Micro-XRCE-DDS-Agent
+  docker build -t xrce-dds-agent .
+  docker run -it --privileged -v /dev:/dev xrce-dds-agent serial \
+         --dev /dev/ttyACM0
+#+END_SRC
+
 
 ** Creating a custom transport agent
 
@@ -1220,6 +1254,11 @@ directly at the ~libmicroros_kv260~ repository: [[https://gitlab.com/sunoc/libmi
 
 
 * Footnotes
+
+[fn:19] This will be done with ROS2 agents "custom transport"  system,
+which has little documentation. Some [[https://github.com/micro-ROS/micro_ros_setup/issues/383][discussions]] about it exist though.
+
+[fn:18] This information was eventually found on a discussion in a [[https://github.com/micro-ROS/micro_ros_setup/issues/591][GitHub Issue thread]]. 
 
 [fn:17] You need to be careful to have you shell in the "correct" space: these command need to be run inside
 the container in which the previous setup were install, not on the host running the container system.

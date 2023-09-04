@@ -1169,16 +1169,44 @@ The same file is available online as a reference, on [[https://github.com/eProsi
 
 #+BEGIN_SRC sh
   git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
-  cd Micro-XRCE-DDS-Agent
+  cd Micro-XRCE-DDS-Agent/
+
+  rm -rf examples/
+  git clone https://gitlab.com/sunoc/rpmsg-micro-ros-agent.git ./examples/custom_agent
+
   mkdir build && cd build
-  cmake -DTHIRDPARTY=ON ..
+  cmake -DUAGENT_BUILD_USAGE_EXAMPLES=ON ..
   make
-  sudo make install
-  sudo ldconfig /usr/local/lib/
+#+END_SRC
+
+The custom agent is then available to run from the ~./src/examples/custom_agent/CustomXRCEAgent~.
+
+All the diff when the custom agent system was added:
+https://github.com/eProsima/Micro-XRCE-DDS-Agent/pull/205/files
+
+For rebuilding the custom agent with a simple ~make clean && make all~ will
+conveniently only rebuild the part that was modify.
+Which means that once all the libraries have been compiled once,
+the subsequent re-compilation of the agent itself can be done quickly !
+
+Running the custom agent executable can be executed as is as the transport we want to use is already
+built in. ~kmod~ package is needed though.
+#+BEGIN_SRC sh
+  sudo apt-get update
+  sudo apt-get install kmod
+    ./examples/custom_agent/CustomXRCEAgent
 #+END_SRC
 
 
-** Building a eProsima agent in a Docker
+** Building the XRCE-DDS agent in a Docker
+The same command presented above for running a custom agent "bare-metal" can be
+run inside a Docker.
+
+#+BEGIN_SRC sh
+  docker run -d --name XRCE_DDS_Agent -it --net=host -v \
+         /dev:/dev --privileged ros:iron
+  docker exec -it XRCE_DDS_Agent bash
+#+END_SRC
 
 
 #+BEGIN_SRC sh

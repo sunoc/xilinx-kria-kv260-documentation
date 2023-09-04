@@ -1108,7 +1108,6 @@ and as presented in the section [[On the host Linux ("bare-metal")]] above:
 
   # Build micro-ROS tools and source them
   colcon build
-  source install/local_setup.bash
 
   # Download micro-ROS-Agent packages
   source install/local_setup.bash
@@ -1116,7 +1115,6 @@ and as presented in the section [[On the host Linux ("bare-metal")]] above:
 
   # Build step
   ros2 run micro_ros_setup build_agent.sh
-  source install/local_setup.bash
 
   # Run a micro-ROS agent
   ros2 run micro_ros_agent micro_ros_agent serial \

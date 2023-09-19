@@ -36,33 +36,33 @@ diff -u --label /ssh\:kria\:/home/ubuntu/system_original.dts --label /ssh\:kria\
 +           #address-cells = <2>;
 +           #size-cells = <2>;
 +           ranges;
-+           rpu0vdev0vring0: rpu0vdev0vring0@3ed40000 {
++           rpu0vdev0vring0: rpu0vdev0vring0@3ed90000 {
 +               no-map;
-+               reg = <0x0 0x3ed40000 0x0 0x4000>;
++               reg = <0x0 0x3ed90000 0x0 0x4000>;
 +           };
-+           rpu0vdev0vring1: rpu0vdev0vring1@3ed44000 {
++           rpu0vdev0vring1: rpu0vdev0vring1@3ed94000 {
 +               no-map;
-+               reg = <0x0 0x3ed44000 0x0 0x4000>;
++               reg = <0x0 0x3ed94000 0x0 0x4000>;
 +           };
-+           rpu0vdev0buffer: rpu0vdev0buffer@3ed48000 {
++           rpu0vdev0buffer: rpu0vdev0buffer@3ed98000 {
 +               no-map;
-+               reg = <0x0 0x3ed48000 0x0 0x100000>;
++               reg = <0x0 0x3ed98000 0x0 0x4000>;
 +           };
 +           rproc_0_reserved: rproc_0_reserved@3ed00000 {
 +               no-map;
-+               reg = <0x0 0x3ed00000 0x0 0x40000>;
++               reg = <0x0 0x3ed00000 0x0 0x90000>;
 +           };
 +       };
 +       tcm_0a: tcm_0a@ffe00000 {
 +           no-map;
-+           reg = <0x0 0xffe00000 0x0 0x10000>;
++           reg = <0x0 0xffe00000 0x0 0x15000>;
 +           status = "okay";
 +           compatible = "mmio-sram";
 +           power-domain = <&zynqmp_firmware 15>;
 +       };
 +       tcm_0b: tcm_0b@ffe20000 {
 +           no-map;
-+           reg = <0x0 0xffe20000 0x0 0x10000>;
++           reg = <0x0 0xffe20000 0x0 0x15000>;
 +           status = "okay";
 +           compatible = "mmio-sram";
 +           power-domain = <&zynqmp_firmware 16>;
@@ -71,7 +71,7 @@ diff -u --label /ssh\:kria\:/home/ubuntu/system_original.dts --label /ssh\:kria\
 +           compatible = "xlnx,zynqmp-r5-remoteproc";
 +           xlnx,cluster-mode = <1>;
 +           ranges;
-+           reg = <0x0 0xFF9A0000 0x0 0x10000>;
++           reg = <0x0 0xFF9A0000 0x0 0x15000>;
 +           #address-cells = <0x2>;
 +           #size-cells = <0x2>;
 +           r5f_0 {

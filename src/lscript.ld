@@ -17,7 +17,7 @@ _UNDEF_STACK_SIZE = DEFINED(_UNDEF_STACK_SIZE) ? _UNDEF_STACK_SIZE : 1024;
 /* TCM size is set to 2*0x20000 for R5 in lockstep mode */
 MEMORY
 {
-   psu_ddr_S_AXI_BASEADDR : ORIGIN = 0x3ED00000, LENGTH = 0x00140000
+   psu_ddr_S_AXI_BASEADDR : ORIGIN = 0x3EC00000, LENGTH = 0x00140000
    psu_ocm_ram_1_S_AXI_BASEADDR : ORIGIN = 0xFFFF0000, LENGTH = 0x00010000
    psu_r5_tcm_ram_0_S_AXI_BASEADDR : ORIGIN = 0x00000000, LENGTH = 0x00015000
    psu_r5_tcm_ram_1_S_AXI_BASEADDR : ORIGIN = 0x00020000, LENGTH = 0x00015000
@@ -240,7 +240,7 @@ SECTIONS
    __tbss_end = .;
 } > psu_r5_tcm_ram_1_S_AXI_BASEADDR
 
-.bss 0x3ed50100 : {
+.bss 0x3ec50100 : {
    . = ALIGN(4);
    __bss_start__ = .;
    *(.bss)
@@ -295,7 +295,7 @@ _SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );
    __undef_stack = .;
 } > psu_r5_tcm_ram_0_S_AXI_BASEADDR
 
-.resource_table 0x3ed50000 : {
+.resource_table 0x3ec50000 : {
 	. = ALIGN(4);
 	*(.resource_table)
 } > psu_ddr_S_AXI_BASEADDR

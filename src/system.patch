@@ -71,7 +71,7 @@ diff -u --label /ssh\:kria\:/home/ubuntu/system_original.dts --label /ssh\:kria\
 +           compatible = "xlnx,zynqmp-r5-remoteproc";
 +           xlnx,cluster-mode = <1>;
 +           ranges;
-+           reg = <0x0 0xFF9A0000 0x0 0x10000>;
++           reg = <0x0 0xFF9A0000 0x0 0x15000>;
 +           #address-cells = <0x2>;
 +           #size-cells = <0x2>;
 +           r5f_0 {

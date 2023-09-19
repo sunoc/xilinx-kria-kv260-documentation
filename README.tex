@@ -1,4 +1,4 @@
-% Created 2023-09-19 火 11:47
+% Created 2023-09-19 火 15:51
 % Intended LaTeX compiler: pdflatex
 \documentclass[10pt]{article}
 \usepackage[utf8]{inputenc}
@@ -55,7 +55,7 @@
 \tableofcontents
 \pagebreak
 \section{Introduction \& motivation}
-\label{sec:org960306d}
+\label{sec:org84046b7}
 This guide will present how to setup and use Xilinx's KRIA board, in particular
 for running ROS on a host Ubuntu system, as well as for deploying
 micro-ROS as a firmware on the MCU part of this board's chip.
@@ -63,17 +63,17 @@ micro-ROS as a firmware on the MCU part of this board's chip.
 The use of this device in particular is interesting because of the presence
 of a CPU comprising both a general purpose ARM core, capable of running
 a Linux distribution, as well as another ARM core, real-time enabled,
-capable to run a RTOS. The figure \ref{fig:org82f5c1f} below shows a schematic
+capable to run a RTOS. The figure \ref{fig:orgc6d7e7c} below shows a schematic
 view of the overall system we are trying to archive.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{./img/map.png}
-\caption{\label{fig:org82f5c1f}The Linux and ROS2 environment (orange) will communicate with the real-time, FreeRTOS and micro-ROS side (blue) using RPMsg (shared memory).}
+\caption{\label{fig:orgc6d7e7c}The Linux and ROS2 environment (orange) will communicate with the real-time, FreeRTOS and micro-ROS side (blue) using RPMsg (shared memory).}
 \end{figure}
 
 \section{Boot firmware}
-\label{sec:orgb192d8a}
+\label{sec:orgfab0bc7}
 The goal for the Linux side of the deployment is to
 have the latest LTS version of Ubuntu up and running.
 
@@ -84,7 +84,7 @@ The procedure is available in \href{https://docs.xilinx.com/r/en-US/ug1089-kv260
 but I will present it step by step here.
 
 \subsection{Getting the new firmware}
-\label{sec:org9fba733}
+\label{sec:org75a32cf}
 A 2022 version of the board firmware is required in order to run the latest
 version of Ubuntu properly.
 
@@ -98,7 +98,7 @@ wget https://www.xilinx.com/member/forms/download/\
 
 
 \subsection{Reaching the board recovery tool}
-\label{sec:org48d6294}
+\label{sec:org404b7e6}
 Now the firmware \texttt{.bin} image is available, it is possible to update it using the
 boards recovery tool. Here are the steps that must be taken in order to reach
 this tool and update the board:
@@ -116,18 +116,18 @@ The netmark and gateway should also be respectively set to
 \item Hold the firmware update button (FWUEN) when powering back the board.
 \item Using a web browser on your host machine, access
 \texttt{http://192.168.0.111}. Thou shall now see the interface, as visible on
-the figure \ref{fig:orgc7f87d0} below. If the page struggle to appear,
+the figure \ref{fig:orgcd772cd} below. If the page struggle to appear,
 \end{itemize}
 you should try to un-plug and re-plug the Ethernet cable.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1\textwidth]{img/recovery.png}
-\caption{\label{fig:orgc7f87d0}The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
+\caption{\label{fig:orgcd772cd}The recovery tool for the board, access from Firefox. We can see board information at the center, and the tools to upload the firmware at the bottom of the page.}
 \end{figure}
 
 \subsection{Updating the boot firmware}
-\label{sec:orgc2c66d8}
+\label{sec:org1da19bf}
 From this "recovery" page, it is possible to upload the \texttt{.bin} file downloaded previously onto
 the board using the "Recover Image" section at the bottom right of the page.
 
@@ -135,22 +135,22 @@ The board can be re-booted afterwards.
 \pagebreak
 
 \section{Installing Linux}
-\label{sec:orgc3a362f}
+\label{sec:org124fdad}
 Withe the boot firmware being up-to-date, we can proceed to install a Linux distribution
 on our Kria board. The step needed to archive a full installation of Ubuntu LTS 22.04
 will be presented in this section\footnote{The same procedure should work for other versions of Ubuntu, as long as they
 support the Kria board, but for this report and project, only the LTS 22.04 was tested
-(as of 2023-08-30).}. The figure \ref{fig:orga5df0c4} below shows
+(as of 2023-08-30).}. The figure \ref{fig:org28f64b5} below shows
 where this operating system sits in the general system we are implementing.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{./img/map_linux.png}
-\caption{\label{fig:orga5df0c4}The Linux operating system (red border)runs on the APU (application, general purpose) side of the Kria board CPU. It is the base layer for the ROS2 system.}
+\caption{\label{fig:org28f64b5}The Linux operating system (red border)runs on the APU (application, general purpose) side of the Kria board CPU. It is the base layer for the ROS2 system.}
 \end{figure}
 
 \subsection{Preparing and booting a Ubuntu 22.04 media}
-\label{sec:orgf9fda62}
+\label{sec:orgb915bc5}
 An \href{https://ubuntu.com/download/amd-xilinx}{official Ubuntu image} exists and is
 provided by Xilinx, allowing the OS installation to be quick and
 straightforward.
@@ -169,7 +169,17 @@ thy data !!
 \uline{If you are unsure of what to do, seek assistance !}
 \end{tcolorbox}
 
-With the image available on thy machine and a SD card visible as \texttt{/dev/sda}
+With the image available on thy machine and a SD card visible as \texttt{/dev/sda} device\footnote{Again, it is \uline{critical} to be 100$\backslash$% certain that you are working with
+the correct device!}
+one can simply run the \texttt{dd} command as follow to write the image to a previously formatted drive (here \texttt{/dev/sda}):
+
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
+unxz iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img.xz
+sudo dd if=iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img \
+     of=/dev/sda status=progress bs=8M && sync
+\end{minted}
+
+
 Once the SD card is flashed and put back in the board, the micro-USB cable can be
 connected from the PC to the board. It is then possible to
 connect to the board in serial with an appropriate tool, for example \texttt{picocom},
@@ -194,12 +204,12 @@ host# ssh ubuntu@192.168.4.11
 \end{minted}
 
 \subsection{Network and admin setups}
-\label{sec:org1037db4}
+\label{sec:orga8f6e0f}
 This section presents a variety of extra convenience configurations
 that can be used when setting-up the Kria board.
 
 \subsubsection{Proxy and DNS}
-\label{sec:orgbc4ab4b}
+\label{sec:orgb8d3d37}
 An issue that can occur when connecting the board to the internet is the
 conflicting situation with the university proxy.
 Indeed, as the network at Nanzan University requires to go through a proxy,
@@ -235,7 +245,7 @@ echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc \
 Eventually the board can be rebooted in order for the setup to get applied cleanly.
 
 \subsubsection{\texttt{root} password}
-\label{sec:org8e4db0c}
+\label{sec:org62b83d2}
 \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 \textbf{WARNING}: Depending on your use-case, the setup presented in this
 subsection can be a critical security breach as it remove the need for a root
@@ -271,7 +281,7 @@ sudo reboot now
 
 
 \subsubsection{Static IP address}
-\label{sec:org58e2cd9}
+\label{sec:orgc79a949}
 A static IP can be set by writing the following
 configuration into your \texttt{netplan} configuration file.
 
@@ -307,7 +317,7 @@ sudo netplan apply
 \end{minted}
 
 \subsubsection{Purging \texttt{snap}}
-\label{sec:org79d4220}
+\label{sec:orgd487cc7}
 As the desktop-specific software are not used at all in the case
 of our project, there are some packages that can be purges in order for the
 system to become more lightweight.
@@ -345,7 +355,7 @@ systemctl list-units | grep snapd
 \end{minted}
 
 \subsubsection{Other unused heavy packages}
-\label{sec:orge27861c}
+\label{sec:orgdd4b216}
 Some other pieces of software can safely be removed since the desktop is
 not to be used:
 
@@ -359,7 +369,7 @@ sudo reboot now
 \end{minted}
 
 \section{Enabling \texttt{remoteproc}}
-\label{sec:orgbe890d9}
+\label{sec:orgee9b957}
 One of the advantage of this Kria board, as cited previously, is the presence of
 multiple types of core (APU, MCU, FPGA) on the same chip.
 
@@ -381,7 +391,7 @@ will present how to setup and use as an example firmware that utilizes the
 and communicate with the real-time firmware using the RPMsg system.
 
 \subsection{Device-Tree Overlay patching}
-\label{sec:orgf3b228f}
+\label{sec:orgc6bb7e0}
 The communication system and interaction from the Linux side towards the real-time capable core
 is not enabled by default within the Ubuntu image provided by Xilinx.
 
@@ -397,7 +407,7 @@ sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
 
 Then, a custom-made patch file can be downloaded and applied.
 This file is available at the URL visible in the command below
-but also in this report appendix \ref{sec:org5413d93}.
+but also in this report appendix \ref{sec:org3406614}.
 
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
 wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/\
@@ -440,24 +450,24 @@ ready to be used!
 \pagebreak
 
 \section{Building an example RPMsg real-time firmware}
-\label{sec:orge6a73a7}
+\label{sec:org72212d1}
 As visible on the official \href{https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1837006921/OpenAMP+Base+Hardware+Configurations\\\#Build-RPU-firmware}{Xilinx documentation about building a demo firmware},
 this section will present the required steps for building a new firmware for the R5F
 core of our Kria board.
 
 The goal here is to have a demonstration firmware running,
 able to use the RPMsg system to communicate with the Linux APU.
-The figure \ref{fig:orgbaaf112} below shows where the real-time firmware
+The figure \ref{fig:org67a19ab} below shows where the real-time firmware
 is positioned in the global project.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{./img/map_microros.png}
-\caption{\label{fig:orgbaaf112}The FreeRTOS firmware and it's application (red border) are running on the real-time capable side of the Kria CPU. A micro-ROS application is shown here, but any real-time firmware will be deployed in the same way.}
+\caption{\label{fig:org67a19ab}The FreeRTOS firmware and it's application (red border) are running on the real-time capable side of the Kria CPU. A micro-ROS application is shown here, but any real-time firmware will be deployed in the same way.}
 \end{figure}
 
 \subsection{Setting up the IDE}
-\label{sec:org4b03ff3}
+\label{sec:orgd10f6ea}
 Xilinx's Vitis IDE is the recommended tool used to build software for the Xilinx boards.
 It also include the tools to interact with the FPGA part, making the whole
 software very large (around 200GB of disk usage).
@@ -479,7 +489,7 @@ This guide will present a setup procedure that supposedly works for all distribu
 LTS from Ubuntu. For other Linux distributions or operating system, please refer to the official documentation.
 
 \subsubsection{Dependencies \& installation}
-\label{sec:org6ed11c9}
+\label{sec:orga56be12}
 Some packages are required to be installed on the host system
 in order for the installation process to happen successfully:
 
@@ -519,7 +529,7 @@ so your schedule should be arranged accordingly.
 \end{tcolorbox}
 
 \subsubsection{Platform configuration file generation}
-\label{sec:orga79d72a}
+\label{sec:org9632fb8}
 In order to have the libraries and configurations in the IDE ready to be used for our board,
 we need to obtain some configuration files that are specific for the Kria KV260,
 as presented in the \href{https://xilinx.github.io/kria-apps-docs/kv260/2022.1/build/html/docs/build\_vitis\_platform.html?highlight=xsa}{Xilinx guide for Kria and Vitis}.
@@ -551,7 +561,7 @@ make platform PLATFORM=k26_base_starter_kit
 \end{minted}
 
 \subsection{Setting up and building a new project for the Kria board}
-\label{sec:org0aed28a}
+\label{sec:orgf9db271}
 With the platform configuration files available, we can now use the IDE to generate a
 new project for our board. The whole process will be described with screen captures and
 captions.
@@ -559,65 +569,65 @@ captions.
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.5\textwidth]{./img/vitis_new/project1.png}
-\caption{\label{fig:org709392b}We are starting with creating a "New Application Project" You should be greeted with this wizard window. Next.}
+\caption{\label{fig:orgb9eda0a}We are starting with creating a "New Application Project" You should be greeted with this wizard window. Next.}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.5\textwidth]{./img/vitis_new/project2.png}
-\caption{\label{fig:orgfd16bed}For the platform, we need to get our build Kria configuration. In the "Create a new platform" tab, click the "Browse\ldots{}" button.}
+\caption{\label{fig:org580aea3}For the platform, we need to get our build Kria configuration. In the "Create a new platform" tab, click the "Browse\ldots{}" button.}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{./img/vitis_new/project3.png}
-\caption{\label{fig:orge7de2bc}In the file explorer, we should navigate in the "k26" directory, where the configuration file was build. From here we are looking for a ".xsa" file, located in a "hw" directory, as visible.}
+\caption{\label{fig:org341d4d4}In the file explorer, we should navigate in the "k26" directory, where the configuration file was build. From here we are looking for a ".xsa" file, located in a "hw" directory, as visible.}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{./img/vitis_new/project4.png}
-\caption{\label{fig:org40dff11}With the configuration file loaded, we can now select a name for our platform, but most importantly, we have to select the "psu Cortex5 0" core as a target. The other, Cortex 53 is the APU running Linux.}
+\caption{\label{fig:org18131f8}With the configuration file loaded, we can now select a name for our platform, but most importantly, we have to select the "psu Cortex5 0" core as a target. The other, Cortex 53 is the APU running Linux.}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{./img/vitis_new/project5.png}
-\caption{\label{fig:orgcdbb6c4}In this next window, we can give a name to our firmware project. It is also critical here to select the core we want to build for. Once again, we want to use the "psu cortex5 0".}
+\caption{\label{fig:org5d8cfe4}In this next window, we can give a name to our firmware project. It is also critical here to select the core we want to build for. Once again, we want to use the "psu cortex5 0".}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{./img/vitis_new/project6.png}
-\caption{\label{fig:org8a0c64a}Here, we want to select "freertos10 xilinx" as our Operating System. The rest can remain unchanged.}
+\caption{\label{fig:orgd9cb1d0}Here, we want to select "freertos10 xilinx" as our Operating System. The rest can remain unchanged.}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{./img/vitis_new/project7.png}
-\caption{\label{fig:org34fe582}Finally, we can select the demonstration template we are going to use; here we go with "OpenAMP echo-test" since we want to have some simple try of the RPMsg system. Finish.}
+\caption{\label{fig:org5afde50}Finally, we can select the demonstration template we are going to use; here we go with "OpenAMP echo-test" since we want to have some simple try of the RPMsg system. Finish.}
 \end{figure}
 
 \pagebreak
 In the Xilinx documentation, it is made mention of the addresses setting that should be checked in the \texttt{script.ld} file.
-The values in the figure \ref{fig:orgaac5c6d} below look different from what could be set in the DTO for the Linux side, but they appear to
+The values in the figure \ref{fig:orge6181e0} below look different from what could be set in the DTO for the Linux side, but they appear to
 work for the example we are running, including the new DTO patch without overlapping memory:
 
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{./img/vitis_new/project_mem.png}
-\caption{\label{fig:orgaac5c6d}lscript.ld memory configuration for the firmware memory setup.}
+\caption{\label{fig:orge6181e0}lscript.ld memory configuration for the firmware memory setup. The same file is available as a whole in this repository's src directory.}
 \end{figure}
 
 
 Once your example project is built and you have a \texttt{.elf} file available, you can
-jump directly to the \ref{sec:orge4b7d3c} section to see how to deploy and use your firmware.
+jump directly to the \ref{sec:orgf4d8d82} section to see how to deploy and use your firmware.
 
 The section in between will present setup specifically needed for micro-ROS.
 
 \subsection{Enabling the Stream Buffer system}
-\label{sec:orgc130e42}
+\label{sec:org5621e94}
 This is a subpart in the general configuration in the project related to some specific
 functions for FreeRTOS threads messaging system, however, this point in particular
 created so much pain I needed to include in early in this guide for not to forget about it
@@ -625,12 +635,12 @@ and keeping a clear track on how to enable this setting.
 
 Indeed, two settings need to be enabled in order to be able to call
 functions such as \texttt{xMessageBufferCreate}, useful when working with tasks
-in FreeRTOS, as visible in the figure \ref{fig:org8ba8faf} below:
+in FreeRTOS, as visible in the figure \ref{fig:orgb7b4c37} below:
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.8\textwidth]{./img/streambuffer.png}
-\caption{\label{fig:org8ba8faf}Enabling Stream Buffer in the Vitis IDE setting: this is a setting that can be found in the "platform.spr" element of your project (the platform, not the firmware project itself). From that file, you can access the settings with the button "Modify BSP Settings", and then as visible, in the tab \texttt{freertos10\_xilinx}, it is needed to toggle here the \texttt{stream\_buffer} setting in the \texttt{kernel\_features}, from the default "false" to "true".}
+\caption{\label{fig:orgb7b4c37}Enabling Stream Buffer in the Vitis IDE setting: this is a setting that can be found in the "platform.spr" element of your project (the platform, not the firmware project itself). From that file, you can access the settings with the button "Modify BSP Settings", and then as visible, in the tab \texttt{freertos10\_xilinx}, it is needed to toggle here the \texttt{stream\_buffer} setting in the \texttt{kernel\_features}, from the default "false" to "true".}
 \end{figure}
 
 \pagebreak
@@ -643,7 +653,7 @@ before the \texttt{\#include "FreeRTOS.h"} in order to override the setting from
 
 \pagebreak
 \section{RPMsg \texttt{echo\_test} software}
-\label{sec:org3ba4453}
+\label{sec:org0a0cccf}
 In order to test the deployment of the firmware on the R5F side, and in particular
 to test the RPMsg function, we need some program on the Linux side of the Kria
 board to "talk" with the real-time side.
@@ -669,7 +679,7 @@ Once this is done, it it possible to run the test program from the Kria board's 
 by running the \texttt{echo\_test} command.
 
 \section{Building micro-ROS as a static library}
-\label{sec:org2fbc398}
+\label{sec:org05184c8}
 In this section, the goal is to build the micro-ROS library in order to be
 able to integrate it's functions into our Cortex R5F firmware.
 
@@ -739,8 +749,8 @@ ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
 
 From that point, we will need some extra configuration files for our Cortex R5F.
 
-Both configuration files\footnote{Both files are also visible in the appendixes \ref{sec:org7aec5f8}
-and \ref{sec:org8b7a4b7} the end of this report.\}} will be downloaded from my repository;
+Both configuration files\footnote{Both files are also visible in the appendixes \ref{sec:org90c1115}
+and \ref{sec:orgd236854} the end of this report.\}} will be downloaded from my repository;
 we also are going to copy the cross-compiler into the microros workspace,
 then we can build the library with the following ros2 command:
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
@@ -760,7 +770,7 @@ custom_r5f_colcon.meta
 \pagebreak
 
 \section{Including micro-ROS to the real-time firmware}
-\label{sec:org125e70a}
+\label{sec:org6048d69}
 Now we have a Vitis demonstration project available and the \texttt{libmicroros} static library
 available, we can combine both by including this library into our Kria project.
 
@@ -779,19 +789,19 @@ docker cp ros_build:/microros_ws/firmware/build/include \
 \end{minted}
 
 Many parameters are available to be set up in the IDE for the compilation toolchain, but
-the figures \ref{fig:orgc28c4c0} and \ref{fig:org5d9b648} below will show you a setup that worked to have the IDE
+the figures \ref{fig:org1f78872} and \ref{fig:org8066ecd} below will show you a setup that worked to have the IDE
 to recognize the include files and to be able to use them for compiling the firmware.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.8\textwidth]{./img/vitis_new/include.png}
-\caption{\label{fig:orgc28c4c0}Firstly, in the "C/C++ Build" settings of your firmware project, under the "Settings" menu, you should find the gcc compiler "Directories". In here you should add the "include" directory of your library. Be careful however, if your include files are in a second layer of directory (as it is the case for libmicroros) you will need to include each sub-directory individually, as visible in this figure.}
+\caption{\label{fig:org1f78872}Firstly, in the "C/C++ Build" settings of your firmware project, under the "Settings" menu, you should find the gcc compiler "Directories". In here you should add the "include" directory of your library. Be careful however, if your include files are in a second layer of directory (as it is the case for libmicroros) you will need to include each sub-directory individually, as visible in this figure.}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.8\textwidth]{./img/vitis_new/include2.png}
-\caption{\label{fig:org5d9b648}Secondly, in the gcc linkers "Libraries", you can add the top level directory of your library. In our case, it is the directory that contains both the "include" directory added earlier, and also the "libmicroros.a" file.}
+\caption{\label{fig:org8066ecd}Secondly, in the gcc linkers "Libraries", you can add the top level directory of your library. In our case, it is the directory that contains both the "include" directory added earlier, and also the "libmicroros.a" file.}
 \end{figure}
 
 \pagebreak
@@ -821,7 +831,7 @@ scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
 \pagebreak
 
 \section{micro-ROS adaptation for the firmware}
-\label{sec:org1f26f26}
+\label{sec:org9d813b7}
 Beyond the inclusion of the library itself, actually using the micro-ROS system
 within an external project require more than just importing the needed
 functions.
@@ -831,7 +841,7 @@ the general ROS2 network, you would face issues with four key aspects.
 These are presented in the following dedicated sub-sections.
 
 \subsection{Time functions}
-\label{sec:orgaba3dc4}
+\label{sec:org8665218}
 As micro-ROS can be used on a variety of board, it does not understand by itself
 what time functions are meant to be used.
 
@@ -843,20 +853,20 @@ function calls.
 In particular for this part, the \texttt{clock\_gettime} function is key, and could
 simply be implemented with some FreeRTOS time functions.
 
-The end result for these implementation are visible in the appendix \ref{sec:orgb92a586},
+The end result for these implementation are visible in the appendix \ref{sec:org773176c},
 and can be reused as-if for the Kria board setups.
 
 \subsection{Memory allocators}
-\label{sec:orga7d2ff0}
+\label{sec:orgd0ada2a}
 Similarly to the time function, it is required to re-implement some form of memory allocating
 functions in order for the library to be able to work with such functions in a formalized way.
 
 As for now, the current version of the allocator function can be seen in the
-appendix \ref{sec:org5e20141}, but the current setup is not
+appendix \ref{sec:org0e9dade}, but the current setup is not
 completely "clean", some further formatting, test and modification will be needed.
 
 \subsection{Custom transport layer\hfill{}\textsc{WORK\_IN\_PROGRESS}}
-\label{sec:org6407c02}
+\label{sec:org96df670}
 This part is the key translation layer that needs to happen in order for the
 DDS system from the micro-ROS library to be using the communication channel we
 want it to.
@@ -871,7 +881,7 @@ system, waiting on the service interrupt routine to be trigger by an incoming me
 This situation meant that we count not simple translate the communication layers from one
 to another: a non-blocking polling and buffer system needed to be put into places.
 The proposed solution that was implemented and that is currently being tested
-is showed and detailed in the figure \ref{fig:org012ca9c} below.
+is showed and detailed in the figure \ref{fig:orgce3f64d} below.
 
 As this part of the firmware was developed and tested on it's own, the overall
 implementation within the "real" ping-pong application is still a work in progress,
@@ -880,7 +890,7 @@ and further modifications are expected when the system will be more thoroughly t
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=1\textwidth]{./img/rpmsg_fw_tasks.png}
-\caption{\label{fig:org012ca9c}Two tasks are being run concurrently in order to manage the communication situation, with binary semaphore-based lock-unlock system.\\[0pt]
+\caption{\label{fig:orgce3f64d}Two tasks are being run concurrently in order to manage the communication situation, with binary semaphore-based lock-unlock system.\\[0pt]
  The role of the micro-ROS task (right) is to make the four functions ("open", "read", "write" and "close")  available and running the actual software function. In this example, polling the read function and writing back when something is receive (ping-pong function). The use of the \texttt{rpmsg\_send()} function is done directly from the micro-ROS task, bypassing the RPMsg task in this situation.\\[0pt]
  In the libmicroros implementation currently being developed, the micro-ROS task holds all the DDS and micro-ROS system, including the mentioned allocators function.\\[0pt]
  The RPMsg task (center) is used to firstly set the RPMsg communication with the Linux side (left), then it stays locked until the ISR (interrupt service routine) is triggered by an incoming message. The message is then passed to the micro-ROS task using a buffer.\\[0pt]
@@ -889,7 +899,7 @@ and further modifications are expected when the system will be more thoroughly t
 
 \pagebreak
 \section{Loading the firmware}
-\label{sec:orge4b7d3c}
+\label{sec:orgf4d8d82}
 Having a version of our \texttt{.elf} firmware (with or without the included
 micro-ROS library) built and loaded onto our Kria's Linux, we want to load and run it
 on the Cortex micro-controller side.
@@ -907,7 +917,7 @@ from the Linux user-space\footnote{In this sequence, we are entering a root shel
 also be archived by putting the commands in a script to be executed with \texttt{sudo}.}, to test a basic RPMsg setup\footnote{It is also important to note that the \texttt{echo\_test} part is specific for the
 RPMsg base demonstration firmware. It is not to be used for other firmware.
 The instruction to build and use this particular program on the Kria Linux
-is visible in the section \ref{sec:org3ba4453}.}:
+is visible in the section \ref{sec:org0a0cccf}.}:
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
 sudo -s
 mv image_echo_test /lib/firmware
@@ -934,24 +944,24 @@ the RPMsg system worked successfully.
 
 
 \section{Running a ROS2 node}
-\label{sec:orgbc5dca3}
+\label{sec:orgc9d4b3a}
 This section as well as the next one are rather "separated" from the rest of the report, as
 they are focused on the ROS2 system being used on the Kria board.
 
 In this first section, the installation of ROS2 as a system will be presented, with
 two different ways of approaching the problem.
 
-As for the previous section, the figure \ref{fig:org9fb8465} below shows what part
+As for the previous section, the figure \ref{fig:orgd75c38a} below shows what part
 of the overall system we are talking about here.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{./img/map_ros.png}
-\caption{\label{fig:org9fb8465}The ROS2 middle (red border) runs on top of the Linux, on the general-purpose core of the Kria board.}
+\caption{\label{fig:orgd75c38a}The ROS2 middle (red border) runs on top of the Linux, on the general-purpose core of the Kria board.}
 \end{figure}
 
 \subsection{On the host Linux ("bare-metal")}
-\label{sec:orgb87efc8}
+\label{sec:orgde4cb5f}
 Since an Ubuntu distribution is installed on the board, the installation of ROS2
 can be done\footnote{As always, this configuration was tested solely on Ubuntu LTS 22.04,
 with the ROS2 versions \texttt{Humble} and then \texttt{Iron} being deployed.
@@ -1021,7 +1031,7 @@ You should be able to see the first terminal sending "Hello world" messages,
 and the second one receiving then.
 
 \subsection{In a container (Docker)}
-\label{sec:orge02915c}
+\label{sec:org8da44bc}
 As containers are used to test and build micro-ROS configurations,
 running ROS2 in a Docker  is a great way to have a reproducible configuration
 of you system.
@@ -1030,14 +1040,14 @@ This part of the guide will present how to install Docker on the
 Kria board and then how to use it to deploy the latest version of ROS2.
 
 \subsubsection{Installing Docker on Ubuntu}
-\label{sec:org05327e8}
+\label{sec:orgdae867e}
 It is possible to have a version of Docker installed simply by using the available repository,
 but since we are on Ubuntu, a PPA is available from Docker in order to have the most up-to-date version.
 
 Following \href{https://docs.docker.com/engine/install/ubuntu/\#install-using-the-repository}{the official documentation}, the following steps can be taken to install the latest version of
 Docker on a Ubuntu system. The last command is meant to test the install.
 If everything went smoothly, you should see something similar to what is presented
-in the figure \ref{fig:org73970c3} below, after the commands:
+in the figure \ref{fig:org71d6e8b} below, after the commands:
 
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
 sudo apt-get update
@@ -1068,12 +1078,12 @@ docker run hello-world
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.7\textwidth]{./img/hello-docker.png}
-\caption{\label{fig:org73970c3}The return of a successful run of the \texttt{hello world} test Docker container.}
+\caption{\label{fig:org71d6e8b}The return of a successful run of the \texttt{hello world} test Docker container.}
 \end{figure}
 
 
 \subsubsection{Running a ROS2 container}
-\label{sec:org0b3fd11}
+\label{sec:org0a105e7}
 The following commands will pull a ROS container, version \texttt{iron}, and name it \texttt{ros\_build}.
 
 A key part for having access to the interfaces (serial) is the mapping of the whole \texttt{/dev}
@@ -1087,7 +1097,7 @@ docker exec -it ros_agent bash
 \end{minted}
 
 From there, it becomes possible to simply use ROS2 as you would for a bare-metal install,
-and as presented in the section \ref{sec:orgb87efc8} above:
+and as presented in the section \ref{sec:orgde4cb5f} above:
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
 source /opt/ros/$ROS_DISTRO/setup.bash
 
@@ -1133,10 +1143,10 @@ ros2 topic echo /microROS/ping
 
 
 \section{micro-ROS agent\hfill{}\textsc{WORK\_IN\_PROGRESS}}
-\label{sec:orgd723653}
+\label{sec:org95c1378}
 The micro-ROS agent on the ROS2 side is the last piece of the puzzle needed to
 allow our DDS environment to use RPMsg as a mean of communication, as visible
-on the schematic of the figure \ref{fig:orgc8b10e5} below.
+on the schematic of the figure \ref{fig:orgecf24f9} below.
 In particular, it will be useful to modify this agent in order to archive
 the full RPMsg communication for ROS2\footnote{This will be done with ROS2 agents "custom transport"  system,
 which has little documentation. Some \href{https://github.com/micro-ROS/micro\_ros\_setup/issues/383}{discussions} about it exist though.}.
@@ -1147,12 +1157,12 @@ This part of the guide will focus on it.
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{./img/map_agent.png}
-\caption{\label{fig:orgc8b10e5}The agent (red border) allows for a micro-ROS instance to communicate with a ROS2 system. It is deployed on the Linux side, as a ROS2 node.}
+\caption{\label{fig:orgecf24f9}The agent (red border) allows for a micro-ROS instance to communicate with a ROS2 system. It is deployed on the Linux side, as a ROS2 node.}
 \end{figure}
 
 
 \subsection{Building a eProsima agent bare-metal}
-\label{sec:org2aa5f17}
+\label{sec:orgb0e56ca}
 A key aspect to understand about modifying the agent (as
 this will be needed later on to support our new communication system),
 is that the default system and instruction provided by micro-ROS does not
@@ -1196,7 +1206,7 @@ Major details on how to implement a custom agent specified here:
 
 
 \subsection{Building the XRCE-DDS agent in a Docker}
-\label{sec:org4dad8fb}
+\label{sec:orgf37b4a8}
 The same command presented above for running a custom agent "bare-metal" can be
 run inside a Docker.
 
@@ -1217,42 +1227,42 @@ docker run -it --privileged -v /dev:/dev xrce-dds-agent serial \
 
 
 \subsection{Creating a custom transport agent}
-\label{sec:org4944b29}
+\label{sec:org5d67420}
 
 
 \pagebreak
 
 
 \section{Conclusion \& future\hfill{}\textsc{WORK\_IN\_PROGRESS}}
-\label{sec:orgd69f2e8}
+\label{sec:orge6562dc}
 
 \pagebreak
 \appendix
 
 
 \section{DTO patch}
-\label{sec:org5413d93}
+\label{sec:org3406614}
 This file is available in this repository: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch}{system.patch}
 \inputminted[linenos, frame=single]{diff}{./src/system.patch}
 
 \pagebreak
 \section{Custom toolchain CMake settings}
-\label{sec:org7aec5f8}
+\label{sec:org90c1115}
 This file is available in this repository: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom\_r5f\_toolchain.cmake}{custom r5f toolchain.cmake}
 \inputminted[linenos, frame=single]{cmake}{./src/custom_r5f_toolchain.cmake}
 
 \pagebreak
 \section{Custom Colcon meta settings}
-\label{sec:org8b7a4b7}
+\label{sec:orgd236854}
 This file is available in this repository: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom\_r5f\_colcon.meta}{custom r5f colcon.meta}
 \inputminted[linenos, frame=single]{yaml}{./src/custom_r5f_colcon.meta}
 
 \pagebreak
 \section{Firmware time functions}
-\label{sec:orgb92a586}
+\label{sec:org773176c}
 
 \subsection{main}
-\label{sec:org9417dc0}
+\label{sec:orgad9f244}
 This file is available in this repository: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/clock.c}{clock.c}
 but a potentially more up-to-date version is visible
 directly at the \texttt{libmicroros\_kv260} repository: \href{https://gitlab.com/sunoc/libmicroros\_kv260/-/blob/4867e762f66af7b4647232eb4c0a31106db66e13/src/clock.c}{clock.c}
@@ -1260,7 +1270,7 @@ directly at the \texttt{libmicroros\_kv260} repository: \href{https://gitlab.com
 \inputminted[linenos, frame=single]{c}{./src/clock.c}
 
 \subsection{header file}
-\label{sec:org57ecba1}
+\label{sec:org8e1f510}
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{c}
 /**< Microseconds per second. */
 #define MICROSECONDS_PER_SECOND    ( 1000000LL )  
@@ -1273,10 +1283,10 @@ directly at the \texttt{libmicroros\_kv260} repository: \href{https://gitlab.com
 
 \pagebreak
 \section{Firmware memory allocation functions}
-\label{sec:org5e20141}
+\label{sec:org0e9dade}
 
 \subsection{main}
-\label{sec:orgc7c05fa}
+\label{sec:org9ec5510}
 This file is available in this repository: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/allocators.c}{allocators.c}
 but a potentially more up-to-date version is visible
 directly at the \texttt{libmicroros\_kv260} repository: \href{https://gitlab.com/sunoc/libmicroros\_kv260/-/blob/4867e762f66af7b4647232eb4c0a31106db66e13/src/allocators.c}{allocators.c}
@@ -1284,7 +1294,7 @@ directly at the \texttt{libmicroros\_kv260} repository: \href{https://gitlab.com
 \inputminted[linenos, frame=single]{c}{./src/allocators.c}
 
 \subsection{header file}
-\label{sec:orgb97da35}
+\label{sec:org718c7fd}
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{c}
 #ifndef _ALLOCATORS_H_
 #define _ALLOCATORS_H_

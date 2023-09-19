@@ -194,13 +194,13 @@ thy data !!
 _If you are unsure of what to do, seek assistance !_
 #+LATEX: \end{tcolorbox}
 
-With the image available on thy machine and a SD card visible as ~/dev/sda~
-[fn:1] one can simply run the ~dd~ command as follow to
-write the image to a previously formatted drive (here ~/dev/sda~):
+With the image available on thy machine and a SD card visible as ~/dev/sda~ device[fn:1]
+one can simply run the ~dd~ command as follow to write the image to a previously formatted drive (here ~/dev/sda~):
 
 #+BEGIN_SRC sh
+  unxz iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img.xz
   sudo dd if=iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img \
-  of=/dev/sda status=progress bs=8M && sync
+       of=/dev/sda status=progress bs=8M && sync
 #+END_SRC
 
 
@@ -629,6 +629,7 @@ work for the example we are running, including the new DTO patch without overlap
 
 #+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: lscript.ld memory configuration for the firmware memory setup.
+#+CAPTION: The same file is available as a whole in this repository's src directory.
 #+NAME: fig:projectmem
 file:./img/vitis_new/project_mem.png
 

@@ -1193,13 +1193,16 @@ conveniently only rebuild the part that was modify.
 Which means that once all the libraries have been compiled once,
 the subsequent re-compilation of the agent itself can be done quickly !
 
-Running the custom agent executable can be executed as is as the transport we want to use is already
-built in. ~kmod~ package is needed though.
-#+BEGIN_SRC sh
-  sudo apt-get update
-  sudo apt-get install kmod
-    ./examples/custom_agent/CustomXRCEAgent
-#+END_SRC
+Major details on how to implement a custom agent specified here:
+https://github.com/eProsima/Micro-XRCE-DDS-Agent/issues/195#issuecomment-721002153
+
+# Running the custom agent executable can be executed as is as the transport we want to use is already
+# built in. ~kmod~ package is needed though.
+# #+BEGIN_SRC sh
+#   sudo apt-get update
+#   sudo apt-get install kmod
+#     ./examples/custom_agent/CustomXRCEAgent
+# #+END_SRC
 
 
 ** Building the XRCE-DDS agent in a Docker

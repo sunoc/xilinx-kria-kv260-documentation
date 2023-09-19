@@ -623,15 +623,15 @@ file:./img/vitis_new/project7.png
 
 #+LATEX: \pagebreak
 In the Xilinx documentation, it is made mention of the addresses setting that should be checked in the ~script.ld~ file.
-These valued look different from what could be set in the DTO for the Linux side, but they appear to
-work for the example we are running:
+The values in the figure [[fig:projectmem]] below look different from what could be set in the DTO for the Linux side, but they appear to
+work for the example we are running, including the new DTO patch without overlapping memory:
 
-#+BEGIN_SRC sh
-  psu_ddr_S_AXI_BASEADDR                     0x3ed00000	
-  psu_ocm_ram_1_S_AXI_BASEADDR        0xfffc0000
-  psu_r5_tcm_ram_0_S_AXI_BASEADDR    0x00000000
-  psu_r5_tcm_ram_1_S_AXI_BASEADDR    0x00020000	
-#+END_SRC
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: lscript.ld memory configuration for the firmware memory setup.
+#+NAME: fig:projectmem
+file:./img/vitis_new/project_mem.png
+
 
 Once your example project is built and you have a ~.elf~ file available, you can
 jump directly to the [[Loading the firmware]] section to see how to deploy and use your firmware.

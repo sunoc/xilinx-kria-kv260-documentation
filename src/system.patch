@@ -36,21 +36,21 @@ diff -u --label /ssh\:kria\:/home/ubuntu/system_original.dts --label /ssh\:kria\
 +           #address-cells = <2>;
 +           #size-cells = <2>;
 +           ranges;
-+           rpu0vdev0vring0: rpu0vdev0vring0@3ee40000 {
++           rpu0vdev0vring0: rpu0vdev0vring0@3ed40000 {
 +               no-map;
-+               reg = <0x0 0x3ee40000 0x0 0x4000>;
++               reg = <0x0 0x3ed40000 0x0 0x4000>;
 +           };
-+           rpu0vdev0vring1: rpu0vdev0vring1@3ee44000 {
++           rpu0vdev0vring1: rpu0vdev0vring1@3ed44000 {
 +               no-map;
-+               reg = <0x0 0x3ee44000 0x0 0x4000>;
++               reg = <0x0 0x3ed44000 0x0 0x4000>;
 +           };
-+           rpu0vdev0buffer: rpu0vdev0buffer@3ee48000 {
++           rpu0vdev0buffer: rpu0vdev0buffer@3ed48000 {
 +               no-map;
-+               reg = <0x0 0x3ee48000 0x0 0x100000>;
++               reg = <0x0 0x3ed48000 0x0 0x100000>;
 +           };
-+           rproc_0_reserved: rproc_0_reserved@3ed00000 {
++           rproc_0_reserved: rproc_0_reserved@3ec00000 {
 +               no-map;
-+               reg = <0x0 0x3ed00000 0x0 0x140000>;
++               reg = <0x0 0x3ec00000 0x0 0x140000>;
 +           };
 +       };
 +       tcm_0a: tcm_0a@ffe00000 {

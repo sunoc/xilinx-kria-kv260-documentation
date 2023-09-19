@@ -140,9 +140,13 @@ this tool and update the board:
 + Set a fixed IP address for your machine, in the ~192.168.0.1/24~
   range, except the specific ~192.168.0.111~, which will be used by the
   board.
+  The netmark and gateway should also be respectively set to
+  ~255.255.255.0~ and ~192.168.0.1~.
++ Hold the firmware update button (FWUEN) when powering back the board.
 + Using a web browser on your host machine, access
   ~http://192.168.0.111~. Thou shall now see the interface, as visible on
-  the figure [[fig:recovery]] below.
+  the figure [[fig:recovery]] below. If the page struggle to appear,
+you should try to un-plug and re-plug the Ethernet cable.
 
 #+ATTR_LATEX: :width 1\textwidth
 #+CAPTION: The recovery tool for the board, access from Firefox. We can see

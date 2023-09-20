@@ -104,63 +104,9 @@ view of the overall system we are trying to archive.
 #+NAME: fig:map
 [[file:./img/map.png]]
 
-* Boot firmware
-The goal for the Linux side of the deployment is to
-have the latest LTS version of Ubuntu up and running.
 
-In order to be able to boot such a newer version of Linux, the
-boot image of the board must first be updated.
-
-The procedure is available in [[https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Firmware-Update][the official documentation]],
-but I will present it step by step here.
-
-** Getting the new firmware
-A 2022 version of the board firmware is required in order to run the latest
-version of Ubuntu properly.
-
-The image can be downloaded at [[https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+K26+
-SOMoot-FW-update-with-xmutil][the atlassian page]] on the topic,
-or even directly with the following command:
-
-#+BEGIN_SRC sh
-  wget https://www.xilinx.com/member/forms/download/\
-       design-license-xef.html?filename=BOOT-k26-starter-kit-20230516185703.bin
-#+END_SRC
-
-
-** Reaching the board recovery tool
-Now the firmware ~.bin~ image is available, it is possible to update it using the
-boards recovery tool. Here are the steps that must be taken in order to reach
-this tool and update the board:
-
-+ Connect the board to your machine via a Ethernet cable.
-  This will obviously cut you internet access, so you should be set for that.
-+ Select the wired network as your connection (must be "forced", since it
-  doesn't have internet access).
-+ Set a fixed IP address for your machine, in the ~192.168.0.1/24~
-  range, except the specific ~192.168.0.111~, which will be used by the
-  board.
-  The netmark and gateway should also be respectively set to
-  ~255.255.255.0~ and ~192.168.0.1~.
-+ Hold the firmware update button (FWUEN) when powering back the board.
-+ Using a web browser on your host machine, access
-  ~http://192.168.0.111~. Thou shall now see the interface, as visible on
-  the figure [[fig:recovery]] below. If the page struggle to appear,
-you should try to un-plug and re-plug the Ethernet cable.
-
-#+ATTR_LATEX: :width 1\textwidth
-#+CAPTION: The recovery tool for the board, access from Firefox. We can see
-#+CAPTION: board information at the center, and the tools to upload the firmware at
-#+CAPTION:   the bottom of the page.
-#+NAME: fig:recovery
-[[file:img/recovery.png]]
-
-** Updating the boot firmware
-From this "recovery" page, it is possible to upload the ~.bin~ file downloaded previously onto
-the board using the "Recover Image" section at the bottom right of the page.
-
-The board can be re-booted afterwards.
-#+LATEX: \pagebreak
+#+INCLUDE: "./boot_firmware.org" :minlevel 1
+* COMMENT [[file:boot_firmware.org][Boot firmware]]
 
 * Installing Linux
 Withe the boot firmware being up-to-date, we can proceed to install a Linux distribution

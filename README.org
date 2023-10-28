@@ -22,6 +22,8 @@ and stays hidden in a :noexport: section in this report.
 
 #+OPTIONS: H:3 toc:t date:t title:t email:t
 
+#+LATEX_COMPILER:
+
 #+LATEX_CLASS: article
 #+LATEX_CLASS_OPTIONS:[10pt]
 #+LATEX_HEADER: \usepackage[a4paper, total={6.5in, 9in}]{geometry}
@@ -820,12 +822,12 @@ As for now, the current version of the allocator function can be seen in the
 appendix [[Firmware memory allocation functions]], but the current setup is not
 completely "clean", some further formatting, test and modification will be needed.
 
-** Custom transport layer                                    :WORK_IN_PROGRESS:
+** Custom transport layer
 This part is the key translation layer that needs to happen in order for the
 DDS system from the micro-ROS library to be using the communication channel we
 want it to.
 
-A problem that we had to figure out lives in the fact that the operation of micro-ROS DDS
+A problem that had to be figured out lives in the fact that the operation of micro-ROS DDS
 and the board's RPMsg communication system does not operate in the same fashion.
 
 The former expects to have four functions ("open", "read", "write" and "close") that can
@@ -844,7 +846,7 @@ and further modifications are expected when the system will be more thoroughly t
 #+ATTR_LATEX: :width 1\textwidth
 #+CAPTION: Two tasks are being run concurrently in order to manage the
 #+CAPTION: communication situation, with binary semaphore-based lock-unlock system.\\
-#+CAPTION: The role of the micro-ROS task (right) is to make the four functions
+#+CAPTION: The role of the micro-ROS task (red) is to make the four functions
 #+CAPTION: ("open", "read", "write" and "close")  available and running the actual
 #+CAPTION: software function. In this example, polling the read function and writing
 #+CAPTION: back when something is receive (ping-pong function).
@@ -852,15 +854,33 @@ and further modifications are expected when the system will be more thoroughly t
 #+CAPTION: bypassing the RPMsg task in this situation.\\
 #+CAPTION: In the libmicroros implementation currently being developed, the micro-ROS task
 #+CAPTION: holds all the DDS and micro-ROS system, including the mentioned allocators function.\\
-#+CAPTION: The RPMsg task (center) is used to firstly set the RPMsg communication
-#+CAPTION: with the Linux side (left), then it stays locked until the ISR (interrupt service routine)
+#+CAPTION: The RPMsg task (green) is used to firstly set the RPMsg communication
+#+CAPTION: with the Linux system, then it stays locked until the ISR (interrupt service routine)
 #+CAPTION: is triggered by an incoming message. The message is then passed to the micro-ROS
 #+CAPTION: task using a buffer.\\
 #+CAPTION: When a shutdown signal is received from the Linux, both functions will gracefully close
 #+CAPTION: and are getting killed.
 #+NAME: fig:rpmsg_fw_tasks
-[[file:./img/rpmsg_fw_tasks.png]]
+[[file:./img/tasks.png]]
 
+A version of this firmware is available at my gitlab repository[fn:20]. This firmware was built using
+Xilinx's IDE, which setup was presented in the section [[Setting up the IDE]], however it was tested
+and given the provided ~Makefile~ system, it is possible to modify and rebuild the firmware
+without this specific tools, as long as the compiler is installed correctly.
+
+Beyond the general two-tasks behavior of the figure [[fig:rpmsg_fw_tasks]], here are the main steps
+of the execution of the firmware:
++ During the RPMsg init phase (RPMsg task), a "hello" message is exchanged with the Linux side
+  to confirm the OpenAMP system is also ready there.
++ Memory allocations and custom transport function are set in the micro-ROS task.
++ The micro-ROS and it's ~rclc~ system run extensive initialization tasks to:
+  - Initialize the support system
+  - Initialize the support node
+  - Initialize the publishers
+  - Initialize the subscribers
++ Finally, the ping-pong function become effective with the micro-ROS task
+  polling to receive some message and sending it back to the sender.
+    
 #+LATEX: \pagebreak
 * Loading the firmware
 Having a version of our ~.elf~ firmware (with or without the included
@@ -1175,9 +1195,27 @@ run inside a Docker.
 ** Creating a custom transport agent
 
 
+These command allows to go build the agent and run it with maximum verbosity (for debugging purpose).
+#+BEGIN_SRC sh
+  cd /Micro-XRCE-DDS-Agent/build
+  make clean && make -j4
+  ./MicroXRCEAgent serial --dev /dev/null --verbose 6
+#+END_SRC
+
+
 #+LATEX: \pagebreak
 
+* Running the ping-pong node                                  :WORK_IN_PROGRESS:
+A custom ping-pong node for ROS2 was developped in order to test the data transfer of the newly created
+Agent / Client system.
 
+In order to have this node up and running, you need to set basically all the previously presented points:
+- The micro-ROS firmware is running on the R5F core, as presented in the section [[Loading the firmware]].
+- On the same Linux you plan to run the node, you will need to run and keep the Agent, as presented
+  in the section [[micro-ROS agent ]].
+- This ping-pong application is released as a ROS2 Python node. It is best to pull and run it
+  in a ROS2 environment to avoid having dependancies issues, as presented in the section [[Running a ROS2 node]].
+  
 * Conclusion & future                                         :WORK_IN_PROGRESS:
 
 #+LATEX: \pagebreak
@@ -1251,6 +1289,7 @@ directly at the ~libmicroros_kv260~ repository: [[https://gitlab.com/sunoc/libmi
 
 
 * Footnotes
+[fn:20] micro-ROS ping pong test firmware repository: https://gitlab.com/sunoc/libmicroros_kv260 
 
 [fn:19] This will be done with ROS2 agents "custom transport"  system,
 which has little documentation. Some [[https://github.com/micro-ROS/micro_ros_setup/issues/383][discussions]] about it exist though.

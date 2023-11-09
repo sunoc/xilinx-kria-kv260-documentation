@@ -1252,15 +1252,14 @@ In order to have this node up and running, you need to set basically all the pre
   
 * Conclusion & future                                         :WORK_IN_PROGRESS:
 
-#+LATEX: \pagebreak
-#+LATEX: \appendix
-
 ** TODO [#B] Update the figures of the report
 SCHEDULED: <2023-11-10 金>
 
 I should use the one used in the [[id:cdeec4c5-19d5-474e-b695-41bb64d3be50][SASIMI2024]] publication, putting also some performance graphs
 and check if the older figures are still up to date.
 
+#+LATEX: \pagebreak
+#+LATEX: \appendix
 * DTO patch
 This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch][system.patch]]
 #+LATEX: \inputminted[linenos, frame=single]{diff}{./src/system.patch}

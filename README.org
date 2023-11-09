@@ -1,5 +1,6 @@
 :PROPERTIES:
 :ID:       ac338634-949e-4e3a-8d75-45bed92243c6
+:CATEGORY: KRIA
 :END:
 #+title: Setting up and using 
 #+title: Xilinx KRIA KV260
@@ -879,7 +880,20 @@ of the execution of the firmware:
   - Initialize the subscribers
 + Finally, the ping-pong function become effective with the micro-ROS task
   polling to receive some message and sending it back to the sender.
-    
+
+** Improvement to be made
+While the version of the firmware since the tag ~0.1~[fn:23] are functional, able to communicate with
+an Agent placed on the neighbour Linux, some work, improvements and tweaks are still to be made.
+
+*** TODO [#A] Firmware stop / crash / reboot
+SCHEDULED: <2023-11-13 月>
+
+This is maybe the most annoying issue that is currently still ongoing: if the firmware
+is not stopped in a "clean" way, the RPMsg task is not kill, making a full reboot of the board
+needed in order to re-launch the firmware and having an established communication.
+
+Something need to be done about that.
+
 #+LATEX: \pagebreak
 * Loading the firmware
 Having a version of our ~.elf~ firmware (with or without the included
@@ -1136,7 +1150,6 @@ and eventually modified.
 #+END_SRC
 The same file is available online as a reference, on [[https://github.com/eProsima/Micro-XRCE-DDS-Agent/blob/develop/src/cpp/transport/custom/CustomAgent.cpp][eProsima XRCE-DDS-Agent GitHub repository]].
 
-
 #+BEGIN_SRC sh
   git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
   cd Micro-XRCE-DDS-Agent/
@@ -1190,7 +1203,7 @@ run inside a Docker.
 #+END_SRC
 
 ** Building the Agent version with a modified transport
-The first working implementation of the DDS over RPMsg happend over a
+The first working implementation of the DDS over RPMsg happened over a
 XRCE-DDS agent whose ~serial~ transport layer has been modified in order
 to use OpenAMP's RPMsg instead.
 
@@ -1227,7 +1240,7 @@ These command allows to go build the agent and run it with maximum verbosity (fo
 #+LATEX: \pagebreak
 
 * Running the ping-pong node                                  :WORK_IN_PROGRESS:
-A custom ping-pong node for ROS2 was developped in order to test the data transfer of the newly created
+A custom ping-pong node for ROS2 was developed in order to test the data transfer of the newly created
 Agent / Client system.
 
 In order to have this node up and running, you need to set basically all the previously presented points:
@@ -1235,15 +1248,18 @@ In order to have this node up and running, you need to set basically all the pre
 - On the same Linux you plan to run the node, you will need to run and keep the Agent, as presented
   in the section [[micro-ROS Agent]].
 - This ping-pong application is released as a ROS2 Python node. It is best to pull and run it
-  in a ROS2 environment to avoid having dependancies issues, as presented in the section [[Running a ROS2 node]].
+  in a ROS2 environment to avoid having dependencies issues, as presented in the section [[Running a ROS2 node]].
   
 * Conclusion & future                                         :WORK_IN_PROGRESS:
 
 #+LATEX: \pagebreak
 #+LATEX: \appendix
 
-** TODO Update the figures of the report
-I should use the one used in the [[id:cdeec4c5-19d5-474e-b695-41bb64d3be50][SASIMI2024]] publication!
+** TODO [#B] Update the figures of the report
+SCHEDULED: <2023-11-10 金>
+
+I should use the one used in the [[id:cdeec4c5-19d5-474e-b695-41bb64d3be50][SASIMI2024]] publication, putting also some performance graphs
+and check if the older figures are still up to date.
 
 * DTO patch
 This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch][system.patch]]
@@ -1312,6 +1328,9 @@ directly at the ~libmicroros_kv260~ repository: [[https://gitlab.com/sunoc/libmi
 
 
 * Footnotes
+
+[fn:23] micro-ROS Client firmware version 0.1, the first working version: https://gitlab.com/sunoc/libmicroros_kv260/-/tree/0.1
+
 [fn:22] The ~--verbose 6~ allows to see the maximum amount of information about the data being transmitted. 
 
 [fn:21] The ~--dev /dev/null~ option is only a placeholder as the serial requires it but not RPMsg.

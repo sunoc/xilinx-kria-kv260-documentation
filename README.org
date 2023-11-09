@@ -87,7 +87,6 @@ Then, the actual build can be made with a simple:
   pdflatex README.tex
 #+END_SRC
 
-
 * Introduction & motivation
 This guide will present how to setup and use Xilinx's KRIA board, in particular
 for running ROS on a host Ubuntu system, as well as for deploying
@@ -1103,8 +1102,8 @@ the ping-pong topic communication from a different shell[fn:17]:
 #+LATEX: \pagebreak
 
 
-* micro-ROS agent                                             :WORK_IN_PROGRESS:
-The micro-ROS agent on the ROS2 side is the last piece of the puzzle needed to
+* micro-ROS Agent                               
+The micro-ROS Agent on the ROS2 side is the last piece of the puzzle needed to
 allow our DDS environment to use RPMsg as a mean of communication, as visible
 on the schematic of the figure [[fig:map_agent]] below.
 In particular, it will be useful to modify this agent in order to archive
@@ -1121,7 +1120,7 @@ This part of the guide will focus on it.
 [[file:./img/map_agent.png]]
 
 
-** Building a eProsima agent bare-metal
+** Building a eProsima bare-metal example agent
 A key aspect to understand about modifying the agent (as
 this will be needed later on to support our new communication system),
 is that the default system and instruction provided by micro-ROS does not
@@ -1171,8 +1170,7 @@ https://github.com/eProsima/Micro-XRCE-DDS-Agent/issues/195#issuecomment-7210021
 #     ./examples/custom_agent/CustomXRCEAgent
 # #+END_SRC
 
-
-** Building the XRCE-DDS agent in a Docker
+** Building a XRCE-DDS agent in a Docker
 The same command presented above for running a custom agent "bare-metal" can be
 run inside a Docker.
 
@@ -1191,10 +1189,33 @@ run inside a Docker.
          --dev /dev/ttyACM0
 #+END_SRC
 
+** Building the Agent version with a modified transport
+The first working implementation of the DDS over RPMsg happend over a
+XRCE-DDS agent whose ~serial~ transport layer has been modified in order
+to use OpenAMP's RPMsg instead.
 
-** Creating a custom transport agent
+The build process it the same as usual, just pulling from my fork of eProsima repository
+and using the ~develop~ branch:
 
+#+BEGIN_SRC sh
+  git clone https://github.com/sunoc/Micro-XRCE-DDS-Agent.git -b develop
+  cd Micro-XRCE-DDS-Agent
+  mkdir build
+  cd build
+  cmake ..
+  make
+#+END_SRC
 
+Giving that your are working from an environment in which the ROS2 tools are available, it is then possible
+to run the Agent as follow[fn:21] [fn:22]:
+
+#+BEGIN_SRC sh
+  source /opt/ros/$ROS_DISTRO/setup.bash
+
+  ./MicroXRCEAgent serial --dev /dev/null --verbose 6
+#+END_SRC
+
+** Creating a custom transport agent                      :WORK_IN_PROGRESS:
 These command allows to go build the agent and run it with maximum verbosity (for debugging purpose).
 #+BEGIN_SRC sh
   cd /Micro-XRCE-DDS-Agent/build
@@ -1212,7 +1233,7 @@ Agent / Client system.
 In order to have this node up and running, you need to set basically all the previously presented points:
 - The micro-ROS firmware is running on the R5F core, as presented in the section [[Loading the firmware]].
 - On the same Linux you plan to run the node, you will need to run and keep the Agent, as presented
-  in the section [[micro-ROS agent ]].
+  in the section [[micro-ROS Agent]].
 - This ping-pong application is released as a ROS2 Python node. It is best to pull and run it
   in a ROS2 environment to avoid having dependancies issues, as presented in the section [[Running a ROS2 node]].
   
@@ -1221,6 +1242,8 @@ In order to have this node up and running, you need to set basically all the pre
 #+LATEX: \pagebreak
 #+LATEX: \appendix
 
+** TODO Update the figures of the report
+I should use the one used in the [[id:cdeec4c5-19d5-474e-b695-41bb64d3be50][SASIMI2024]] publication!
 
 * DTO patch
 This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch][system.patch]]
@@ -1289,6 +1312,10 @@ directly at the ~libmicroros_kv260~ repository: [[https://gitlab.com/sunoc/libmi
 
 
 * Footnotes
+[fn:22] The ~--verbose 6~ allows to see the maximum amount of information about the data being transmitted. 
+
+[fn:21] The ~--dev /dev/null~ option is only a placeholder as the serial requires it but not RPMsg.
+
 [fn:20] micro-ROS ping pong test firmware repository: https://gitlab.com/sunoc/libmicroros_kv260 
 
 [fn:19] This will be done with ROS2 agents "custom transport"  system,

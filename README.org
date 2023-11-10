@@ -522,13 +522,13 @@ With the platform configuration files available, we can now use the IDE to gener
 new project for our board. The whole process will be described with screen captures and
 captions.
 
-#+ATTR_LATEX: :width .5\textwidth
+#+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: We are starting with creating a "New Application Project"
 #+CAPTION: You should be greeted with this wizard window. Next.
 #+NAME: fig:project1
 [[file:./img/vitis_new/project1.png]]
 
-#+ATTR_LATEX: :width .5\textwidth
+#+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: For the platform, we need to get our build Kria configuration.
 #+CAPTION: In the "Create a new platform" tab,
 #+CAPTION: click the "Browse..." button.
@@ -839,11 +839,10 @@ to another: a non-blocking polling and buffer system needed to be put into place
 The proposed solution that was implemented and that is currently being tested
 is showed and detailed in the figure [[fig:rpmsg_fw_tasks]] below.
 
-As this part of the firmware was developed and tested on it's own, the overall
-implementation within the "real" ping-pong application is still a work in progress,
-and further modifications are expected when the system will be more thoroughly tested.
+The next figure [[fig:client_arch]] show a more visual representation of the two tasks and the
+functions used in them.
 
-#+ATTR_LATEX: :width 1\textwidth
+#+ATTR_LATEX: :width .9\textwidth
 #+CAPTION: Two tasks are being run concurrently in order to manage the
 #+CAPTION: communication situation, with binary semaphore-based lock-unlock system.\\
 #+CAPTION: The role of the micro-ROS task (red) is to make the four functions
@@ -862,6 +861,11 @@ and further modifications are expected when the system will be more thoroughly t
 #+CAPTION: and are getting killed.
 #+NAME: fig:rpmsg_fw_tasks
 [[file:./img/tasks.png]]
+
+#+ATTR_LATEX: :width .9\textwidth
+#+CAPTION: Functions architecture for the Client firmware.
+#+NAME: fig:client_arch
+[[file:./img/client_arch.png]]
 
 A version of this firmware is available at my gitlab repository[fn:20]. This firmware was built using
 Xilinx's IDE, which setup was presented in the section [[Setting up the IDE]], however it was tested
@@ -948,6 +952,11 @@ of the overall system we are talking about here.
 #+CAPTION: on the general-purpose core of the Kria board.
 #+NAME: fig:map_ros
 [[file:./img/map_ros.png]]
+
+#+ATTR_LATEX: :width .55\textwidth
+#+CAPTION: Methods architecture for the modified Agent node.
+#+NAME: fig:agent_arch
+[[file:./img/agent_arch.png]]
 
 ** On the host Linux ("bare-metal")
 Since an Ubuntu distribution is installed on the board, the installation of ROS2
@@ -1252,9 +1261,10 @@ In order to have this node up and running, you need to set basically all the pre
   
 * Conclusion & future                                         :WORK_IN_PROGRESS:
 
-** TODO [#B] Update the figures of the report
-SCHEDULED: <2023-11-10 金>
+** DONE [#B] Update the figures of the report
+CLOSED: [2023-11-10 金 14:32] SCHEDULED: <2023-11-10 金>
 
+- State "DONE"       from "TODO"       [2023-11-10 金 14:32]
 I should use the one used in the [[id:cdeec4c5-19d5-474e-b695-41bb64d3be50][SASIMI2024]] publication, putting also some performance graphs
 and check if the older figures are still up to date.
 

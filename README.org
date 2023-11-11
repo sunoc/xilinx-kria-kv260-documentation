@@ -885,6 +885,29 @@ of the execution of the firmware:
 + Finally, the ping-pong function become effective with the micro-ROS task
   polling to receive some message and sending it back to the sender.
 
+** Building the updated firmware outside of the IDE       :WORK_IN_PROGRESS:
+While the use of the IDE presented in the previous sections is much needed in order to first create
+a RPMsg-ready base firmware, it might be inconvenient having to carry this extremely heavy tool
+for any modification or rebuild of the firmware.
+
+Fortunately, the Vitis IDE projects have a very handy function: they general a pure ~Makefile~, with
+all the needed dependencies and path for library set.
+This ~make~ system can be used externally, however, and as explained previously, two conditions must be
+fulfilled:
++ The cross-compiler needs to be in the ~$PATH~.
++ Standard building tools must be installer, in particular ~git~ in order to obtain the repository,
+  and ~make~, obviously.
+
+#+BEGIN_SRC sh
+  cd /tmp
+  git clone https://gitlab.com/sunoc/libmicroros_kv260.git
+  cd libmicroros_kv260/Debug
+  make
+#+END_SRC
+
+From there, you will have the binary ~rpmsg_pingpong_microros_lib.elf~ file created and ready to be deployed
+on the KRIA board.
+
 ** Improvement to be made
 While the version of the firmware since the tag ~0.1~[fn:23] are functional, able to communicate with
 an Agent placed on the neighbour Linux, some work, improvements and tweaks are still to be made.
@@ -1125,7 +1148,7 @@ the ping-pong topic communication from a different shell[fn:17]:
 #+LATEX: \pagebreak
 
 
-* micro-ROS Agent                               
+* micro-ROS XRCE-DDS Agent                               
 The micro-ROS Agent on the ROS2 side is the last piece of the puzzle needed to
 allow our DDS environment to use RPMsg as a mean of communication, as visible
 on the schematic of the figure [[fig:map_agent]] below.
@@ -1255,18 +1278,12 @@ Agent / Client system.
 In order to have this node up and running, you need to set basically all the previously presented points:
 - The micro-ROS firmware is running on the R5F core, as presented in the section [[Loading the firmware]].
 - On the same Linux you plan to run the node, you will need to run and keep the Agent, as presented
-  in the section [[micro-ROS Agent]].
+  in the section [[micro-ROS XRCE-DDS Agent]].
 - This ping-pong application is released as a ROS2 Python node. It is best to pull and run it
   in a ROS2 environment to avoid having dependencies issues, as presented in the section [[Running a ROS2 node]].
   
 * Conclusion & future                                         :WORK_IN_PROGRESS:
 
-** DONE [#B] Update the figures of the report
-CLOSED: [2023-11-10 金 14:32] SCHEDULED: <2023-11-10 金>
-
-- State "DONE"       from "TODO"       [2023-11-10 金 14:32]
-I should use the one used in the [[id:cdeec4c5-19d5-474e-b695-41bb64d3be50][SASIMI2024]] publication, putting also some performance graphs
-and check if the older figures are still up to date.
 
 #+LATEX: \pagebreak
 #+LATEX: \appendix

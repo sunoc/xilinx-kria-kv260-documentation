@@ -1260,6 +1260,13 @@ to run the Agent as follow[fn:21] [fn:22]:
   ./MicroXRCEAgent serial --dev /dev/null --verbose 6
 #+END_SRC
 
+** TODO Separated RPMsg transport created for XRCE-DDS Agent
+SCHEDULED: <2023-11-14 火 10:00>
+
+- [ ] Implementation done
+- [ ] Successfully tested
+- [ ] Pull request done to the eProsima repository
+
 ** Creating a custom transport agent                      :WORK_IN_PROGRESS:
 These command allows to go build the agent and run it with maximum verbosity (for debugging purpose).
 #+BEGIN_SRC sh

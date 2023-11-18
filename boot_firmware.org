@@ -1,4 +1,3 @@
-* Boot firmware
 The goal for the Linux side of the deployment is to
 have the latest LTS version of Ubuntu up and running.
 

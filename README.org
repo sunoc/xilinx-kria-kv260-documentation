@@ -107,8 +107,9 @@ view of the overall system we are trying to archive.
 [[file:./img/map.png]]
 
 
-#+INCLUDE: "./boot_firmware.org" :minlevel 1
-* COMMENT [[file:boot_firmware.org][Boot firmware]]
+* Boot firmware
+#+INCLUDE: "./boot_firmware.org" :minlevel 2
+** COMMENT LINK: [[file:boot_firmware.org][Boot firmware]]
 
 * Installing Linux
 Withe the boot firmware being up-to-date, we can proceed to install a Linux distribution
@@ -912,9 +913,9 @@ on the KRIA board.
 While the version of the firmware since the tag ~0.1~[fn:23] are functional, able to communicate with
 an Agent placed on the neighbour Linux, some work, improvements and tweaks are still to be made.
 
-*** TODO [#A] Firmware stop / crash / reboot
-SCHEDULED: <2023-11-13 月>
-
+*** WAIT [#A] Firmware stop / crash / reboot
+  maybe a complete re-implementation with a different os / else
+  would be better.
 This is maybe the most annoying issue that is currently still ongoing: if the firmware
 is not stopped in a "clean" way, the RPMsg task is not kill, making a full reboot of the board
 needed in order to re-launch the firmware and having an established communication.
@@ -1260,9 +1261,9 @@ to run the Agent as follow[fn:21] [fn:22]:
   ./MicroXRCEAgent serial --dev /dev/null --verbose 6
 #+END_SRC
 
-** TODO Separated RPMsg transport created for XRCE-DDS Agent
-SCHEDULED: <2023-11-14 火 10:00>
-
+** WAIT Separated RPMsg transport created for XRCE-DDS Agent
+  now focusing on updating my knowledge about the techo.
+    gotta update the doc latec
 - [ ] Implementation done
 - [ ] Successfully tested
 - [ ] Pull request done to the eProsima repository

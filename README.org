@@ -90,14 +90,14 @@ Then, the actual build can be made with a simple:
 
 * Introduction & motivation
 This guide will present how to setup and use Xilinx's KRIA board, in particular
-for running ROS on a host Ubuntu system, as well as for deploying
-micro-ROS as a firmware on the MCU part of this board's chip.
+for running ROS on a host Ubuntu system, as well as for deploying micro-ROS as a
+firmware on the MCU part of this board's chip.
 
-The use of this device in particular is interesting because of the presence
-of a CPU comprising both a general purpose ARM core, capable of running
-a Linux distribution, as well as another ARM core, real-time enabled,
-capable to run a RTOS. The figure [[fig:map]] below shows a schematic
-view of the overall system we are trying to archive.
+The use of this device in particular is interesting because of the presence of a
+CPU comprising both a general purpose ARM core, capable of running a Linux
+distribution, as well as another ARM core, real-time enabled, capable to run a
+RTOS. The figure [[fig:map]] below shows a schematic view of the overall system we
+are trying to archive.
 
 #+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: The Linux and ROS2 environment (orange) will
@@ -691,11 +691,11 @@ in the [[https://micro.ros.org/docs/tutorials/advanced/create\_custom\_static\_l
        wget \
        nano
 
-  . /opt/ros/\$ROS_DISTRO/setup.bash
+  . /opt/ros/$ROS_DISTRO/setup.bash
 
   mkdir microros_ws
   cd microros_ws
-  git clone -b \$ROS_DISTRO \
+  git clone -b $ROS_DISTRO \
       https://github.com/micro-ROS/micro_ros_setup.git \
       src/micro_ros_setup
 

@@ -156,7 +156,7 @@ Once the SD card is flashed and put back in the board, the micro-USB cable can b
 connected from the PC to the board. It is then possible to
 connect to the board in serial with an appropriate tool, for example ~picocom~,
 as in the following example (the serial port that "appeared" was the ~/dev/ttyUSB1~ in this case,
-and the 115200 bitrate is the default value for the board):
+and the 115200 bit-rate is the default value for the board):
 
 #+BEGIN_SRC sh
   sudo picocom /dev/ttyUSB1 -b 115200
@@ -164,7 +164,7 @@ and the 115200 bitrate is the default value for the board):
 
 Once logged in, it is typically easier and more convenient to connect the board
 using SSH. When the board is connected to the network, it is possible to know
-it's IP address with the ~ip~ command; then it is possible to connect to
+it's IP address with the ~IP~ command; then it is possible to connect to
 the board with ssh, as follow (example, with the first command to be run on the board
 and the second one on the host PC, both without the first placeholder hostnames):
 
@@ -331,14 +331,22 @@ not to be used:
   sudo reboot now
 #+END_SRC
 
-* Installing Linux (PetaLinux option)
+* Installing Linux (PetaLinux option)                      :WORK_IN_PROGRESS:
 This part is an alternative to the previous section [[]], where the installation
 of PetaLinux as a host system[fn:24] will be presented, as being an alternative to the
-Ubuntu LTS. Here are some reasonings why you'd prefer to use PetaLinux instead
+Ubuntu LTS. Here are some reasoning why you'd prefer to use PetaLinux instead
 of Ubuntu:
 + Direct support from Xilinx. While Ubuntu is also an official port, it is
   provided through Canonical.
 + If you plan to use ROS2 in containers.
+
+
+** General installation
+The indication on how to install PetaLinux on a KRIA board is detailed in the
+official documentation[fn:25], but for the KV260 board with an older release of
+the Linux. This guide will try to keep an up-to-date version of the guide, in
+particular for the KR260 KRIA board and, at the time of writing, the PetaLinux
+in version 2023.2.
 
 * Enabling ~remoteproc~
 One of the advantage of this Kria board, as cited previously, is the presence of
@@ -654,7 +662,7 @@ In this section, the goal is to build the micro-ROS library in order to be
 able to integrate it's functions into our Cortex R5F firmware.
 
 All of this should be done via cross-compiling on a host machine, however
-it is most common in the guides about micro-ROS to build the firmwares and libraries within a Docker,
+it is most common in the guides about micro-ROS to build the firmware and libraries within a Docker,
 so we can have access of the ROS environment without installing it permanently.
 
 One can simply run this command to summon a ROS2 Docker[fn:8] with the wanted version,
@@ -662,7 +670,7 @@ but first we also need to check the cross-compilation tools.
 
 We are downloading the latest ~arm-none-eabi~ gcc compiler directly from the ARM website.
 
-The cross-compilation tool can then be extracted, set as our ~toolchain~ variable,
+The cross-compilation tool can then be extracted, set as our ~tool-chain~ variable,
 then passed as a parameter when creating the Docker container:
 #+BEGIN_SRC sh
   pushd /home/$USER/Downloads
@@ -755,7 +763,7 @@ and that the Docker container is named ~ros_build~:
          /home/$USER/workspace/microros_lib/
 #+END_SRC
 
-Many parameters are available to be set up in the IDE for the compilation toolchain, but
+Many parameters are available to be set up in the IDE for the compilation tool-chain, but
 the figures [[fig:include]] and [[fig:include2]] below will show you a setup that worked to have the IDE
 to recognize the include files and to be able to use them for compiling the firmware.
 
@@ -770,7 +778,7 @@ to recognize the include files and to be able to use them for compiling the firm
 [[file:./img/vitis_new/include.png]]
 
 #+ATTR_LATEX: :width .8\textwidth
-#+CAPTION: Secondly, in the gcc linkers "Libraries", you can add the top level directory of your library.
+#+CAPTION: Secondly, in the gcc linker "Libraries", you can add the top level directory of your library.
 #+CAPTION: In our case, it is the directory that contains both the "include" directory added earlier,
 #+CAPTION: and also the "libmicroros.a" file.
 #+NAME: fig:include2
@@ -1293,7 +1301,9 @@ In order to have this node up and running, you need to set basically all the pre
   in the section [[micro-ROS XRCE-DDS Agent]].
 - This ping-pong application is released as a ROS2 Python node. It is best to pull and run it
   in a ROS2 environment to avoid having dependencies issues, as presented in the section [[Running a ROS2 node]].
-  
+
+* Monitoring and performances evaluation                    :WORK_IN_PROGRESS:
+
 * Conclusion & future                                      :WORK_IN_PROGRESS:
 
 
@@ -1304,7 +1314,7 @@ This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kri
 #+LATEX: \inputminted[linenos, frame=single]{diff}{./src/system.patch}
 
 #+LATEX: \pagebreak
-* Custom toolchain CMake settings
+* Custom tool-chain CMake settings
 This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom_r5f_toolchain.cmake][custom r5f toolchain.cmake]]
 #+LATEX: \inputminted[linenos, frame=single]{cmake}{./src/custom_r5f_toolchain.cmake}
 
@@ -1365,9 +1375,12 @@ directly at the ~libmicroros_kv260~ repository: [[https://gitlab.com/sunoc/libmi
 #+END_SRC
 
 * Footnotes
+
+[fn:25] https://xilinx.github.io/kria-apps-docs/kv260/2021.1/build/html/docs/build_petalinux.html
+
 [fn:24] It is to be noted that for this part, the "other" KRIA board (KR260) was
 used instead of the KV260 that was being used for everything tried on top of
-Ubuntu. No significan difference should be noted.
+Ubuntu. No significant difference should be noted.
 
 [fn:23] micro-ROS Client firmware version 0.1, the first working version: https://gitlab.com/sunoc/libmicroros_kv260/-/tree/0.1
 

@@ -5,7 +5,7 @@ set(CMAKE_INSTALL_LIBDIR /usr/)
 set(PLATFORM_NAME "LwIP")
 
 
-set(ARCH_CPU_FLAGS "-mcpu=cortex-r5 -mthumb -mfpu=vfpv3-d16 -mfloat-abi=hard -DARMR5 -O0 -Wall -fdata-sections -ffunction-sections -fno-tree-loop-distribute-patterns -Wno-unused-parameter -Wno-unused-value -Wno-unused-variable -Wno-unused-function -Wno-unused-but-set-variable" CACHE STRING "" FORCE)
+set(ARCH_CPU_FLAGS "-mcpu=cortex-r5 -mthumb -mfpu=vfpv3-d16 -mfloat-abi=hard -DARMR5 -O0 -Wall -fdata-sections -ffunction-sections -fno-tree-loop-distribute-patterns -Wno-unused-parameter -Wno-unused-value -Wno-unused-variable -Wno-unused-function -Wno-unused-but-set-variable -Wl,--gc-sections" CACHE STRING "" FORCE)
 set(ARCH_OPT_FLAGS "")
 
 set(CMAKE_C_COMPILER arm-none-eabi-gcc)

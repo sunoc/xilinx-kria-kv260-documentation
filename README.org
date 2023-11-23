@@ -162,17 +162,21 @@ and the 115200 bit-rate is the default value for the board):
   sudo picocom /dev/ttyUSB1 -b 115200
 #+END_SRC
 
+In my case, I am using Emacs's ~serial-term~:
+#+BEGIN_SRC sh
+  M-x serial-term RET /dev/ttyUSB1 RET 115200 RET
+#+END_SRC
+
+
 Once logged in, it is typically easier and more convenient to connect the board
 using SSH. When the board is connected to the network, it is possible to know
 it's IP address with the ~IP~ command; then it is possible to connect to
 the board with ssh, as follow (example, with the first command to be run on the board
 and the second one on the host PC, both without the first placeholder hostnames):
-
-
 #+BEGIN_SRC sh
-  kria# ip addr
+    kria# ip addr
 
-  host# ssh ubuntu@192.168.4.11
+    host# ssh ubuntu@192.168.4.11
 #+END_SRC
 
 ** Network and admin setups
@@ -340,13 +344,83 @@ of Ubuntu:
   provided through Canonical.
 + If you plan to use ROS2 in containers.
 
-
 ** General installation
 The indication on how to install PetaLinux on a KRIA board is detailed in the
 official documentation[fn:25], but for the KV260 board with an older release of
 the Linux. This guide will try to keep an up-to-date version of the guide, in
 particular for the KR260 KRIA board and, at the time of writing, the PetaLinux
 in version 2023.2.
+
+Two tools should be downloaded upfront in order to be ready and create the
+PetaLinux image for our target board. Both can be obtained at the Xilinx
+official download page[fn:26]. Login with an AMD account is required in order to
+download the files we need, namely, we'll have to get:
++ The installer tool: ~petalinux-v2023.2-10121855-installer.run~ or similar name.
++ The SOM board support package: ~xilinx-kr260-starterkit-v2023.2-10140544.bsp~ or similar name[fn:29].
+The specific name of the utils you'll get to download will evolve over time.
+The version 2023.2 was the latest available at the time of writing this guide.
+For the following command, I will assume that both files were downloaded into
+the same directory and that you have a shell open in said directory.
+
+Firstly, a crap ton of dependencies are needed. They are detailed in the
+release notes of the version of the tool you are downloading and it depends on
+your distribution, but here is a one-liner that works for the PetaLinux 2023.2
+to be built on Ubuntu(-based) 22.04 LTS:
+
+#+BEGIN_SRC sh
+  sudo apt-get update && sudo apt-get install iproute2 gawk gcc net-tools \
+  libncurses-dev openssl libselinux1 xterm autoconf libtool texinfo zlib1g-dev \
+  gcc-multilib build-essential automake screen libstdc++-11-dev g++ xz-utils cpp \
+  patch python3 python3-jinja2 diffutils debianutils iputils-ping cpio gnupg
+#+END_SRC
+
+Installing the petalinux tools can be done with the ~.run~ script[fn:28], as follow:
+#+BEGIN_SRC sh
+  sudo chmod +x ./petalinux-v2023.2-10121855-installer.run
+  ./petalinux-v2023.2-10121855-installer.run
+  source settings.sh
+#+END_SRC
+
+A project can then be created, using the ~.bsp~ file. From there it is possible to
+build the image file meant to be booted by the board:
+#+BEGIN_SRC sh
+  petalinux-create -t project -s xilinx-kr260-starterkit-v2023.2-10140544.bsp
+  cd xilinx-kr260-starterkit-2023.2/
+  petalinux-build
+  petalinux-package --wic --bootfiles "ramdisk.cpio.gz.u-boot boot.scr Image system.dtb"
+#+END_SRC
+
+#+LATEX: \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black]
+*DANGER*: The next part involve the ~dd~ command writing on disks!!!
+As always with the dd command, thou have to be *VERY* careful on what arguments
+thou give. Selecting the wrong disk will result on the destruction of
+thy data !!
+_If you are unsure of what to do, seek assistance !_
+#+LATEX: \end{tcolorbox}
+
+Finally, and now an image has been generated, it can be burnt to a micro-SD card the usual way:
+#+BEGIN_SRC sh
+  sudo dd if=./images/linux/petalinux-sdimage.wic \
+     of=/dev/sda status=progress bs=8M && sync
+#+END_SRC
+
+From that point, the media can be ejected, put in the board and the boot process
+should happen successfully.
+
+** First login and configuration
+The initial login username is ~petalinux~. The initial password is to be set at the moment of the first boot.
+
+
+#+BEGIN_SRC sh
+  sudo dnf update
+  sudo dnf upgrade
+  sudo reboot now
+#+END_SRC
+
+
+** Note: good points for PetaLinux over Ubuntu
++ The boot process in insanely faster: a few seconds for PetaLinux versus multiple minutes with Ubuntu.
++ +The fan is silent all the way through, and seemingly managed in a better way.+
 
 * Enabling ~remoteproc~
 One of the advantage of this Kria board, as cited previously, is the presence of
@@ -670,7 +744,7 @@ but first we also need to check the cross-compilation tools.
 
 We are downloading the latest ~arm-none-eabi~ gcc compiler directly from the ARM website.
 
-The cross-compilation tool can then be extracted, set as our ~tool-chain~ variable,
+The cross-compilation tool can then be extracted, set as our ~toolchain~ variable,
 then passed as a parameter when creating the Docker container:
 #+BEGIN_SRC sh
   pushd /home/$USER/Downloads
@@ -1178,7 +1252,6 @@ This part of the guide will focus on it.
 #+NAME: fig:map_agent
 [[file:./img/map_agent.png]]
 
-
 ** Building a eProsima bare-metal example agent
 A key aspect to understand about modifying the agent (as
 this will be needed later on to support our new communication system),
@@ -1193,7 +1266,7 @@ and eventually modified.
 #+BEGIN_SRC sh
   sudo nano /microros_ws/build/micro_ros_agent/agent/src/xrceagent/src/cpp/transport/custom/CustomAgent.cpp
 #+END_SRC
-The same file is available online as a reference, on [[https://github.com/eProsima/Micro-XRCE-DDS-Agent/blob/develop/src/cpp/transport/custom/CustomAgent.cpp][eProsima XRCE-DDS-Agent GitHub repository]].
+The same file is available online as a reference, on eProsima repository[fn:27].
 
 #+BEGIN_SRC sh
   git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
@@ -1376,6 +1449,18 @@ directly at the ~libmicroros_kv260~ repository: [[https://gitlab.com/sunoc/libmi
 
 * Footnotes
 
+[fn:29] The ~xilinx-kr260-starterkit-v2023.2-10140544.bsp~ file is specifically
+meant for the KR260 demo board. If we were building for the KV260, for example,
+the BSP file to download would be different.
+
+[fn:28] It is to be noted that the ~source~ command will run best on ~bash~. Trying
+to run it on ~zsh~ for ex. will cause issues. This can be enforced with the
+command ~sudo dpkg-reconfigure bash~.
+
+[fn:27] https://github.com/eProsima/Micro-XRCE-DDS-Agent/blob/develop/src/cpp/transport/custom/CustomAgent.cpp
+
+[fn:26] https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/embedded-design-tools.html 
+
 [fn:25] https://xilinx.github.io/kria-apps-docs/kv260/2021.1/build/html/docs/build_petalinux.html
 
 [fn:24] It is to be noted that for this part, the "other" KRIA board (KR260) was
@@ -1429,7 +1514,7 @@ You own path will vary depending on how your project was named in the first plac
 Obviously, the ~SSH~ connection parameters will also be specific to your case.
 The ~ubuntu@192.168.1.10~ set here are merely an example.
 
-[fn:9] Both files are also visible in the appendixes [[Custom toolchain CMake settings]]
+[fn:9] Both files are also visible in the appendixes [[Custom tool-chain CMake settings]]
 and [[Custom Colcon meta settings]] the end of this report.}
 
 [fn:8] If Docker is not set up on your machine, you can follow the guide on [[https://docs.docker.com/engine/install/ubuntu/][the official website]].

@@ -366,7 +366,6 @@ Firstly, a crap ton of dependencies are needed. They are detailed in the
 release notes of the version of the tool you are downloading and it depends on
 your distribution, but here is a one-liner that works for the PetaLinux 2023.2
 to be built on Ubuntu(-based) 22.04 LTS:
-
 #+BEGIN_SRC sh
   sudo apt-get update && sudo apt-get install iproute2 gawk gcc net-tools \
   libncurses-dev openssl libselinux1 xterm autoconf libtool texinfo zlib1g-dev \
@@ -384,9 +383,49 @@ Installing the petalinux tools can be done with the ~.run~ script[fn:28], as fol
 A project can then be created, using the ~.bsp~ file. From there it is possible to
 build the image file meant to be booted by the board:
 #+BEGIN_SRC sh
-  petalinux-create -t project -s xilinx-kr260-starterkit-v2023.2-10140544.bsp
-  cd xilinx-kr260-starterkit-2023.2/
+    petalinux-create -t project -s xilinx-kr260-starterkit-v2023.2-10140544.bsp
+    cd xilinx-kr260-starterkit-2023.2/
+#+END_SRC
+
+
+Some kernel and module configuration are needed in order for the petalinux system to work properly.
+These setup can be set using the following command:
+
+#+BEGIN_SRC sh
+  petalinux-config -c rootfs
+#+END_SRC
+
+Then, here are the options that we want to enable:
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: Hey, listen ~
+#+NAME: fig:yocto_openamp
+[[file:./img/yocto_openamp.png]]
+
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: Hey, listen !!
+#+NAME: fig:yocto_ssh
+[[file:./img/yocto_ssh.png]]
+
+
+# Jupyter can also be activated as a packagegroup ?!
+
+The more general option allows to enable other stuff related to OpenAMP:
+#+BEGIN_SRC sh
+  petalinux-config
+#+END_SRC
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: Hey, listen !
+#+NAME: fig:yocto_openamp2
+[[file:./img/yocto_openamp2.png]]
+
+
+It is then possible to build and package the image. Most critically compared to the example,
+the ~openamp.dtb~ overlay must be used in order for OpenAMP and subsequently RPMsg to become usable.
+#+BEGIN_SRC sh
   petalinux-build
+  #petalinux-package --wic --bootfiles "ramdisk.cpio.gz.u-boot boot.scr Image ../../pre-built/linux/images/openamp.dtb"
   petalinux-package --wic --bootfiles "ramdisk.cpio.gz.u-boot boot.scr Image system.dtb"
 #+END_SRC
 
@@ -413,7 +452,6 @@ The initial login username is ~petalinux~. The initial password is to be set at 
 
 #+BEGIN_SRC sh
   sudo dnf update
-  sudo dnf upgrade
   sudo reboot now
 #+END_SRC
 
@@ -421,6 +459,10 @@ The initial login username is ~petalinux~. The initial password is to be set at 
 ** Note: good points for PetaLinux over Ubuntu
 + The boot process in insanely faster: a few seconds for PetaLinux versus multiple minutes with Ubuntu.
 + +The fan is silent all the way through, and seemingly managed in a better way.+
+  This seems to stop being true once we update the board packages with
+  ~dnf~. Unknown reason for now.
++ OpenAMP and the echo test app works fairly "out of the box"
++ Communication seems insanely fast too
 
 * Enabling ~remoteproc~
 One of the advantage of this Kria board, as cited previously, is the presence of

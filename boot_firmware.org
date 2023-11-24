@@ -4,17 +4,17 @@ have the latest LTS version of Ubuntu up and running.
 In order to be able to boot such a newer version of Linux, the
 boot image of the board must first be updated.
 
-The procedure is available in [[https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Firmware-Update][the official documentation]],
+The procedure is available in the official documentation[fn:2],
 but I will present it step by step here.
 
 ** Getting the new firmware
 A 2022 version of the board firmware is required in order to run the latest
 version of Ubuntu properly.
 
-The image can be downloaded at [[https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+K26+
-SOMoot-FW-update-with-xmutil][the atlassian page]] on the topic,
+The image can be downloaded at the atlassian page[fn:1] on the topic,
 or even directly with the following command:
 
+>>>> The link is unusable !!!!!!!
 #+BEGIN_SRC sh
   wget https://www.xilinx.com/member/forms/download/\
        design-license-xef.html?filename=BOOT-k26-starter-kit-20230516185703.bin
@@ -54,3 +54,8 @@ the board using the "Recover Image" section at the bottom right of the page.
 
 The board can be re-booted afterwards.
 #+LATEX: \pagebreak
+
+* Footnotes
+[fn:2] https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Firmware-Update 
+
+[fn:1] https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria

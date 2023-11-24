@@ -3,7 +3,7 @@
 :CATEGORY: KRIA
 :END:
 #+title: Setting up and using
-#+title: Xilinx KRIA KV260
+#+title: Xilinx KRIA KV260 and KR260
 #+filetags: :export:
 #+subtitle: \begin{CJK}{UTF8}{min}南山大学\end{CJK}
 #+author: Vincent Conus
@@ -60,7 +60,7 @@ and stays hidden in a :noexport: section in this report.
      "\\vspace{2cm}\n"
      "{\\large %a -  Source available at \\gitlab{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation} \\par}\n"
      "\\vspace{3cm}\n"
-     "\\includegraphics[width=0.8\\textwidth]{./img/board}"
+     "\\includegraphics[width=0.8\\textwidth]{./img/boards}"
      "\\end{titlepage}\n"))
 #+end_src
 

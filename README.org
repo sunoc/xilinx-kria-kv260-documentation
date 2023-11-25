@@ -335,6 +335,45 @@ not to be used:
   sudo reboot now
 #+END_SRC
 
+#+LATEX: \pagebreak
+** Jupyter notebook setup
+Here are some instruction on how to install and setup Jupyter on a KRIA board,
+accessing it remotely and using it for making data analysis.
+
+The following commands will set the required packages and install Jupyter itself[fn:30]:
+#+BEGIN_SRC sh
+  sudo apt-get update && sudo apt-get install python3 python3-pip python3-venv python3-virtualenv
+
+  virtualenv myjupyter
+  source ./myjupyter/bin/activate
+  python3 -m pip install jupyter pandas numpy matplotlib scipy
+
+  sudo reboot now
+#+END_SRC
+
+Then in a terminal on your host machine (not on the KRIA board), you can run the following command to bind local ports
+
+#+BEGIN_SRC sh
+  ssh -L 8888:localhost:8888 kria
+#+END_SRC
+
+Then on the opened SSH shell to the KRIA board:
+#+BEGIN_SRC sh
+  source ./myjupyter/bin/activate
+  jupyter notebook
+#+END_SRC
+
+From there, it is possible to use the displayed URL (something that looks like
+~http://localhost:8888/tree?token~) to access the remote Notebook system.
+It is possible to do so with ~localhost~ since we have the ~ssh~ port map connection going on.
+
+Eventually creating Notebooks and stuff, it is possible to obtain a situation like shown in the figure [[fig:jupyter]] below.
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: A test Jupyter Notebook for CSV data analysis.
+#+NAME: fig:jupyter
+[[file:./img/jupyter.png]]
+
 * Installing Linux (PetaLinux option)                      :WORK_IN_PROGRESS:
 This part is an alternative to the previous section [[]], where the installation
 of PetaLinux as a host system[fn:24] will be presented, as being an alternative to the
@@ -460,7 +499,8 @@ The initial login username is ~petalinux~. The initial password is to be set at 
 + The boot process in insanely faster: a few seconds for PetaLinux versus multiple minutes with Ubuntu.
 + +The fan is silent all the way through, and seemingly managed in a better way.+
   This seems to stop being true once we update the board packages with
-  ~dnf~. Unknown reason for now.
+  ~dnf~. Unknown reason for now. There is an issue with the ZynqMP Linux PIN
+  controll system, as visible in the ~dmesg~ log.
 + OpenAMP and the echo test app works fairly "out of the box"
 + Communication seems insanely fast too
 
@@ -1490,6 +1530,7 @@ directly at the ~libmicroros_kv260~ repository: [[https://gitlab.com/sunoc/libmi
 #+END_SRC
 
 * Footnotes
+[fn:30] Alongside other packages useful for data analysis, such as ~pandas~ or ~numpy~. 
 
 [fn:29] The ~xilinx-kr260-starterkit-v2023.2-10140544.bsp~ file is specifically
 meant for the KR260 demo board. If we were building for the KV260, for example,

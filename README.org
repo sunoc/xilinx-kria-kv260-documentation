@@ -1,15 +1,16 @@
 :PROPERTIES:
 :ID:       ac338634-949e-4e3a-8d75-45bed92243c6
+:CATEGORY: KRIA
 :END:
-#+title: Setting up and using 
-#+title: Xilinx KRIA KV260
+#+title: Setting up and using
+#+title: Xilinx KRIA KV260 and KR260
 #+filetags: :export:
 #+subtitle: \begin{CJK}{UTF8}{min}南山大学\end{CJK}
 #+author: Vincent Conus
 #+email: vincent.conus@protonmail.com
 #+date: 2023-8-30
 
-* Headers and LaTeX settings for export                               :noexport:
+* Headers and LaTeX settings for export                            :noexport:
 A large amount of headers and parameters are needed in order
 to have this "README" document being exportable as a LaTeX
 document formatted the way I wanted it to be.
@@ -21,6 +22,8 @@ and stays hidden in a :noexport: section in this report.
 #+LANGUAGE: English
 
 #+OPTIONS: H:3 toc:t date:t title:t email:t
+
+#+LATEX_COMPILER:
 
 #+LATEX_CLASS: article
 #+LATEX_CLASS_OPTIONS:[10pt]
@@ -57,7 +60,7 @@ and stays hidden in a :noexport: section in this report.
      "\\vspace{2cm}\n"
      "{\\large %a -  Source available at \\gitlab{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation} \\par}\n"
      "\\vspace{3cm}\n"
-     "\\includegraphics[width=0.8\\textwidth]{./img/board}"
+     "\\includegraphics[width=0.8\\textwidth]{./img/boards}"
      "\\end{titlepage}\n"))
 #+end_src
 
@@ -68,7 +71,7 @@ and stays hidden in a :noexport: section in this report.
        "\\pagebreak\n"))
 #+end_src
 
-* Building this report from the LaTeX file                            :noexport:
+* Building this report from the LaTeX file                         :noexport:
 The base file for this report is actually this README.org file itself.
 However, upon local build, this file is regularly exported as
 a ~.tex~ file that can be built normally.
@@ -85,17 +88,16 @@ Then, the actual build can be made with a simple:
   pdflatex README.tex
 #+END_SRC
 
-
 * Introduction & motivation
 This guide will present how to setup and use Xilinx's KRIA board, in particular
 for running ROS on a host Ubuntu system, as well as for deploying
 micro-ROS[[cite:&Belsare2023]] as a firmware on the MCU part of this board's chip.
 
-The use of this device in particular is interesting because of the presence
-of a CPU comprising both a general purpose ARM core, capable of running
-a Linux distribution, as well as another ARM core, real-time enabled,
-capable to run a RTOS. The figure [[fig:map]] below shows a schematic
-view of the overall system we are trying to archive.
+The use of this device in particular is interesting because of the presence of a
+CPU comprising both a general purpose ARM core, capable of running a Linux
+distribution, as well as another ARM core, real-time enabled, capable to run a
+RTOS. The figure [[fig:map]] below shows a schematic view of the overall system we
+are trying to archive.
 
 #+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: The Linux and ROS2 environment (orange) will
@@ -105,60 +107,10 @@ view of the overall system we are trying to archive.
 [[file:./img/map.png]]
 
 * Boot firmware
-The goal for the Linux side of the deployment is to
-have the latest LTS version of Ubuntu up and running.
+#+INCLUDE: "./boot_firmware.org" :minlevel 2 :lines "7-"
+** COMMENT LINK: [[id:be2ce0ab-07db-49e6-be50-72f2db76cde3][KRIA board boot firmware update]]
 
-In order to be able to boot such a newer version of Linux, the
-boot image of the board must first be updated.
-
-The procedure is available in [[https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Firmware-Update][the official documentation]],
-but I will present it step by step here.
-
-** Getting the new firmware
-A 2022 version of the board firmware is required in order to run the latest
-version of Ubuntu properly.
-
-The image can be downloaded at [[https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+K26+
-SOMoot-FW-update-with-xmutil][the atlassian page]] on the topic,
-or even directly with the following command:
-
-#+BEGIN_SRC sh
-  wget https://www.xilinx.com/member/forms/download/\
-       design-license-xef.html?filename=BOOT-k26-starter-kit-20230516185703.bin
-#+END_SRC
-
-
-** Reaching the board recovery tool
-Now the firmware ~.bin~ image is available, it is possible to update it using the
-boards recovery tool. Here are the steps that must be taken in order to reach
-this tool and update the board:
-
-+ Connect the board to your machine via a Ethernet cable.
-  This will obviously cut you internet access, so you should be set for that.
-+ Select the wired network as your connection (must be "forced", since it
-  doesn't have internet access).
-+ Set a fixed IP address for your machine, in the ~192.168.0.1/24~
-  range, except the specific ~192.168.0.111~, which will be used by the
-  board.
-+ Using a web browser on your host machine, access
-  ~http://192.168.0.111~. Thou shall now see the interface, as visible on
-  the figure [[fig:recovery]] below.
-
-#+ATTR_LATEX: :width 1\textwidth
-#+CAPTION: The recovery tool for the board, access from Firefox. We can see
-#+CAPTION: board information at the center, and the tools to upload the firmware at
-#+CAPTION:   the bottom of the page.
-#+NAME: fig:recovery
-[[file:img/recovery.png]]
-
-** Updating the boot firmware
-From this "recovery" page, it is possible to upload the ~.bin~ file downloaded previously onto
-the board using the "Recover Image" section at the bottom right of the page.
-
-The board can be re-booted afterwards.
-#+LATEX: \pagebreak
-
-* Installing Linux
+* Installing Linux (Ubuntu LTS 22.04 option)
 Withe the boot firmware being up-to-date, we can proceed to install a Linux distribution
 on our Kria board. The step needed to archive a full installation of Ubuntu LTS 22.04
 will be presented in this section[fn:7]. The figure [[fig:map_linux]] below shows
@@ -190,13 +142,13 @@ thy data !!
 _If you are unsure of what to do, seek assistance !_
 #+LATEX: \end{tcolorbox}
 
-With the image available on thy machine and a SD card visible as ~/dev/sda~
-[fn:1] one can simply run the ~dd~ command as follow to
-write the image to a previously formatted drive (here ~/dev/sda~):
+With the image available on thy machine and a SD card visible as ~/dev/sda~ device[fn:1]
+one can simply run the ~dd~ command as follow to write the image to a previously formatted drive (here ~/dev/sda~):
 
 #+BEGIN_SRC sh
+  unxz iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img.xz
   sudo dd if=iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img \
-  of=/dev/sda status=progress bs=8M && sync
+       of=/dev/sda status=progress bs=8M && sync
 #+END_SRC
 
 
@@ -204,23 +156,27 @@ Once the SD card is flashed and put back in the board, the micro-USB cable can b
 connected from the PC to the board. It is then possible to
 connect to the board in serial with an appropriate tool, for example ~picocom~,
 as in the following example (the serial port that "appeared" was the ~/dev/ttyUSB1~ in this case,
-and the 115200 bitrate is the default value for the board):
+and the 115200 bit-rate is the default value for the board):
 
 #+BEGIN_SRC sh
   sudo picocom /dev/ttyUSB1 -b 115200
 #+END_SRC
 
+In my case, I am using Emacs's ~serial-term~:
+#+BEGIN_SRC sh
+  M-x serial-term RET /dev/ttyUSB1 RET 115200 RET
+#+END_SRC
+
+
 Once logged in, it is typically easier and more convenient to connect the board
 using SSH. When the board is connected to the network, it is possible to know
-it's IP address with the ~ip~ command; then it is possible to connect to
+it's IP address with the ~IP~ command; then it is possible to connect to
 the board with ssh, as follow (example, with the first command to be run on the board
 and the second one on the host PC, both without the first placeholder hostnames):
-
-
 #+BEGIN_SRC sh
-  kria# ip addr
+    kria# ip addr
 
-  host# ssh ubuntu@192.168.4.11
+    host# ssh ubuntu@192.168.4.11
 #+END_SRC
 
 ** Network and admin setups
@@ -295,7 +251,6 @@ sudo apt-get update
 sudo apt-get dist-upgrade
 sudo reboot now
 #+END_SRC
-
 
 *** Static IP address
 A static IP can be set by writing the following
@@ -379,6 +334,175 @@ not to be used:
   sudo apt-get autoclean
   sudo reboot now
 #+END_SRC
+
+#+LATEX: \pagebreak
+** Jupyter notebook setup
+Here are some instruction on how to install and setup Jupyter on a KRIA board,
+accessing it remotely and using it for making data analysis.
+
+The following commands will set the required packages and install Jupyter itself[fn:30]:
+#+BEGIN_SRC sh
+  sudo apt-get update && sudo apt-get install python3 python3-pip python3-venv python3-virtualenv
+
+  virtualenv myjupyter
+  source ./myjupyter/bin/activate
+  python3 -m pip install jupyter pandas numpy matplotlib scipy
+
+  sudo reboot now
+#+END_SRC
+
+Then in a terminal on your host machine (not on the KRIA board), you can run the following command to bind local ports
+
+#+BEGIN_SRC sh
+  ssh -L 8888:localhost:8888 kria
+#+END_SRC
+
+Then on the opened SSH shell to the KRIA board:
+#+BEGIN_SRC sh
+  source ./myjupyter/bin/activate
+  jupyter notebook
+#+END_SRC
+
+From there, it is possible to use the displayed URL (something that looks like
+~http://localhost:8888/tree?token~) to access the remote Notebook system from a local web browser.
+It is possible to do so with ~localhost~ since we have the ~ssh~ port map connection going on.
+
+Eventually creating Notebooks and stuff, it is possible to obtain a situation like shown in the figure [[fig:jupyter]] below.
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: A test Jupyter Notebook for CSV data analysis.
+#+NAME: fig:jupyter
+[[file:./img/jupyter.png]]
+
+* Installing Linux (PetaLinux option)                      :WORK_IN_PROGRESS:
+This part is an alternative to the previous section [[]], where the installation
+of PetaLinux as a host system[fn:24] will be presented, as being an alternative to the
+Ubuntu LTS. Here are some reasoning why you'd prefer to use PetaLinux instead
+of Ubuntu:
++ Direct support from Xilinx. While Ubuntu is also an official port, it is
+  provided through Canonical.
++ If you plan to use ROS2 in containers.
+
+** General installation
+The indication on how to install PetaLinux on a KRIA board is detailed in the
+official documentation[fn:25], but for the KV260 board with an older release of
+the Linux. This guide will try to keep an up-to-date version of the guide, in
+particular for the KR260 KRIA board and, at the time of writing, the PetaLinux
+in version 2023.2.
+
+Two tools should be downloaded upfront in order to be ready and create the
+PetaLinux image for our target board. Both can be obtained at the Xilinx
+official download page[fn:26]. Login with an AMD account is required in order to
+download the files we need, namely, we'll have to get:
++ The installer tool: ~petalinux-v2023.2-10121855-installer.run~ or similar name.
++ The SOM board support package: ~xilinx-kr260-starterkit-v2023.2-10140544.bsp~ or similar name[fn:29].
+The specific name of the utils you'll get to download will evolve over time.
+The version 2023.2 was the latest available at the time of writing this guide.
+For the following command, I will assume that both files were downloaded into
+the same directory and that you have a shell open in said directory.
+
+Firstly, a crap ton of dependencies are needed. They are detailed in the
+release notes of the version of the tool you are downloading and it depends on
+your distribution, but here is a one-liner that works for the PetaLinux 2023.2
+to be built on Ubuntu(-based) 22.04 LTS:
+#+BEGIN_SRC sh
+  sudo apt-get update && sudo apt-get install iproute2 gawk gcc net-tools \
+  libncurses-dev openssl libselinux1 xterm autoconf libtool texinfo zlib1g-dev \
+  gcc-multilib build-essential automake screen libstdc++-11-dev g++ xz-utils cpp \
+  patch python3 python3-jinja2 diffutils debianutils iputils-ping cpio gnupg
+#+END_SRC
+
+Installing the petalinux tools can be done with the ~.run~ script[fn:28], as follow:
+#+BEGIN_SRC sh
+  sudo chmod +x ./petalinux-v2023.2-10121855-installer.run
+  ./petalinux-v2023.2-10121855-installer.run
+  source settings.sh
+#+END_SRC
+
+A project can then be created, using the ~.bsp~ file. From there it is possible to
+build the image file meant to be booted by the board:
+#+BEGIN_SRC sh
+    petalinux-create -t project -s xilinx-kr260-starterkit-v2023.2-10140544.bsp
+    cd xilinx-kr260-starterkit-2023.2/
+#+END_SRC
+
+
+Some kernel and module configuration are needed in order for the petalinux system to work properly.
+These setup can be set using the following command:
+
+#+BEGIN_SRC sh
+  petalinux-config -c rootfs
+#+END_SRC
+
+Then, here are the options that we want to enable:
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: Hey, listen ~
+#+NAME: fig:yocto_openamp
+[[file:./img/yocto_openamp.png]]
+
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: Hey, listen !!
+#+NAME: fig:yocto_ssh
+[[file:./img/yocto_ssh.png]]
+
+
+# Jupyter can also be activated as a packagegroup ?!
+
+The more general option allows to enable other stuff related to OpenAMP:
+#+BEGIN_SRC sh
+  petalinux-config
+#+END_SRC
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: Hey, listen !
+#+NAME: fig:yocto_openamp2
+[[file:./img/yocto_openamp2.png]]
+
+
+It is then possible to build and package the image. Most critically compared to the example,
+the ~openamp.dtb~ overlay must be used in order for OpenAMP and subsequently RPMsg to become usable.
+#+BEGIN_SRC sh
+  petalinux-build
+  #petalinux-package --wic --bootfiles "ramdisk.cpio.gz.u-boot boot.scr Image ../../pre-built/linux/images/openamp.dtb"
+  petalinux-package --wic --bootfiles "ramdisk.cpio.gz.u-boot boot.scr Image system.dtb"
+#+END_SRC
+
+#+LATEX: \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black]
+*DANGER*: The next part involve the ~dd~ command writing on disks!!!
+As always with the dd command, thou have to be *VERY* careful on what arguments
+thou give. Selecting the wrong disk will result on the destruction of
+thy data !!
+_If you are unsure of what to do, seek assistance !_
+#+LATEX: \end{tcolorbox}
+
+Finally, and now an image has been generated, it can be burnt to a micro-SD card the usual way:
+#+BEGIN_SRC sh
+  sudo dd if=./images/linux/petalinux-sdimage.wic \
+     of=/dev/sda status=progress bs=8M && sync
+#+END_SRC
+
+From that point, the media can be ejected, put in the board and the boot process
+should happen successfully.
+
+** First login and configuration
+The initial login username is ~petalinux~. The initial password is to be set at the moment of the first boot.
+
+
+#+BEGIN_SRC sh
+  sudo dnf update
+  sudo reboot now
+#+END_SRC
+
+
+** Note: good points for PetaLinux over Ubuntu
++ The boot process in insanely faster: a few seconds for PetaLinux versus multiple minutes with Ubuntu.
++ +The fan is silent all the way through, and seemingly managed in a better way.+
+  This seems to stop being true once we update the board packages with
+  ~dnf~. Unknown reason for now. There is an issue with the ZynqMP Linux PIN
+  controll system, as visible in the ~dmesg~ log.
++ OpenAMP and the echo test app works fairly "out of the box"
++ Communication seems insanely fast too
 
 * Enabling ~remoteproc~
 One of the advantage of this Kria board, as cited previously, is the presence of
@@ -570,13 +694,13 @@ With the platform configuration files available, we can now use the IDE to gener
 new project for our board. The whole process will be described with screen captures and
 captions.
 
-#+ATTR_LATEX: :width .5\textwidth
+#+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: We are starting with creating a "New Application Project"
 #+CAPTION: You should be greeted with this wizard window. Next.
 #+NAME: fig:project1
 [[file:./img/vitis_new/project1.png]]
 
-#+ATTR_LATEX: :width .5\textwidth
+#+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: For the platform, we need to get our build Kria configuration.
 #+CAPTION: In the "Create a new platform" tab,
 #+CAPTION: click the "Browse..." button.
@@ -619,15 +743,16 @@ file:./img/vitis_new/project7.png
 
 #+LATEX: \pagebreak
 In the Xilinx documentation, it is made mention of the addresses setting that should be checked in the ~script.ld~ file.
-These valued look different from what could be set in the DTO for the Linux side, but they appear to
-work for the example we are running:
+The values in the figure [[fig:projectmem]] below look different from what could be set in the DTO for the Linux side, but they appear to
+work for the example we are running, including the new DTO patch without overlapping memory:
 
-#+BEGIN_SRC sh
-  psu_ddr_S_AXI_BASEADDR                     0x3ed00000	
-  psu_ocm_ram_1_S_AXI_BASEADDR        0xfffc0000
-  psu_r5_tcm_ram_0_S_AXI_BASEADDR    0x00000000
-  psu_r5_tcm_ram_1_S_AXI_BASEADDR    0x00020000	
-#+END_SRC
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: lscript.ld memory configuration for the firmware memory setup.
+#+CAPTION: The same file is available as a whole in this repository's src directory.
+#+NAME: fig:projectmem
+file:./img/vitis_new/project_mem.png
+
 
 Once your example project is built and you have a ~.elf~ file available, you can
 jump directly to the [[Loading the firmware]] section to see how to deploy and use your firmware.
@@ -693,7 +818,7 @@ In this section, the goal is to build the micro-ROS library in order to be
 able to integrate it's functions into our Cortex R5F firmware.
 
 All of this should be done via cross-compiling on a host machine, however
-it is most common in the guides about micro-ROS to build the firmwares and libraries within a Docker,
+it is most common in the guides about micro-ROS to build the firmware and libraries within a Docker,
 so we can have access of the ROS environment without installing it permanently.
 
 One can simply run this command to summon a ROS2 Docker[fn:8] with the wanted version,
@@ -737,11 +862,11 @@ in the [[https://micro.ros.org/docs/tutorials/advanced/create\_custom\_static\_l
        wget \
        nano
 
-  . /opt/ros/\$ROS_DISTRO/setup.bash
+  . /opt/ros/$ROS_DISTRO/setup.bash
 
   mkdir microros_ws
   cd microros_ws
-  git clone -b \$ROS_DISTRO \
+  git clone -b $ROS_DISTRO \
       https://github.com/micro-ROS/micro_ros_setup.git \
       src/micro_ros_setup
 
@@ -767,11 +892,11 @@ then we can build the library with the following ros2 command:
   wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
   documentation/-/raw/main/src/custom_r5f_colcon.meta
 
-  cp -r /armr5-toolchain/ \$(pwd)/firmware/toolchain && \
-  export PATH=\$PATH:\$(pwd)/firmware/toolchain/bin
+  cp -r /armr5-toolchain/ $(pwd)/firmware/toolchain && \
+  export PATH=$PATH:$(pwd)/firmware/toolchain/bin
 
   ros2 run micro_ros_setup build_firmware.sh \
-  \$(pwd)/custom_r5f_toolchain.cmake \$(pwd)/\
+  $(pwd)/custom_r5f_toolchain.cmake $(pwd)/\
   custom_r5f_colcon.meta
 #+END_SRC
 #+LATEX: \pagebreak
@@ -794,7 +919,7 @@ and that the Docker container is named ~ros_build~:
          /home/$USER/workspace/microros_lib/
 #+END_SRC
 
-Many parameters are available to be set up in the IDE for the compilation toolchain, but
+Many parameters are available to be set up in the IDE for the compilation tool-chain, but
 the figures [[fig:include]] and [[fig:include2]] below will show you a setup that worked to have the IDE
 to recognize the include files and to be able to use them for compiling the firmware.
 
@@ -809,7 +934,7 @@ to recognize the include files and to be able to use them for compiling the firm
 [[file:./img/vitis_new/include.png]]
 
 #+ATTR_LATEX: :width .8\textwidth
-#+CAPTION: Secondly, in the gcc linkers "Libraries", you can add the top level directory of your library.
+#+CAPTION: Secondly, in the gcc linker "Libraries", you can add the top level directory of your library.
 #+CAPTION: In our case, it is the directory that contains both the "include" directory added earlier,
 #+CAPTION: and also the "libmicroros.a" file.
 #+NAME: fig:include2
@@ -869,12 +994,12 @@ As for now, the current version of the allocator function can be seen in the
 appendix [[Firmware memory allocation functions]], but the current setup is not
 completely "clean", some further formatting, test and modification will be needed.
 
-** Custom transport layer                                    :WORK_IN_PROGRESS:
+** Custom transport layer
 This part is the key translation layer that needs to happen in order for the
 DDS system from the micro-ROS library to be using the communication channel we
 want it to.
 
-A problem that we had to figure out lives in the fact that the operation of micro-ROS DDS
+A problem that had to be figured out lives in the fact that the operation of micro-ROS DDS
 and the board's RPMsg communication system does not operate in the same fashion.
 
 The former expects to have four functions ("open", "read", "write" and "close") that can
@@ -886,14 +1011,13 @@ to another: a non-blocking polling and buffer system needed to be put into place
 The proposed solution that was implemented and that is currently being tested
 is showed and detailed in the figure [[fig:rpmsg_fw_tasks]] below.
 
-As this part of the firmware was developed and tested on it's own, the overall
-implementation within the "real" ping-pong application is still a work in progress,
-and further modifications are expected when the system will be more thoroughly tested.
+The next figure [[fig:client_arch]] show a more visual representation of the two tasks and the
+functions used in them.
 
-#+ATTR_LATEX: :width 1\textwidth
+#+ATTR_LATEX: :width .9\textwidth
 #+CAPTION: Two tasks are being run concurrently in order to manage the
 #+CAPTION: communication situation, with binary semaphore-based lock-unlock system.\\
-#+CAPTION: The role of the micro-ROS task (right) is to make the four functions
+#+CAPTION: The role of the micro-ROS task (red) is to make the four functions
 #+CAPTION: ("open", "read", "write" and "close")  available and running the actual
 #+CAPTION: software function. In this example, polling the read function and writing
 #+CAPTION: back when something is receive (ping-pong function).
@@ -901,14 +1025,73 @@ and further modifications are expected when the system will be more thoroughly t
 #+CAPTION: bypassing the RPMsg task in this situation.\\
 #+CAPTION: In the libmicroros implementation currently being developed, the micro-ROS task
 #+CAPTION: holds all the DDS and micro-ROS system, including the mentioned allocators function.\\
-#+CAPTION: The RPMsg task (center) is used to firstly set the RPMsg communication
-#+CAPTION: with the Linux side (left), then it stays locked until the ISR (interrupt service routine)
+#+CAPTION: The RPMsg task (green) is used to firstly set the RPMsg communication
+#+CAPTION: with the Linux system, then it stays locked until the ISR (interrupt service routine)
 #+CAPTION: is triggered by an incoming message. The message is then passed to the micro-ROS
 #+CAPTION: task using a buffer.\\
 #+CAPTION: When a shutdown signal is received from the Linux, both functions will gracefully close
 #+CAPTION: and are getting killed.
 #+NAME: fig:rpmsg_fw_tasks
-[[file:./img/rpmsg_fw_tasks.png]]
+[[file:./img/tasks.png]]
+
+#+ATTR_LATEX: :width .9\textwidth
+#+CAPTION: Functions architecture for the Client firmware.
+#+NAME: fig:client_arch
+[[file:./img/client_arch.png]]
+
+A version of this firmware is available at my gitlab repository[fn:20]. This firmware was built using
+Xilinx's IDE, which setup was presented in the section [[Setting up the IDE]], however it was tested
+and given the provided ~Makefile~ system, it is possible to modify and rebuild the firmware
+without this specific tools, as long as the compiler is installed correctly.
+
+Beyond the general two-tasks behavior of the figure [[fig:rpmsg_fw_tasks]], here are the main steps
+of the execution of the firmware:
++ During the RPMsg init phase (RPMsg task), a "hello" message is exchanged with the Linux side
+  to confirm the OpenAMP system is also ready there.
++ Memory allocations and custom transport function are set in the micro-ROS task.
++ The micro-ROS and it's ~rclc~ system run extensive initialization tasks to:
+  - Initialize the support system
+  - Initialize the support node
+  - Initialize the publishers
+  - Initialize the subscribers
++ Finally, the ping-pong function become effective with the micro-ROS task
+  polling to receive some message and sending it back to the sender.
+
+** Building the updated firmware outside of the IDE       :WORK_IN_PROGRESS:
+While the use of the IDE presented in the previous sections is much needed in order to first create
+a RPMsg-ready base firmware, it might be inconvenient having to carry this extremely heavy tool
+for any modification or rebuild of the firmware.
+
+Fortunately, the Vitis IDE projects have a very handy function: they general a pure ~Makefile~, with
+all the needed dependencies and path for library set.
+This ~make~ system can be used externally, however, and as explained previously, two conditions must be
+fulfilled:
++ The cross-compiler needs to be in the ~$PATH~.
++ Standard building tools must be installer, in particular ~git~ in order to obtain the repository,
+  and ~make~, obviously.
+
+#+BEGIN_SRC sh
+  cd /tmp
+  git clone https://gitlab.com/sunoc/libmicroros_kv260.git
+  cd libmicroros_kv260/Debug
+  make
+#+END_SRC
+
+From there, you will have the binary ~rpmsg_pingpong_microros_lib.elf~ file created and ready to be deployed
+on the KRIA board.
+
+** Improvement to be made
+While the version of the firmware since the tag ~0.1~[fn:23] are functional, able to communicate with
+an Agent placed on the neighbour Linux, some work, improvements and tweaks are still to be made.
+
+*** WAIT [#A] Firmware stop / crash / reboot
+  maybe a complete re-implementation with a different os / else
+  would be better.
+This is maybe the most annoying issue that is currently still ongoing: if the firmware
+is not stopped in a "clean" way, the RPMsg task is not kill, making a full reboot of the board
+needed in order to re-launch the firmware and having an established communication.
+
+Something need to be done about that.
 
 #+LATEX: \pagebreak
 * Loading the firmware
@@ -948,7 +1131,6 @@ return of the board (typically a ~/dev/ttyUSB1~), but two things are to be noted
   the RPMsg system worked successfully.
 #+LATEX: \pagebreak
 
-  
 * Running a ROS2 node
 This section as well as the next one are rather "separated" from the rest of the report, as
 they are focused on the ROS2 system being used on the Kria board.
@@ -964,6 +1146,11 @@ of the overall system we are talking about here.
 #+CAPTION: on the general-purpose core of the Kria board.
 #+NAME: fig:map_ros
 [[file:./img/map_ros.png]]
+
+#+ATTR_LATEX: :width .55\textwidth
+#+CAPTION: Methods architecture for the modified Agent node.
+#+NAME: fig:agent_arch
+[[file:./img/agent_arch.png]]
 
 ** On the host Linux ("bare-metal")
 Since an Ubuntu distribution is installed on the board, the installation of ROS2
@@ -1075,7 +1262,6 @@ in the figure [[fig:hello-docker]] below, after the commands:
 #+NAME: fig:hello-docker
 [[file:./img/hello-docker.png]]
 
-
 *** Running a ROS2 container
 The following commands will pull a ROS container, version ~iron~, and name it ~ros_build~.
 
@@ -1108,7 +1294,6 @@ and as presented in the section [[On the host Linux ("bare-metal")]] above:
 
   # Build micro-ROS tools and source them
   colcon build
-  source install/local_setup.bash
 
   # Download micro-ROS-Agent packages
   source install/local_setup.bash
@@ -1116,7 +1301,6 @@ and as presented in the section [[On the host Linux ("bare-metal")]] above:
 
   # Build step
   ros2 run micro_ros_setup build_agent.sh
-  source install/local_setup.bash
 
   # Run a micro-ROS agent
   ros2 run micro_ros_agent micro_ros_agent serial \
@@ -1133,9 +1317,8 @@ the ping-pong topic communication from a different shell[fn:17]:
 #+END_SRC
 #+LATEX: \pagebreak
 
-
-* micro-ROS agent                                             :WORK_IN_PROGRESS:
-The micro-ROS agent on the ROS2 side is the last piece of the puzzle needed to
+* micro-ROS XRCE-DDS Agent
+The micro-ROS Agent on the ROS2 side is the last piece of the puzzle needed to
 allow our DDS environment to use RPMsg as a mean of communication, as visible
 on the schematic of the figure [[fig:map_agent]] below.
 In particular, it will be useful to modify this agent in order to archive
@@ -1151,8 +1334,7 @@ This part of the guide will focus on it.
 #+NAME: fig:map_agent
 [[file:./img/map_agent.png]]
 
-
-** Building a eProsima agent bare-metal
+** Building a eProsima bare-metal example agent
 A key aspect to understand about modifying the agent (as
 this will be needed later on to support our new communication system),
 is that the default system and instruction provided by micro-ROS does not
@@ -1166,21 +1348,50 @@ and eventually modified.
 #+BEGIN_SRC sh
   sudo nano /microros_ws/build/micro_ros_agent/agent/src/xrceagent/src/cpp/transport/custom/CustomAgent.cpp
 #+END_SRC
-The same file is available online as a reference, on [[https://github.com/eProsima/Micro-XRCE-DDS-Agent/blob/develop/src/cpp/transport/custom/CustomAgent.cpp][eProsima XRCE-DDS-Agent GitHub repository]].
-
+The same file is available online as a reference, on eProsima repository[fn:27].
 
 #+BEGIN_SRC sh
   git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
-  cd Micro-XRCE-DDS-Agent
+  cd Micro-XRCE-DDS-Agent/
+
+  rm -rf examples/
+  git clone https://gitlab.com/sunoc/rpmsg-micro-ros-agent.git ./examples/custom_agent
+
   mkdir build && cd build
-  cmake -DTHIRDPARTY=ON ..
+  cmake -DUAGENT_BUILD_USAGE_EXAMPLES=ON ..
   make
-  sudo make install
-  sudo ldconfig /usr/local/lib/
 #+END_SRC
 
+The custom agent is then available to run from the ~./src/examples/custom_agent/CustomXRCEAgent~.
 
-** Building a eProsima agent in a Docker
+All the diff when the custom agent system was added:
+https://github.com/eProsima/Micro-XRCE-DDS-Agent/pull/205/files
+
+For rebuilding the custom agent with a simple ~make clean && make all~ will
+conveniently only rebuild the part that was modify.
+Which means that once all the libraries have been compiled once,
+the subsequent re-compilation of the agent itself can be done quickly !
+
+Major details on how to implement a custom agent specified here:
+https://github.com/eProsima/Micro-XRCE-DDS-Agent/issues/195#issuecomment-721002153
+
+# Running the custom agent executable can be executed as is as the transport we want to use is already
+# built in. ~kmod~ package is needed though.
+# #+BEGIN_SRC sh
+#   sudo apt-get update
+#   sudo apt-get install kmod
+#     ./examples/custom_agent/CustomXRCEAgent
+# #+END_SRC
+
+** Building a XRCE-DDS agent in a Docker
+The same command presented above for running a custom agent "bare-metal" can be
+run inside a Docker.
+
+#+BEGIN_SRC sh
+  docker run -d --name XRCE_DDS_Agent -it --net=host -v \
+         /dev:/dev --privileged ros:iron
+  docker exec -it XRCE_DDS_Agent bash
+#+END_SRC
 
 
 #+BEGIN_SRC sh
@@ -1191,25 +1402,74 @@ The same file is available online as a reference, on [[https://github.com/eProsi
          --dev /dev/ttyACM0
 #+END_SRC
 
+** Building the Agent version with a modified transport
+The first working implementation of the DDS over RPMsg happened over a
+XRCE-DDS agent whose ~serial~ transport layer has been modified in order
+to use OpenAMP's RPMsg instead.
 
-** Creating a custom transport agent
+The build process it the same as usual, just pulling from my fork of eProsima repository
+and using the ~develop~ branch:
+
+#+BEGIN_SRC sh
+  git clone https://github.com/sunoc/Micro-XRCE-DDS-Agent.git -b develop
+  cd Micro-XRCE-DDS-Agent
+  mkdir build
+  cd build
+  cmake ..
+  make
+#+END_SRC
+
+Giving that your are working from an environment in which the ROS2 tools are available, it is then possible
+to run the Agent as follow[fn:21] [fn:22]:
+
+#+BEGIN_SRC sh
+  source /opt/ros/$ROS_DISTRO/setup.bash
+
+  ./MicroXRCEAgent serial --dev /dev/null --verbose 6
+#+END_SRC
+
+** WAIT [#C] Separated RPMsg transport created for XRCE-DDS Agent
+  now focusing on updating my knowledge about the techo.
+    gotta update the doc latec
+- [ ] Implementation done
+- [ ] Successfully tested
+- [ ] Pull request done to the eProsima repository
+
+** Creating a custom transport agent                      :WORK_IN_PROGRESS:
+These command allows to go build the agent and run it with maximum verbosity (for debugging purpose).
+#+BEGIN_SRC sh
+  cd /Micro-XRCE-DDS-Agent/build
+  make clean && make -j4
+  ./MicroXRCEAgent serial --dev /dev/null --verbose 6
+#+END_SRC
 
 
 #+LATEX: \pagebreak
 
+* Running the ping-pong node                               :WORK_IN_PROGRESS:
+A custom ping-pong node for ROS2 was developed in order to test the data transfer of the newly created
+Agent / Client system.
 
-* Conclusion & future                                         :WORK_IN_PROGRESS:
+In order to have this node up and running, you need to set basically all the previously presented points:
+- The micro-ROS firmware is running on the R5F core, as presented in the section [[Loading the firmware]].
+- On the same Linux you plan to run the node, you will need to run and keep the Agent, as presented
+  in the section [[micro-ROS XRCE-DDS Agent]].
+- This ping-pong application is released as a ROS2 Python node. It is best to pull and run it
+  in a ROS2 environment to avoid having dependencies issues, as presented in the section [[Running a ROS2 node]].
+
+* Monitoring and performances evaluation                   :WORK_IN_PROGRESS:
+
+* Conclusion & future                                      :WORK_IN_PROGRESS:
+
 
 #+LATEX: \pagebreak
 #+LATEX: \appendix
-
-
 * DTO patch
 This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch][system.patch]]
 #+LATEX: \inputminted[linenos, frame=single]{diff}{./src/system.patch}
 
 #+LATEX: \pagebreak
-* Custom toolchain CMake settings
+* Custom tool-chain CMake settings
 This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom_r5f_toolchain.cmake][custom r5f toolchain.cmake]]
 #+LATEX: \inputminted[linenos, frame=single]{cmake}{./src/custom_r5f_toolchain.cmake}
 
@@ -1269,8 +1529,34 @@ directly at the ~libmicroros_kv260~ repository: [[https://gitlab.com/sunoc/libmi
   #endif // _ALLOCATORS_H_
 #+END_SRC
 
-
 * Footnotes
+[fn:30] Alongside other packages useful for data analysis, such as ~pandas~ or ~numpy~. 
+
+[fn:29] The ~xilinx-kr260-starterkit-v2023.2-10140544.bsp~ file is specifically
+meant for the KR260 demo board. If we were building for the KV260, for example,
+the BSP file to download would be different.
+
+[fn:28] It is to be noted that the ~source~ command will run best on ~bash~. Trying
+to run it on ~zsh~ for ex. will cause issues. This can be enforced with the
+command ~sudo dpkg-reconfigure bash~.
+
+[fn:27] https://github.com/eProsima/Micro-XRCE-DDS-Agent/blob/develop/src/cpp/transport/custom/CustomAgent.cpp
+
+[fn:26] https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/embedded-design-tools.html 
+
+[fn:25] https://xilinx.github.io/kria-apps-docs/kv260/2021.1/build/html/docs/build_petalinux.html
+
+[fn:24] It is to be noted that for this part, the "other" KRIA board (KR260) was
+used instead of the KV260 that was being used for everything tried on top of
+Ubuntu. No significant difference should be noted.
+
+[fn:23] micro-ROS Client firmware version 0.1, the first working version: https://gitlab.com/sunoc/libmicroros_kv260/-/tree/0.1
+
+[fn:22] The ~--verbose 6~ allows to see the maximum amount of information about the data being transmitted. 
+
+[fn:21] The ~--dev /dev/null~ option is only a placeholder as the serial requires it but not RPMsg.
+
+[fn:20] micro-ROS ping pong test firmware repository: https://gitlab.com/sunoc/libmicroros_kv260 
 
 [fn:19] This will be done with ROS2 agents "custom transport"  system,
 which has little documentation. Some [[https://github.com/micro-ROS/micro_ros_setup/issues/383][discussions]] about it exist though.
@@ -1282,12 +1568,12 @@ the container in which the previous setup were install, not on the host running 
 The hostname should help you to figure out where you are.
 
 [fn:16] This is an example and this situation can become a security issue. It would be a better practice
-in a production environment to map only the devices that are actually in use. 
+in a production environment to map only the devices that are actually in use.
 
 [fn:15] This command installs a complete "desktop" version of ROS2, containing many
 useful package for our project.
 If space is a constraint, different, less complete packages can be install.
-Please refer to the official documentation about it. 
+Please refer to the official documentation about it.
 
 [fn:14] The ~curl~ command from the guide does not work through the school proxy,
 but the command ~wget~ used instead does work. The key is then moved to the correct spot with ~mv~. 
@@ -1300,7 +1586,7 @@ tested for this guide. In case of doubt or problem, please refer to the official
 [fn:12] It is also important to note that the ~echo_test~ part is specific for the
 RPMsg base demonstration firmware. It is not to be used for other firmware.
 The instruction to build and use this particular program on the Kria Linux
-is visible in the section [[RPMsg ~echo_test~ software]]. 
+is visible in the section [[RPMsg ~echo_test~ software]].
 
 [fn:11] In this sequence, we are entering a root shell with ~sudo -s~, but this can
 also be archived by putting the commands in a script to be executed with ~sudo~. 
@@ -1311,8 +1597,8 @@ You own path will vary depending on how your project was named in the first plac
 Obviously, the ~SSH~ connection parameters will also be specific to your case.
 The ~ubuntu@192.168.1.10~ set here are merely an example.
 
-[fn:9] Both files are also visible in the appendixes [[Custom toolchain CMake settings]]
-and [[Custom Colcon meta settings]] the end of this report.} 
+[fn:9] Both files are also visible in the appendixes [[Custom tool-chain CMake settings]]
+and [[Custom Colcon meta settings]] the end of this report.}
 
 [fn:8] If Docker is not set up on your machine, you can follow the guide on [[https://docs.docker.com/engine/install/ubuntu/][the official website]].
 When you can successfully run the "hello-world" container, you are good to go.

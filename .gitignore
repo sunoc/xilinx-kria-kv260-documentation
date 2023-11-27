@@ -4,6 +4,7 @@
 *.toc
 *.dvi
 *.pyg
+*.bbl
 *.gz
 _minted-instructions/
 _minted*

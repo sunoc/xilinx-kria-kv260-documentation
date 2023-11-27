@@ -89,7 +89,7 @@ Then, the actual build can be made with a simple:
 * Introduction & motivation
 This guide will present how to setup and use Xilinx's KRIA board, in particular
 for running ROS on a host Ubuntu system, as well as for deploying
-micro-ROS as a firmware on the MCU part of this board's chip.
+micro-ROS[[cite:&Belsare2023]] as a firmware on the MCU part of this board's chip.
 
 The use of this device in particular is interesting because of the presence
 of a CPU comprising both a general purpose ARM core, capable of running
@@ -1338,3 +1338,7 @@ thus the specific delete order.
 
 [fn:1] Again, it is _critical_ to be 100\% certain that you are working with
 the correct device! 
+
+* References
+[[bibliographystyle:ieeetr]]
+[[bibliography:~/Nextcloud/PARA/3_Researches/Bibliography/references.bib]]

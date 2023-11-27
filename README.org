@@ -364,7 +364,7 @@ Then on the opened SSH shell to the KRIA board:
 #+END_SRC
 
 From there, it is possible to use the displayed URL (something that looks like
-~http://localhost:8888/tree?token~) to access the remote Notebook system.
+~http://localhost:8888/tree?token~) to access the remote Notebook system from a local web browser.
 It is possible to do so with ~localhost~ since we have the ~ssh~ port map connection going on.
 
 Eventually creating Notebooks and stuff, it is possible to obtain a situation like shown in the figure [[fig:jupyter]] below.
@@ -1428,7 +1428,7 @@ to run the Agent as follow[fn:21] [fn:22]:
   ./MicroXRCEAgent serial --dev /dev/null --verbose 6
 #+END_SRC
 
-** WAIT Separated RPMsg transport created for XRCE-DDS Agent
+** WAIT [#C] Separated RPMsg transport created for XRCE-DDS Agent
   now focusing on updating my knowledge about the techo.
     gotta update the doc latec
 - [ ] Implementation done
@@ -1457,7 +1457,7 @@ In order to have this node up and running, you need to set basically all the pre
 - This ping-pong application is released as a ROS2 Python node. It is best to pull and run it
   in a ROS2 environment to avoid having dependencies issues, as presented in the section [[Running a ROS2 node]].
 
-* Monitoring and performances evaluation                    :WORK_IN_PROGRESS:
+* Monitoring and performances evaluation                   :WORK_IN_PROGRESS:
 
 * Conclusion & future                                      :WORK_IN_PROGRESS:
 

@@ -1,3 +1,9 @@
+:PROPERTIES:
+:ID:       be2ce0ab-07db-49e6-be50-72f2db76cde3
+:END:
+#+title: KRIA board boot firmware update
+#+filetags: :draft:
+
 The goal for the Linux side of the deployment is to
 have the latest LTS version of Ubuntu up and running.
 
@@ -6,6 +12,12 @@ boot image of the board must first be updated.
 
 The procedure is available in the official documentation[fn:2],
 but I will present it step by step here.
+** Integration in my org-roam system                              :noexport:
+#+BEGIN_SRC sh
+  ln -s $PWD/boot_firmware.org ~/Nextcloud/zettel/boot_firmware.org
+#+END_SRC
+
+#+RESULTS:
 
 ** Getting the new firmware
 A 2022.2 version of the board firmware is best in order to run the latest
@@ -74,3 +86,4 @@ The board can be re-booted afterwards.
 [fn:2] https://docs.xilinx.com/r/en-US/ug1089-kv260-starter-kit/Firmware-Update 
 
 [fn:1] https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+SOMs+Starter+Kits#K26-Boot-Firmware-Updates
+

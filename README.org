@@ -107,8 +107,8 @@ are trying to archive.
 [[file:./img/map.png]]
 
 * Boot firmware
-#+INCLUDE: "./boot_firmware.org" :minlevel 2
-** COMMENT LINK: [[file:boot_firmware.org][Boot firmware]]
+#+INCLUDE: "./boot_firmware.org" :minlevel 2 :lines "7-"
+** COMMENT LINK: [[id:be2ce0ab-07db-49e6-be50-72f2db76cde3][KRIA board boot firmware update]]
 
 * Installing Linux (Ubuntu LTS 22.04 option)
 Withe the boot firmware being up-to-date, we can proceed to install a Linux distribution

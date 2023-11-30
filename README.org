@@ -512,29 +512,41 @@ error occurs, the system should be good to go:
 ** "echo-test" performance comparison
 Now we have a working demonstration for RPMsg, a goal was to compare this system between boards.
 
-
+Here is the complete sequence in order to archive a timely measured ~echo_test~ run, namely:
+- Installation of the build dependencies
+- Clone of the Xilinx repository
+- Patching of the main source to add the time measurement
+- Building of the test software
+- Communication with the R5F, with reload of the firmware
 #+BEGIN_SRC sh
   sudo dnf install git make gcc binutils packagegroup-core-buildessential
   sudo ln -s /usr/bin/aarch64-xilinx-linux-gcc /bin/cc
-
-
   git clone https://github.com/OpenAMP/openamp-system-reference.git
   cd openamp-system-reference/examples/linux/rpmsg-echo-test/
-  wget PATCH
-
+  wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/echo_test.patch
+  patch -u -b echo_test.c -i echo_test.patch
+  make
+  sudo -s
+  echo image_echo_test  > /sys/class/remoteproc/remoteproc0/firmware
+  echo start > /sys/class/remoteproc/remoteproc0/state
+  ./echo_test
+  echo stop > /sys/class/remoteproc/remoteproc0/state
 #+END_SRC
 
-
-
-** COMMENT First login and configuration
-The initial login username is ~petalinux~. The initial password is to be set at the moment of the first boot.
-
-
-#+BEGIN_SRC sh
-  ip a
-  sudo dnf update
-  sudo reboot now
-#+END_SRC
+Here are some results (in seconds) of the measurement for the KR260 running PetaLinux and the KV260 running Ubuntu:
+| KR260 (PetaLinux) | KV260 (Ubuntu) |
+|-------------------+----------------|
+|             4.879 |          3.875 |
+|             4.828 |          4.910 |
+|             4.816 |          3.929 |
+|             4.692 |          5.007 |
+|             2.612 |          4.877 |
+|             4.812 |          3.201 |
+|             4.748 |          3.840 |
+|             4.874 |          5.101 |
+|-------------------+----------------|
+|          4.532625 |         4.3425 |
+#+TBLFM: @10$1=vmean(@2$1..@9$1)::@10$2=vmean(@2$2..@9$2)
 
 
 ** Note: good points for PetaLinux over Ubuntu
@@ -544,7 +556,6 @@ The initial login username is ~petalinux~. The initial password is to be set at 
   ~dnf~. Unknown reason for now. There is an issue with the ZynqMP Linux PIN
   control system, as visible in the ~dmesg~ log.
 + OpenAMP and the echo test app works fairly "out of the box"
-+ Communication seems insanely fast too
 
 * Enabling ~remoteproc~
 One of the advantage of this Kria board, as cited previously, is the presence of

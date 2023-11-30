@@ -374,7 +374,7 @@ Eventually creating Notebooks and stuff, it is possible to obtain a situation li
 #+NAME: fig:jupyter
 [[file:./img/jupyter.png]]
 
-* Installing Linux (PetaLinux option)                      :WORK_IN_PROGRESS:
+* Installing Linux (PetaLinux option)
 This part is an alternative to the previous section [[Installing Linux (Ubuntu LTS
 22.04 option)]], where the installation of PetaLinux as a host system[fn:24]
 will be presented, as being an alternative to the Ubuntu LTS. Here are some

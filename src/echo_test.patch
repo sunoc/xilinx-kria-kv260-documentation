@@ -1,0 +1,49 @@
+--- echo_test_old.c	2023-11-29 20:19:54.042268088 -0800
++++ echo_test.c	2023-11-29 20:35:21.483559586 -0800
+@@ -44,6 +44,13 @@
+ 
+ #define PR_DBG(fmt, args ...) printf("%s():%u "fmt, __func__, __LINE__, ##args)
+ #define SHUTDOWN_MSG    0xEF56A55A
++
++int64_t timespecDiff(struct timespec *timeA_p, struct timespec *timeB_p)
++{
++  return ((timeA_p->tv_sec * 1000000000) + timeA_p->tv_nsec) -
++           ((timeB_p->tv_sec * 1000000000) + timeB_p->tv_nsec);
++}
++
+ void send_shutdown(int fd)
+ {
+ 	union {
+@@ -91,6 +98,9 @@
+ 	struct _payload *i_payload;
+ 	struct _payload *r_payload;
+ 
++	struct timespec start, end;
++	int timeElapsed;
++
+ 	printf("\r\n Echo test start \r\n");
+ 	lookup_channel(rpmsg_dev, &eptinfo);
+ 
+@@ -168,6 +178,7 @@
+ 		printf("\r\n  Echo Test Round %d \r\n", j);
+ 		printf("\r\n **********************************");
+ 		printf("****\r\n");
++		clock_gettime(CLOCK_MONOTONIC, &start);
+ 		for (i = 0, size = PAYLOAD_MIN_SIZE; i < NUM_PAYLOADS;
+ 		i++, size++) {
+ 			int k;
+@@ -217,10 +228,14 @@
+ 			(2 * sizeof(unsigned long)) + PAYLOAD_MAX_SIZE);
+ 
+ 		}
++		clock_gettime(CLOCK_MONOTONIC, &end);
++		timeElapsed = timespecDiff(&end, &start);
+ 		printf("\r\n **********************************");
+ 		printf("****\r\n");
+ 		printf("\r\n Echo Test Round %d Test Results: Error count = %d\r\n",
+ 		j, err_cnt);
++		printf("\r\n The whole process took %.6f s\r\n",
++		       (float)(timeElapsed)/100000000);
+ 		printf("\r\n **********************************");
+ 		printf("****\r\n");
+ 	}

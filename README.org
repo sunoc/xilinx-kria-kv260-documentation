@@ -375,20 +375,28 @@ Eventually creating Notebooks and stuff, it is possible to obtain a situation li
 [[file:./img/jupyter.png]]
 
 * Installing Linux (PetaLinux option)                      :WORK_IN_PROGRESS:
-This part is an alternative to the previous section [[]], where the installation
-of PetaLinux as a host system[fn:24] will be presented, as being an alternative to the
-Ubuntu LTS. Here are some reasoning why you'd prefer to use PetaLinux instead
-of Ubuntu:
+This part is an alternative to the previous section [[Installing Linux (Ubuntu LTS
+22.04 option)]], where the installation of PetaLinux as a host system[fn:24]
+will be presented, as being an alternative to the Ubuntu LTS. Here are some
+reasoning why you'd prefer to use PetaLinux instead of Ubuntu:
 + Direct support from Xilinx. While Ubuntu is also an official port, it is
   provided through Canonical.
 + If you plan to use ROS2 in containers.
+
+It is also to be noted that the building process of a PetaLinux image is not as
+trivial as simply flashing a downloaded ISO file. It takes some time to
+configure it and even more time to be built, especially if you are working on a
+lower-end machine.
 
 ** General installation
 The indication on how to install PetaLinux on a KRIA board is detailed in the
 official documentation[fn:25], but for the KV260 board with an older release of
 the Linux. This guide will try to keep an up-to-date version of the guide, in
 particular for the KR260 KRIA board and, at the time of writing, the PetaLinux
-in version 2023.2.
+in version 2023.2 for the installer.  The 2022.2 version is recommended for this
+board's latest updated boot firmware, as presented in the Section [[Boot firmware]]
+above; however I happened to have issues with the building process from a system
+based on Ubuntu 22.04. Thus the choice of the 2023.2 that should be compatible.
 
 Two tools should be downloaded upfront in order to be ready and create the
 PetaLinux image for our target board. Both can be obtained at the Xilinx
@@ -397,7 +405,7 @@ download the files we need, namely, we'll have to get:
 + The installer tool: ~petalinux-v2023.2-10121855-installer.run~ or similar name.
 + The SOM board support package: ~xilinx-kr260-starterkit-v2023.2-10140544.bsp~ or similar name[fn:29].
 The specific name of the utils you'll get to download will evolve over time.
-The version 2023.2 was the latest available at the time of writing this guide.
+
 For the following command, I will assume that both files were downloaded into
 the same directory and that you have a shell open in said directory.
 
@@ -406,65 +414,65 @@ release notes of the version of the tool you are downloading and it depends on
 your distribution, but here is a one-liner that works for the PetaLinux 2023.2
 to be built on Ubuntu(-based) 22.04 LTS:
 #+BEGIN_SRC sh
-  sudo apt-get update && sudo apt-get install iproute2 gawk gcc net-tools \
-  libncurses-dev openssl libselinux1 xterm autoconf libtool texinfo zlib1g-dev \
-  gcc-multilib build-essential automake screen libstdc++-11-dev g++ xz-utils cpp \
-  patch python3 python3-jinja2 diffutils debianutils iputils-ping cpio gnupg
+  sudo apt-get install iproute2 gawk python3 build-essential gcc git make \
+  net-tools libncurses5-dev tftpd zlib1g-dev libssl-dev flex bison libselinux1 \
+  gnupg wget git-core diffstat chrpath socat xterm autoconf libtool tar unzip \
+  texinfo zlib1g-dev gcc-multilib automake zlib1g:i386 screen pax gzip cpio \
+  python3-pip python3-pexpect xz-utils debianutils iputils-ping python3-git \
+  python3-jinja2 libegl1-mesa libsdl1.2-dev pylint asciidoc
 #+END_SRC
 
 Installing the petalinux tools can be done with the ~.run~ script[fn:28], as follow:
 #+BEGIN_SRC sh
   sudo chmod +x ./petalinux-v2023.2-10121855-installer.run
   ./petalinux-v2023.2-10121855-installer.run
+  bash
   source settings.sh
 #+END_SRC
 
 A project can then be created, using the ~.bsp~ file. From there it is possible to
 build the image file meant to be booted by the board:
 #+BEGIN_SRC sh
-    petalinux-create -t project -s xilinx-kr260-starterkit-v2023.2-10140544.bsp
-    cd xilinx-kr260-starterkit-2023.2/
+  petalinux-create -t project -s xilinx-kr260-starterkit-v2023.2-10140544.bsp
+  cd xilinx-kr260-starterkit-2023.2/
 #+END_SRC
 
 
+The more general option allows to enable stuff related to hardware
+configuration[fn:33]. For this step, it is possible to select the ~openamp~
+setting the the DTG Settings, as visible in the Figure [[fig:yocto_openamp_dtg]] below:
+#+BEGIN_SRC sh
+  petalinux-config --get-hw-description  ./hardware/xilinx-kr260-starterkit-2023.2/kr260_starter_kit.xsa
+#+END_SRC
+
+Then, here are the options that we want to enable:
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: In the hardware config, it is possible to select the openamp device tree source.
+#+NAME: fig:yocto_openamp_dtg
+[[file:./img/yocto_openamp_dtg.png]]
+
 Some kernel and module configuration are needed in order for the petalinux system to work properly.
 These setup can be set using the following command:
-
 #+BEGIN_SRC sh
   petalinux-config -c rootfs
 #+END_SRC
 
 Then, here are the options that we want to enable:
 #+ATTR_LATEX: :width .6\textwidth
-#+CAPTION: Hey, listen ~
+#+CAPTION: In the rootfs config, it is possible to select the openamp package.
 #+NAME: fig:yocto_openamp
 [[file:./img/yocto_openamp.png]]
 
 
 #+ATTR_LATEX: :width .6\textwidth
-#+CAPTION: Hey, listen !!
+#+CAPTION: OpenSSH can be configure in the same rootfs config.
 #+NAME: fig:yocto_ssh
 [[file:./img/yocto_ssh.png]]
 
-
-# Jupyter can also be activated as a packagegroup ?!
-
-The more general option allows to enable other stuff related to OpenAMP:
-#+BEGIN_SRC sh
-  petalinux-config
-#+END_SRC
-
-#+ATTR_LATEX: :width .6\textwidth
-#+CAPTION: Hey, listen !
-#+NAME: fig:yocto_openamp2
-[[file:./img/yocto_openamp2.png]]
-
-
-It is then possible to build and package the image. Most critically compared to the example,
+It is then possible to build[fn:32] and package the image. Most critically compared to the example,
 the ~openamp.dtb~ overlay must be used in order for OpenAMP and subsequently RPMsg to become usable.
 #+BEGIN_SRC sh
   petalinux-build
-  #petalinux-package --wic --bootfiles "ramdisk.cpio.gz.u-boot boot.scr Image ../../pre-built/linux/images/openamp.dtb"
   petalinux-package --wic --bootfiles "ramdisk.cpio.gz.u-boot boot.scr Image system.dtb"
 #+END_SRC
 
@@ -485,11 +493,45 @@ Finally, and now an image has been generated, it can be burnt to a micro-SD card
 From that point, the media can be ejected, put in the board and the boot process
 should happen successfully.
 
-** First login and configuration
+** Testing openamp "echo-test"
+A good and out-of-the-box way to try and confirm that the OpenAMP setup was done
+properly is to run the so-called "echo-test". This program will basically send
+series of packages to the R5F core and expect them to be returned.
+
+As presented in the official documentation[fn:34], this can be simply done with
+the following commands. If the return of the ~echo_test~ commands states that zero
+error occurs, the system should be good to go:
+#+BEGIN_SRC sh
+  sudo -s
+  echo image_echo_test  > /sys/class/remoteproc/remoteproc0/firmware
+  echo start > /sys/class/remoteproc/remoteproc0/state
+  echo_test
+  echo stop > /sys/class/remoteproc/remoteproc0/state
+#+END_SRC
+
+** "echo-test" performance comparison
+Now we have a working demonstration for RPMsg, a goal was to compare this system between boards.
+
+
+#+BEGIN_SRC sh
+  sudo dnf install git make gcc binutils packagegroup-core-buildessential
+  sudo ln -s /usr/bin/aarch64-xilinx-linux-gcc /bin/cc
+
+
+  git clone https://github.com/OpenAMP/openamp-system-reference.git
+  cd openamp-system-reference/examples/linux/rpmsg-echo-test/
+  wget PATCH
+
+#+END_SRC
+
+
+
+** COMMENT First login and configuration
 The initial login username is ~petalinux~. The initial password is to be set at the moment of the first boot.
 
 
 #+BEGIN_SRC sh
+  ip a
   sudo dnf update
   sudo reboot now
 #+END_SRC
@@ -500,7 +542,7 @@ The initial login username is ~petalinux~. The initial password is to be set at 
 + +The fan is silent all the way through, and seemingly managed in a better way.+
   This seems to stop being true once we update the board packages with
   ~dnf~. Unknown reason for now. There is an issue with the ZynqMP Linux PIN
-  controll system, as visible in the ~dmesg~ log.
+  control system, as visible in the ~dmesg~ log.
 + OpenAMP and the echo test app works fairly "out of the box"
 + Communication seems insanely fast too
 
@@ -1530,11 +1572,21 @@ directly at the ~libmicroros_kv260~ repository: [[https://gitlab.com/sunoc/libmi
 #+END_SRC
 
 * Footnotes
+[fn:34] https://xilinx.github.io/kria-apps-docs/openamp/build/html/openamp_landing.html#openamp-demos 
+
+[fn:33] If you search in the work directory, you might notice that three
+differently named ~.xsa~ files exist. After a quick ~diff~ check, they appear to be
+exactly identical.
+
+[fn:32] Beware, the ~petalinux-build~ command execution takes a lot of time. 
+
+[fn:31] https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria+SOMs+Starter+Kits#K26-Boot-Firmware-Updates 
+
 [fn:30] Alongside other packages useful for data analysis, such as ~pandas~ or ~numpy~. 
 
-[fn:29] The ~xilinx-kr260-starterkit-v2023.2-10140544.bsp~ file is specifically
-meant for the KR260 demo board. If we were building for the KV260, for example,
-the BSP file to download would be different.
+[fn:29] As of the time of writing this section, it was recommended[fn:31] to be
+using the boot firmware in version 2022.2. Thus the software pack for the board
+will also be using this version.
 
 [fn:28] It is to be noted that the ~source~ command will run best on ~bash~. Trying
 to run it on ~zsh~ for ex. will cause issues. This can be enforced with the
@@ -1542,7 +1594,7 @@ command ~sudo dpkg-reconfigure bash~.
 
 [fn:27] https://github.com/eProsima/Micro-XRCE-DDS-Agent/blob/develop/src/cpp/transport/custom/CustomAgent.cpp
 
-[fn:26] https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/embedded-design-tools.html 
+[fn:26] https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/embedded-design-tools/2022-2.html
 
 [fn:25] https://xilinx.github.io/kria-apps-docs/kv260/2021.1/build/html/docs/build_petalinux.html
 

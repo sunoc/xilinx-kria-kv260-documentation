@@ -510,6 +510,52 @@ error occurs, the system should be good to go:
 #+END_SRC
 
 ** "echo-test" performance comparison
+
+*** Raw plot of the package measurement                          :noexport:
+#+BEGIN_SRC python :results file :eval no-export
+  import pandas as pd
+  import numpy as np
+  import matplotlib.pyplot as plt
+  import scipy.stats as stats
+
+  df_kr = pd.read_csv('./csv/kr260_echo_test.csv', names=['time KR260 (PetaLinux)'])
+  df_kv = pd.read_csv('./csv/kv260_echo_test.csv', names=['time KV260 (Ubuntu)'])
+
+  df_payload = pd.DataFrame([s] for l in range(0, 10, 1) for s in range(17, 489, 1))
+
+  df_tot_2 = pd.concat([df_kr, df_kv, df_payload], sort=False, axis=1)
+
+  df_tot_2 = df_tot_2.rename(columns={0:'Payload size'})
+
+  df_tot_2['time KR260 (PetaLinux)'] = df_tot_2['time KR260 (PetaLinux)'].div(df_tot_2['Payload size'])
+  df_tot_2['time KV260 (Ubuntu)'] = df_tot_2['time KV260 (Ubuntu)'].div(df_tot_2['Payload size'])
+
+  df_tot_2 = df_tot_2.sort_values(by=['Payload size'], ascending=True)
+  df_tot_2 = df_tot_2.drop(columns=['Payload size'])
+
+  df_tot_2 = df_tot_2.reset_index(drop=True)
+  
+  df_tot_2 = 1/df_tot_2
+  df_tot_2 = df_tot_2.mul(1000)
+
+  plt.rc('font', size=10)
+
+  scatterplot = df_tot_2.plot(style='.', grid='true')
+  scatterplot.set_xlabel('Package sent [n]')
+  scatterplot.set_ylabel('Data throughput [MB/s]')
+  # scatterplot.set_yscale("log");
+  # densityplot = df_tot_2.plot.density(grid='true', xlim=[0.2, 0.9])
+  # densityplot.set_xlabel('Round trip time for one RPMsg package [us]')
+  # densityplot.set_ylabel('Probability density [%]')
+  plt.savefig('./img/kr260_echo_test_density.png', dpi=400, bbox_inches='tight')
+  return './img/kr260_echo_test_density.png'
+#+END_SRC
+
+#+RESULTS:
+[[file:./img/kr260_echo_test_density.png]]
+
+
+*** Report :ignore:
 Now we have a working demonstration for RPMsg, a goal was to compare this system between boards.
 
 Here is the complete sequence in order to archive a timely measured ~echo_test~ run, namely:
@@ -533,29 +579,27 @@ Here is the complete sequence in order to archive a timely measured ~echo_test~ 
   echo stop > /sys/class/remoteproc/remoteproc0/state
 #+END_SRC
 
-Here are some results (in seconds) of the measurement for the KR260 running PetaLinux and the KV260 running Ubuntu:
-| KR260 (PetaLinux) | KV260 (Ubuntu) |
-|-------------------+----------------|
-|             4.879 |          3.875 |
-|             4.828 |          4.910 |
-|             4.816 |          3.929 |
-|             4.692 |          5.007 |
-|             2.612 |          4.877 |
-|             4.812 |          3.201 |
-|             4.748 |          3.840 |
-|             4.874 |          5.101 |
-|-------------------+----------------|
-|          4.532625 |         4.3425 |
-#+TBLFM: @10$1=vmean(@2$1..@9$1)::@10$2=vmean(@2$2..@9$2)
+The figure [[fig:kr260_echo_test_density]] below shows a comparison for the data
+throughput that is reachable for a packages round trip of individual RPMsg
+packages for both PetaLinux running on the KR260 board and Ubuntu running on the
+KV260.
 
+A difference exist but it is not as significant as to explain the rather slow
+transfer rate when used in combination with ROS2 DDS.
 
-** Note: good points for PetaLinux over Ubuntu
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: A graph of the data transfer rate for individual packages to be transmitted and received back from the Linux.
+#+NAME: fig:kr260_echo_test_density
+[[file:./img/kr260_echo_test_density.png]]
+
+** Note: good points for PetaLinux over Ubuntu :noexport:
 + The boot process in insanely faster: a few seconds for PetaLinux versus multiple minutes with Ubuntu.
 + +The fan is silent all the way through, and seemingly managed in a better way.+
   This seems to stop being true once we update the board packages with
   ~dnf~. Unknown reason for now. There is an issue with the ZynqMP Linux PIN
   control system, as visible in the ~dmesg~ log.
-+ OpenAMP and the echo test app works fairly "out of the box"
++ OpenAMP and the echo test app works fairly "out of the box" if configured
+  properly during the build process.
 
 * Enabling ~remoteproc~
 One of the advantage of this Kria board, as cited previously, is the presence of

@@ -592,6 +592,8 @@ transfer rate when used in combination with ROS2 DDS.
 #+NAME: fig:kr260_echo_test_density
 [[file:./img/kr260_echo_test_density.png]]
 
+This fast delay for data transmission was later confirmed by measurment done using an external logic anayser[fn:35].
+
 ** Note: good points for PetaLinux over Ubuntu :noexport:
 + The boot process in insanely faster: a few seconds for PetaLinux versus multiple minutes with Ubuntu.
 + +The fan is silent all the way through, and seemingly managed in a better way.+
@@ -1627,6 +1629,9 @@ directly at the ~libmicroros_kv260~ repository: [[https://gitlab.com/sunoc/libmi
 #+END_SRC
 
 * Footnotes
+
+[fn:35] https://gitlab.com/sunoc/saleae-logic-8-documentation
+
 [fn:34] https://xilinx.github.io/kria-apps-docs/openamp/build/html/openamp_landing.html#openamp-demos 
 
 [fn:33] If you search in the work directory, you might notice that three

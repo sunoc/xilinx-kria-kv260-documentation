@@ -592,7 +592,63 @@ transfer rate when used in combination with ROS2 DDS.
 #+NAME: fig:kr260_echo_test_density
 [[file:./img/kr260_echo_test_density.png]]
 
-This fast delay for data transmission was later confirmed by measurment done using an external logic anayser[fn:35].
+This fast delay for data transmission was later confirmed by measurement done using an external logic analyser[fn:35].
+
+** Setting up a static IP address for PetaLinux
+This is not a trivial task in petalinux.
+
+As it appears, the classic ~/etc/network/interfaces~ must be modified, however and
+for some unknown reason the DHCP keep being used even when disabled, and the
+actual static interface is not used until restarted.
+
+Multiple steps are required in order to mitigate all of this.
+
+First, we can make our standard ~interfaces~ configuration, in the  ~/etc/network/interfaces~:
+#+BEGIN_SRC sh
+  # Wired or wireless interfaces
+  auto eth0
+  iface eth0 inet static
+        address 192.168.11.107
+        netmask 255.255.255.0
+        network 192.168.11.0
+        gateway 192.168.11.1
+#+END_SRC
+
+Then we need to have ~systemd~ to run a script after boot time to restart the ~eth0~ interface.
+
+A very basic script, as follow need to be placed somewhere on the system, for example here, in the ~/home/root/net.sh~:
+#+BEGIN_SRC sh
+  #!/bin/sh -e
+  ifdown eth0
+  ifup eth0
+  exit 0
+#+END_SRC
+
+Then, we want to create a ~systemd~ service that will run this script as ~idle~,
+i.e. after all the rest. Said file, in our case named ~updown.service~ must be
+placed in the ~/etc/systemd/system/~ directory:
+#+BEGIN_SRC systemd
+[Unit]
+Description=Restart once more the eth0 network to enable the static IP
+
+[Service]
+Type=idle
+ExecStart=/bin/sh /home/root/net.sh
+
+[Install]
+WantedBy=multi-user.target
+#+END_SRC
+
+Finally, as a ~root~ we need to set the correct right for these files and finally enabling the service before reboot:
+#+BEGIN_SRC sh
+  sudo -s
+  chmod +x /home/root/net.sh
+  chmod 644 /etc/systemd/system/updown.service
+  systemctl enable updown.service
+  reboot now
+#+END_SRC
+
+With all of this, on the next reboot of the board, the static IP should be available alongside the DHCP IP.
 
 ** Note: good points for PetaLinux over Ubuntu :noexport:
 + The boot process in insanely faster: a few seconds for PetaLinux versus multiple minutes with Ubuntu.

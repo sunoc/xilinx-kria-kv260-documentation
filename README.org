@@ -48,27 +48,27 @@ and stays hidden in a :noexport: section in this report.
 #+LATEX_HEADER:    \href{#1}{GitLab \faGitlab}}
 
 #+begin_src emacs-lisp :exports results :results none :eval export
-  (make-variable-buffer-local 'org-latex-title-command)
-  (setq org-latex-title-command (concat
-     "\\begin{titlepage}\n"
-     "\\centering\n"
-     "{\\LARGE %t \\par }\n"
-     "\\vspace{5mm}\n"
-     "{\\large %s \\par}\n"
-     "\\vspace{1cm}\n"
-     "{\\large %D \\par}\n"
-     "\\vspace{2cm}\n"
-     "{\\large %a -  Source available at \\gitlab{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation} \\par}\n"
-     "\\vspace{3cm}\n"
-     "\\includegraphics[width=0.8\\textwidth]{./img/boards}"
-     "\\end{titlepage}\n"))
+(make-variable-buffer-local 'org-latex-title-command)
+(setq org-latex-title-command (concat
+			       "\\begin{titlepage}\n"
+			       "\\centering\n"
+			       "{\\LARGE %t \\par }\n"
+			       "\\vspace{5mm}\n"
+			       "{\\large %s \\par}\n"
+			       "\\vspace{1cm}\n"
+			       "{\\large %D \\par}\n"
+			       "\\vspace{2cm}\n"
+			       "{\\large %a -  Source available at \\gitlab{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation} \\par}\n"
+			       "\\vspace{3cm}\n"
+			       "\\includegraphics[width=0.8\\textwidth]{./img/boards}"
+			       "\\end{titlepage}\n"))
 #+end_src
 
 #+begin_src emacs-lisp :exports results :results none :eval export
-    (make-variable-buffer-local 'org-latex-toc-command)
-    (setq org-latex-toc-command (concat
-       "\\tableofcontents\n"
-       "\\pagebreak\n"))
+(make-variable-buffer-local 'org-latex-toc-command)
+(setq org-latex-toc-command (concat
+			     "\\tableofcontents\n"
+			     "\\pagebreak\n"))
 #+end_src
 
 * Building this report from the LaTeX file                         :noexport:
@@ -79,13 +79,13 @@ On a moderately recent Ubuntu-base distribution, the following packages seemed t
 report:
 
 #+BEGIN_SRC bash
-  sudo apt-get install texlive-base texlive-latex-recommended texlive-lang-japanese
+sudo apt-get install texlive-base texlive-latex-recommended texlive-lang-japanese
 #+END_SRC
 
 Then, the actual build can be made with a simple:
 
 #+BEGIN_SRC bash
-  pdflatex README.tex
+pdflatex README.tex
 #+END_SRC
 
 * Introduction & motivation
@@ -146,9 +146,9 @@ With the image available on thy machine and a SD card visible as ~/dev/sda~ devi
 one can simply run the ~dd~ command as follow to write the image to a previously formatted drive (here ~/dev/sda~):
 
 #+BEGIN_SRC sh
-  unxz iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img.xz
-  sudo dd if=iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img \
-       of=/dev/sda status=progress bs=8M && sync
+unxz iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img.xz
+sudo dd if=iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img \
+     of=/dev/sda status=progress bs=8M && sync
 #+END_SRC
 
 
@@ -175,9 +175,9 @@ it's IP address with the ~IP~ command; then it is possible to connect to
 the board with ssh, as follow (example, with the first command to be run on the board
 and the second one on the host PC, both without the first placeholder hostnames):
 #+BEGIN_SRC sh
-    kria# ip addr
+kria# ip addr
 
-    host# ssh ubuntu@192.168.4.11
+host# ssh ubuntu@192.168.4.11
 #+END_SRC
 
 ** Network and admin setups
@@ -195,9 +195,9 @@ editing it and adding your favorite DNS, for example ~nameserver 1.1.1.1~
 next to the other ~nameserver~ entry. The resolver can then be restarted.
 
 #+BEGIN_SRC sh
-  sudo nano /etc/resolv.conf
+sudo nano /etc/resolv.conf
 
-  sudo systemctl restart systemd-resolved
+sudo systemctl restart systemd-resolved
 #+END_SRC
 
 Secondly, it might become needed to setup the proxy for the school.
@@ -207,14 +207,14 @@ containing you AXIA credentials (this is specific to Nanzan University IT system
 then by consolidating the configuration for other types of connections in the ~bashrc~:
 
 #+BEGIN_SRC sh
-  export https_proxy="http://<AXIA_username>:\
-         <AXIA_psw>@proxy.ic.nanzan-u.ac.jp:8080"
+export https_proxy="http://<AXIA_username>:\
+       <AXIA_psw>@proxy.ic.nanzan-u.ac.jp:8080"
 
-  echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc \
-       echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc \
-       echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc \
-       echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" \
-       >> ~/.bashrc
+echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc \
+     echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc \
+     echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc \
+     echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" \
+     >> ~/.bashrc
 #+END_SRC
 
 Eventually the board can be rebooted in order for the setup to get applied cleanly.
@@ -259,7 +259,7 @@ configuration into your ~netplan~ configuration file.
 
 The name of the files might vary:
 #+BEGIN_SRC sh
-  sudo nano /etc/netplan/50-cloud-init.yaml
+sudo nano /etc/netplan/50-cloud-init.yaml
 #+END_SRC
 
 You can then set the wanted IP as follow. Note that a custom DNS was
@@ -272,20 +272,20 @@ also set in that case.
       eth0:
         addresses:
           - 192.168.11.103/24
-        routes:
-          - to: default
-            via: 192.168.11.1
-        nameservers:
-          addresses:
-            - 8.8.8.8
-            - 1.1.1.1
+          routes:
+            - to: default
+              via: 192.168.11.1
+              nameservers:
+                addresses:
+                  - 8.8.8.8
+                  - 1.1.1.1
 #+END_SRC
 
 Finally, the change in settings can be applied
 as follow:
 
 #+BEGIN_SRC sh
-  sudo netplan apply
+sudo netplan apply
 #+END_SRC
 
 *** Purging ~snap~
@@ -299,28 +299,28 @@ These steps take a lot of time and need to be executed in that specific order[fn
 but the system fan runs sensibly slower without all of this stuff:
 
 #+BEGIN_SRC sh
-  sudo systemctl disable snapd.service
-  sudo systemctl disable snapd.socket
-  sudo systemctl disable snapd.seeded.service
+sudo systemctl disable snapd.service
+sudo systemctl disable snapd.socket
+sudo systemctl disable snapd.seeded.service
 
-  sudo snap list #show installed package, remove then all:
-  sudo snap remove --purge firefox
-  sudo snap remove --purge gnome-3-38-2004
-  sudo snap remove --purge gnome-42-2204
-  sudo snap remove --purge gtk-common-themes
-  sudo snap remove --purge snapd-desktop-integration
-  sudo snap remove --purge snap-store
-  sudo snap remove --purge bare
-  sudo snap remove --purge core20
-  sudo snap remove --purge core22
-  sudo snap remove --purge snapd
-  sudo snap list # check that everything is uninstalled
+sudo snap list #show installed package, remove then all:
+sudo snap remove --purge firefox
+sudo snap remove --purge gnome-3-38-2004
+sudo snap remove --purge gnome-42-2204
+sudo snap remove --purge gtk-common-themes
+sudo snap remove --purge snapd-desktop-integration
+sudo snap remove --purge snap-store
+sudo snap remove --purge bare
+sudo snap remove --purge core20
+sudo snap remove --purge core22
+sudo snap remove --purge snapd
+sudo snap list # check that everything is uninstalled
 
-  sudo rm -rf /var/cache/snapd/
-  sudo rm -rf ~/snap
-  sudo apt autoremove --purge snapd
+sudo rm -rf /var/cache/snapd/
+sudo rm -rf ~/snap
+sudo apt autoremove --purge snapd
 
-  systemctl list-units | grep snapd
+systemctl list-units | grep snapd
 #+END_SRC
 
 *** Other unused heavy packages
@@ -328,12 +328,12 @@ Some other pieces of software can safely be removed since the desktop is
 not to be used:
 
 #+BEGIN_SRC sh
-  sudo apt-get autoremove --purge yaru-theme-icon \
-  fonts-noto-cjk yaru-theme-gtk vim-runtime \
-  ubuntu-wallpapers-jammy humanity-icon-theme
+sudo apt-get autoremove --purge yaru-theme-icon \
+     fonts-noto-cjk yaru-theme-gtk vim-runtime \
+     ubuntu-wallpapers-jammy humanity-icon-theme
 
-  sudo apt-get autoclean
-  sudo reboot now
+sudo apt-get autoclean
+sudo reboot now
 #+END_SRC
 
 #+LATEX: \pagebreak
@@ -343,25 +343,25 @@ accessing it remotely and using it for making data analysis.
 
 The following commands will set the required packages and install Jupyter itself[fn:30]:
 #+BEGIN_SRC sh
-  sudo apt-get update && sudo apt-get install python3 python3-pip python3-venv python3-virtualenv
+sudo apt-get update && sudo apt-get install python3 python3-pip python3-venv python3-virtualenv
 
-  virtualenv myjupyter
-  source ./myjupyter/bin/activate
-  python3 -m pip install jupyter pandas numpy matplotlib scipy
+virtualenv myjupyter
+source ./myjupyter/bin/activate
+python3 -m pip install jupyter pandas numpy matplotlib scipy
 
-  sudo reboot now
+sudo reboot now
 #+END_SRC
 
 Then in a terminal on your host machine (not on the KRIA board), you can run the following command to bind local ports
 
 #+BEGIN_SRC sh
-  ssh -L 8888:localhost:8888 kria
+ssh -L 8888:localhost:8888 kria
 #+END_SRC
 
 Then on the opened SSH shell to the KRIA board:
 #+BEGIN_SRC sh
-  source ./myjupyter/bin/activate
-  jupyter notebook
+source ./myjupyter/bin/activate
+jupyter notebook
 #+END_SRC
 
 From there, it is possible to use the displayed URL (something that looks like
@@ -415,27 +415,27 @@ release notes of the version of the tool you are downloading and it depends on
 your distribution, but here is a one-liner that works for the PetaLinux 2023.2
 to be built on Ubuntu(-based) 22.04 LTS:
 #+BEGIN_SRC sh
-  sudo apt-get install iproute2 gawk python3 build-essential gcc git make \
-  net-tools libncurses5-dev tftpd zlib1g-dev libssl-dev flex bison libselinux1 \
-  gnupg wget git-core diffstat chrpath socat xterm autoconf libtool tar unzip \
-  texinfo zlib1g-dev gcc-multilib automake zlib1g:i386 screen pax gzip cpio \
-  python3-pip python3-pexpect xz-utils debianutils iputils-ping python3-git \
-  python3-jinja2 libegl1-mesa libsdl1.2-dev pylint asciidoc
+sudo apt-get install iproute2 gawk python3 build-essential gcc git make \
+     net-tools libncurses5-dev tftpd zlib1g-dev libssl-dev flex bison libselinux1 \
+     gnupg wget git-core diffstat chrpath socat xterm autoconf libtool tar unzip \
+     texinfo zlib1g-dev gcc-multilib automake zlib1g:i386 screen pax gzip cpio \
+     python3-pip python3-pexpect xz-utils debianutils iputils-ping python3-git \
+     python3-jinja2 libegl1-mesa libsdl1.2-dev pylint asciidoc
 #+END_SRC
 
 Installing the petalinux tools can be done with the ~.run~ script[fn:28], as follow:
 #+BEGIN_SRC sh
-  sudo chmod +x ./petalinux-v2023.2-10121855-installer.run
-  ./petalinux-v2023.2-10121855-installer.run
-  bash
-  source settings.sh
+sudo chmod +x ./petalinux-v2023.2-10121855-installer.run
+./petalinux-v2023.2-10121855-installer.run
+bash
+source settings.sh
 #+END_SRC
 
 A project can then be created, using the ~.bsp~ file. From there it is possible to
 build the image file meant to be booted by the board:
 #+BEGIN_SRC sh
-  petalinux-create -t project -s xilinx-kr260-starterkit-v2023.2-10140544.bsp
-  cd xilinx-kr260-starterkit-2023.2/
+petalinux-create -t project -s xilinx-kr260-starterkit-v2023.2-10140544.bsp
+cd xilinx-kr260-starterkit-2023.2/
 #+END_SRC
 
 
@@ -443,7 +443,7 @@ The more general option allows to enable stuff related to hardware
 configuration[fn:33]. For this step, it is possible to select the ~openamp~
 setting the the DTG Settings, as visible in the Figure [[fig:yocto_openamp_dtg]] below:
 #+BEGIN_SRC sh
-  petalinux-config --get-hw-description  ./hardware/xilinx-kr260-starterkit-2023.2/kr260_starter_kit.xsa
+petalinux-config --get-hw-description  ./hardware/xilinx-kr260-starterkit-2023.2/kr260_starter_kit.xsa
 #+END_SRC
 
 Then, here are the options that we want to enable:
@@ -455,7 +455,7 @@ Then, here are the options that we want to enable:
 Some kernel and module configuration are needed in order for the petalinux system to work properly.
 These setup can be set using the following command:
 #+BEGIN_SRC sh
-  petalinux-config -c rootfs
+petalinux-config -c rootfs
 #+END_SRC
 
 Then, here are the options that we want to enable:
@@ -473,8 +473,8 @@ Then, here are the options that we want to enable:
 It is then possible to build[fn:32] and package the image. Most critically compared to the example,
 the ~openamp.dtb~ overlay must be used in order for OpenAMP and subsequently RPMsg to become usable.
 #+BEGIN_SRC sh
-  petalinux-build
-  petalinux-package --wic --bootfiles "ramdisk.cpio.gz.u-boot boot.scr Image system.dtb"
+petalinux-build
+petalinux-package --wic --bootfiles "ramdisk.cpio.gz.u-boot boot.scr Image system.dtb"
 #+END_SRC
 
 #+LATEX: \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black]
@@ -487,7 +487,7 @@ _If you are unsure of what to do, seek assistance !_
 
 Finally, and now an image has been generated, it can be burnt to a micro-SD card the usual way:
 #+BEGIN_SRC sh
-  sudo dd if=./images/linux/petalinux-sdimage.wic \
+sudo dd if=./images/linux/petalinux-sdimage.wic \
      of=/dev/sda status=progress bs=8M && sync
 #+END_SRC
 
@@ -503,53 +503,53 @@ As presented in the official documentation[fn:34], this can be simply done with
 the following commands. If the return of the ~echo_test~ commands states that zero
 error occurs, the system should be good to go:
 #+BEGIN_SRC sh
-  sudo -s
-  echo image_echo_test  > /sys/class/remoteproc/remoteproc0/firmware
-  echo start > /sys/class/remoteproc/remoteproc0/state
-  echo_test
-  echo stop > /sys/class/remoteproc/remoteproc0/state
+sudo -s
+echo image_echo_test  > /sys/class/remoteproc/remoteproc0/firmware
+echo start > /sys/class/remoteproc/remoteproc0/state
+echo_test
+echo stop > /sys/class/remoteproc/remoteproc0/state
 #+END_SRC
 
 ** "echo-test" performance comparison
 
 *** Raw plot of the package measurement                          :noexport:
 #+BEGIN_SRC python :results file :eval no-export
-  import pandas as pd
-  import numpy as np
-  import matplotlib.pyplot as plt
-  import scipy.stats as stats
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.stats as stats
 
-  df_kr = pd.read_csv('./csv/kr260_echo_test.csv', names=['time KR260 (PetaLinux)'])
-  df_kv = pd.read_csv('./csv/kv260_echo_test.csv', names=['time KV260 (Ubuntu)'])
+df_kr = pd.read_csv('./csv/kr260_echo_test.csv', names=['time KR260 (PetaLinux)'])
+df_kv = pd.read_csv('./csv/kv260_echo_test.csv', names=['time KV260 (Ubuntu)'])
 
-  df_payload = pd.DataFrame([s] for l in range(0, 10, 1) for s in range(17, 489, 1))
+df_payload = pd.DataFrame([s] for l in range(0, 10, 1) for s in range(17, 489, 1))
 
-  df_tot_2 = pd.concat([df_kr, df_kv, df_payload], sort=False, axis=1)
+df_tot_2 = pd.concat([df_kr, df_kv, df_payload], sort=False, axis=1)
 
-  df_tot_2 = df_tot_2.rename(columns={0:'Payload size'})
+df_tot_2 = df_tot_2.rename(columns={0:'Payload size'})
 
-  df_tot_2['time KR260 (PetaLinux)'] = df_tot_2['time KR260 (PetaLinux)'].div(df_tot_2['Payload size'])
-  df_tot_2['time KV260 (Ubuntu)'] = df_tot_2['time KV260 (Ubuntu)'].div(df_tot_2['Payload size'])
+df_tot_2['time KR260 (PetaLinux)'] = df_tot_2['time KR260 (PetaLinux)'].div(df_tot_2['Payload size'])
+df_tot_2['time KV260 (Ubuntu)'] = df_tot_2['time KV260 (Ubuntu)'].div(df_tot_2['Payload size'])
 
-  df_tot_2 = df_tot_2.sort_values(by=['Payload size'], ascending=True)
-  df_tot_2 = df_tot_2.drop(columns=['Payload size'])
+df_tot_2 = df_tot_2.sort_values(by=['Payload size'], ascending=True)
+df_tot_2 = df_tot_2.drop(columns=['Payload size'])
 
-  df_tot_2 = df_tot_2.reset_index(drop=True)
-  
-  df_tot_2 = 1/df_tot_2
-  df_tot_2 = df_tot_2.mul(1000)
+df_tot_2 = df_tot_2.reset_index(drop=True)
 
-  plt.rc('font', size=10)
+df_tot_2 = 1/df_tot_2
+df_tot_2 = df_tot_2.mul(1000)
 
-  scatterplot = df_tot_2.plot(style='.', grid='true')
-  scatterplot.set_xlabel('Package sent [n]')
-  scatterplot.set_ylabel('Data throughput [MB/s]')
-  # scatterplot.set_yscale("log");
-  # densityplot = df_tot_2.plot.density(grid='true', xlim=[0.2, 0.9])
-  # densityplot.set_xlabel('Round trip time for one RPMsg package [us]')
-  # densityplot.set_ylabel('Probability density [%]')
-  plt.savefig('./img/kr260_echo_test_density.png', dpi=400, bbox_inches='tight')
-  return './img/kr260_echo_test_density.png'
+plt.rc('font', size=10)
+
+scatterplot = df_tot_2.plot(style='.', grid='true')
+scatterplot.set_xlabel('Package sent [n]')
+scatterplot.set_ylabel('Data throughput [MB/s]')
+# scatterplot.set_yscale("log");
+# densityplot = df_tot_2.plot.density(grid='true', xlim=[0.2, 0.9])
+# densityplot.set_xlabel('Round trip time for one RPMsg package [us]')
+# densityplot.set_ylabel('Probability density [%]')
+plt.savefig('./img/kr260_echo_test_density.png', dpi=400, bbox_inches='tight')
+return './img/kr260_echo_test_density.png'
 #+END_SRC
 
 #+RESULTS:
@@ -566,18 +566,18 @@ Here is the complete sequence in order to archive a timely measured ~echo_test~ 
 - Building of the test software
 - Communication with the R5F, with reload of the firmware
 #+BEGIN_SRC sh
-  sudo dnf install git make gcc binutils packagegroup-core-buildessential
-  sudo ln -s /usr/bin/aarch64-xilinx-linux-gcc /bin/cc
-  git clone https://github.com/OpenAMP/openamp-system-reference.git
-  cd openamp-system-reference/examples/linux/rpmsg-echo-test/
-  wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/echo_test.patch
-  patch -u -b echo_test.c -i echo_test.patch
-  make
-  sudo -s
-  echo image_echo_test  > /sys/class/remoteproc/remoteproc0/firmware
-  echo start > /sys/class/remoteproc/remoteproc0/state
-  ./echo_test
-  echo stop > /sys/class/remoteproc/remoteproc0/state
+sudo dnf install git make gcc binutils packagegroup-core-buildessential
+sudo ln -s /usr/bin/aarch64-xilinx-linux-gcc /bin/cc
+git clone https://github.com/OpenAMP/openamp-system-reference.git
+cd openamp-system-reference/examples/linux/rpmsg-echo-test/
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/echo_test.patch
+patch -u -b echo_test.c -i echo_test.patch
+make
+sudo -s
+echo image_echo_test  > /sys/class/remoteproc/remoteproc0/firmware
+echo start > /sys/class/remoteproc/remoteproc0/state
+./echo_test
+echo stop > /sys/class/remoteproc/remoteproc0/state
 #+END_SRC
 
 The figure [[fig:kr260_echo_test_density]] below shows a comparison for the data
@@ -606,23 +606,23 @@ Multiple steps are required in order to mitigate all of this.
 
 First, we can make our standard ~interfaces~ configuration, in the  ~/etc/network/interfaces~:
 #+BEGIN_SRC sh
-  # Wired or wireless interfaces
-  auto eth0
-  iface eth0 inet static
-        address 192.168.11.107
-        netmask 255.255.255.0
-        network 192.168.11.0
-        gateway 192.168.11.1
+# Wired or wireless interfaces
+auto eth0
+iface eth0 inet static
+address 192.168.11.107
+netmask 255.255.255.0
+network 192.168.11.0
+gateway 192.168.11.1
 #+END_SRC
 
 Then we need to have ~systemd~ to run a script after boot time to restart the ~eth0~ interface.
 
 A very basic script, as follow need to be placed somewhere on the system, for example here, in the ~/home/root/net.sh~:
 #+BEGIN_SRC sh
-  #!/bin/sh -e
-  ifdown eth0
-  ifup eth0
-  exit 0
+#!/bin/sh -e
+ifdown eth0
+ifup eth0
+exit 0
 #+END_SRC
 
 Then, we want to create a ~systemd~ service that will run this script as ~idle~,
@@ -642,11 +642,11 @@ WantedBy=multi-user.target
 
 Finally, as a ~root~ we need to set the correct right for these files and finally enabling the service before reboot:
 #+BEGIN_SRC sh
-  sudo -s
-  chmod +x /home/root/net.sh
-  chmod 644 /etc/systemd/system/updown.service
-  systemctl enable updown.service
-  reboot now
+sudo -s
+chmod +x /home/root/net.sh
+chmod 644 /etc/systemd/system/updown.service
+systemctl enable updown.service
+reboot now
 #+END_SRC
 
 With all of this, on the next reboot of the board, the static IP should be available alongside the DHCP IP.
@@ -691,7 +691,7 @@ Firstly, we need to get the original firmware device tree, converted
 into a readable format (DTS):
 
 #+BEGIN_SRC sh
-  sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
+sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
 #+END_SRC
 
 Then, a custom-made patch file can be downloaded and applied.
@@ -699,38 +699,38 @@ This file is available at the URL visible in the command below
 but also in this report appendix [[DTO patch]].
 
 #+BEGIN_SRC sh
-  wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/\
-       blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/\
+     blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch
 
-  patch system.dts < system.patch
+patch system.dts < system.patch
 #+END_SRC
 
 As for the board to be able to reserve the correct amount of memory with the new settings, some
 ~cma~ kernel configuration is needed[fn:5]:
 
 #+BEGIN_SRC sh
-  sudo nano /etc/default/flash-kernel
+sudo nano /etc/default/flash-kernel
 
-  LINUX_KERNEL_CMDLINE="quiet splash cma=512M cpuidle.off=1"
-  LINUX_KERNEL_CMDLINE_DEFAULTS=""
-  sudo flash-kernel
+LINUX_KERNEL_CMDLINE="quiet splash cma=512M cpuidle.off=1"
+LINUX_KERNEL_CMDLINE_DEFAULTS=""
+sudo flash-kernel
 #+END_SRC
 
 Now the DTS file has been modified, one can regenerate the binary and place it on the ~/boot~ partition
 and reboot the board:
 
 #+BEGIN_SRC sh
-  dtc -I dts -O dtb system.dts -o user-override.dtb
-  sudo mv user-override.dtb /boot/firmware/
-  sudo reboot now
+dtc -I dts -O dtb system.dts -o user-override.dtb
+sudo mv user-override.dtb /boot/firmware/
+sudo reboot now
 #+END_SRC
 
 After rebooting, you can check the content of the \verb|remoteproc| system directory,
 and a ~remoteproc0~ device should be visible, as follow:
 
 #+BEGIN_SRC sh
-  ls /sys/class/remoteproc/
-  #  remoteproc0
+ls /sys/class/remoteproc/
+#  remoteproc0
 #+END_SRC
 
 If it is the case, it means that the patch was successful and  that the remote processor is
@@ -780,28 +780,28 @@ Some packages are required to be installed on the host system
 in order for the installation process to happen successfully:
 
 #+BEGIN_SRC sh
-  sudo apt-get -y update
+sudo apt-get -y update
 
-  sudo apt-get -y install libncurses-dev \
-       ncurses-term \
-       ncurses-base \
-       ncurses-bin \
-       libncurses5 \
-       libtinfo5 \
-       libncurses5-dev \
-       libncursesw5-dev
+sudo apt-get -y install libncurses-dev \
+     ncurses-term \
+     ncurses-base \
+     ncurses-bin \
+     libncurses5 \
+     libtinfo5 \
+     libncurses5-dev \
+     libncursesw5-dev
 #+END_SRC
 
 Once this is done, the previously downloaded binary installer can be executed:
 
 #+BEGIN_SRC sh
-  ./Xilinx_Unified_2022.2_1014_8888_Lin64.bin
+./Xilinx_Unified_2022.2_1014_8888_Lin64.bin
 #+END_SRC
 
 If it is not possible to run the previous command, make the file executable with the ~chmod~ command:
 
 #+BEGIN_SRC sh
-  sudo chmod +x ./Xilinx_Unified_2022.2_1014_8888_Lin64.bin
+sudo chmod +x ./Xilinx_Unified_2022.2_1014_8888_Lin64.bin
 #+END_SRC
 
 From there you can follow the step-by-step graphical installer.
@@ -830,19 +830,19 @@ creating a symbolic link from the current, 12 version works as a workaround.
 Here are the steps for installing the dependencies and building this configuration file:
 
 #+BEGIN_SRC sh
-  sudo apt-get update
-  sudo apt-get install cmake tcl libidn11-dev \
-  libidn-dev libidn12 idn
-  sudo ln -s /usr/lib/x86_64-linux-gnu/libidn.so.12 \
-  /usr/lib/x86_64-linux-gnu/libidn.so.11
+sudo apt-get update
+sudo apt-get install cmake tcl libidn11-dev \
+     libidn-dev libidn12 idn
+sudo ln -s /usr/lib/x86_64-linux-gnu/libidn.so.12 \
+     /usr/lib/x86_64-linux-gnu/libidn.so.11
 
-  cd ~/Xilinx
-  git clone --recursive \
-  https://github.com/Xilinx/kria-vitis-platforms.git
-  cd kria-vitis-platforms/k26/platforms
-  export XILINX_VIVADO=/home/$USER/Xilinx/Vivado/2022.2/
-  export XILINX_VITIS=/home/$USER/Xilinx/Vitis/2022.2/
-  make platform PLATFORM=k26_base_starter_kit
+cd ~/Xilinx
+git clone --recursive \
+    https://github.com/Xilinx/kria-vitis-platforms.git
+cd kria-vitis-platforms/k26/platforms
+export XILINX_VIVADO=/home/$USER/Xilinx/Vivado/2022.2/
+export XILINX_VITIS=/home/$USER/Xilinx/Vitis/2022.2/
+make platform PLATFORM=k26_base_starter_kit
 #+END_SRC
 
 ** Setting up and building a new project for the Kria board
@@ -958,12 +958,12 @@ As a reminder, this is meant to be done on the Linux running on the
 Kria board, NOT on your host machine !
 
 #+BEGIN_SRC sh
-  git clone https://github.com/Xilinx/meta-openamp.git
-  cd  meta-openamp
-  git checkout xlnx-rel-v2022.2
-  cd  ./recipes-openamp/rpmsg-examples/rpmsg-echo-test
-  make
-  sudo ln -s $(pwd)/echo_test /usr/bin/
+git clone https://github.com/Xilinx/meta-openamp.git
+cd  meta-openamp
+git checkout xlnx-rel-v2022.2
+cd  ./recipes-openamp/rpmsg-examples/rpmsg-echo-test
+make
+sudo ln -s $(pwd)/echo_test /usr/bin/
 #+END_SRC
 
 Once this is done, it it possible to run the test program from the Kria board's Ubuntu
@@ -985,55 +985,55 @@ We are downloading the latest ~arm-none-eabi~ gcc compiler directly from the ARM
 The cross-compilation tool can then be extracted, set as our ~toolchain~ variable,
 then passed as a parameter when creating the Docker container:
 #+BEGIN_SRC sh
-  pushd /home/$USER/Downloads
-  wget https://developer.arm.com/-/media/Files/downloads/\
-  gnu/12.2.mpacbti-rel1/binrel/arm-gnu-toolchain-12.2\
-  .mpacbti-rel1-x86_64-arm-none-eabi.tar.xz
-  tar -xvf arm-gnu-toolchain-12.2.mpacbti-rel1-x86_64-\
-  arm-none-eabi.tar.xz
-  popd
+pushd /home/$USER/Downloads
+wget https://developer.arm.com/-/media/Files/downloads/\
+     gnu/12.2.mpacbti-rel1/binrel/arm-gnu-toolchain-12.2\
+     .mpacbti-rel1-x86_64-arm-none-eabi.tar.xz
+tar -xvf arm-gnu-toolchain-12.2.mpacbti-rel1-x86_64-\
+    arm-none-eabi.tar.xz
+popd
 
-  toolchain="/home/$USER/Downloads/arm-gnu-toolchain-\
-  12.2.mpacbti-rel1-x86_64-arm-none-eabi/"
+toolchain="/home/$USER/Downloads/arm-gnu-toolchain-\
+12.2.mpacbti-rel1-x86_64-arm-none-eabi/"
 
 
-  docker run -d --name ros_build -it --net=host \
-  --hostname ros_build \
-  -v /dev:/dev \
-  -v $toolchain:/armr5-toolchain \
-  --privileged ros:iron
+docker run -d --name ros_build -it --net=host \
+       --hostname ros_build \
+       -v /dev:/dev \
+       -v $toolchain:/armr5-toolchain \
+       --privileged ros:iron
 #+END_SRC
 
 Now the container named ~ros_build~ was created, it is possible to "enter" it, and having access
 to the tools in it by running the following command that will open a ~bash~ shell in said container:
 #+BEGIN_SRC sh
-  docker exec -it ros_build bash
+docker exec -it ros_build bash
 #+END_SRC
 
 Now we are in the ROS2 container, we can build the micro-ROS firmware as presented
 in the [[https://micro.ros.org/docs/tutorials/advanced/create\_custom\_static\_library][dedicated micro-ROS guide]]:
 #+BEGIN_SRC sh
-  sudo apt update 
-  sudo apt-get -y install python3-pip \
-       wget \
-       nano
+sudo apt update 
+sudo apt-get -y install python3-pip \
+     wget \
+     nano
 
-  . /opt/ros/$ROS_DISTRO/setup.bash
+. /opt/ros/$ROS_DISTRO/setup.bash
 
-  mkdir microros_ws
-  cd microros_ws
-  git clone -b $ROS_DISTRO \
-      https://github.com/micro-ROS/micro_ros_setup.git \
-      src/micro_ros_setup
+mkdir microros_ws
+cd microros_ws
+git clone -b $ROS_DISTRO \
+    https://github.com/micro-ROS/micro_ros_setup.git \
+    src/micro_ros_setup
 
-  sudo rosdep fix-permissions &&\
-      rosdep update &&\
-      rosdep install --from-paths src --ignore-src -y
+sudo rosdep fix-permissions &&\
+    rosdep update &&\
+    rosdep install --from-paths src --ignore-src -y
 
-  colcon build
-  . ./install/local_setup.bash
+colcon build
+. ./install/local_setup.bash
 
-  ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
+ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
 #+END_SRC
 
 From that point, we will need some extra configuration files for our Cortex R5F.
@@ -1042,18 +1042,18 @@ Both configuration files[fn:9] will be downloaded from my repository;
 we also are going to copy the cross-compiler into the microros workspace,
 then we can build the library with the following ros2 command:
 #+BEGIN_SRC sh
-  wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
-  documentation/-/raw/main/src/custom_r5f_toolchain.cmake
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
+     documentation/-/raw/main/src/custom_r5f_toolchain.cmake
 
-  wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
-  documentation/-/raw/main/src/custom_r5f_colcon.meta
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
+     documentation/-/raw/main/src/custom_r5f_colcon.meta
 
-  cp -r /armr5-toolchain/ $(pwd)/firmware/toolchain && \
-  export PATH=$PATH:$(pwd)/firmware/toolchain/bin
+cp -r /armr5-toolchain/ $(pwd)/firmware/toolchain && \
+    export PATH=$PATH:$(pwd)/firmware/toolchain/bin
 
-  ros2 run micro_ros_setup build_firmware.sh \
-  $(pwd)/custom_r5f_toolchain.cmake $(pwd)/\
-  custom_r5f_colcon.meta
+ros2 run micro_ros_setup build_firmware.sh \
+     $(pwd)/custom_r5f_toolchain.cmake $(pwd)/\
+     custom_r5f_colcon.meta
 #+END_SRC
 #+LATEX: \pagebreak
 
@@ -1066,13 +1066,13 @@ and the include files from the Docker builder.
 Here, we assume your Vitis IDE workspace sits in you home directory, at ~~/workspace~,
 and that the Docker container is named ~ros_build~:
 #+BEGIN_SRC sh
-  mkdir /home/$USER/workspace/microros_lib
+mkdir /home/$USER/workspace/microros_lib
 
-  docker cp ros_build:/microros_ws/firmware/build/\
-         libmicroros.a /home/$USER/workspace/microros_lib/
+docker cp ros_build:/microros_ws/firmware/build/\
+       libmicroros.a /home/$USER/workspace/microros_lib/
 
-  docker cp ros_build:/microros_ws/firmware/build/include \
-         /home/$USER/workspace/microros_lib/
+docker cp ros_build:/microros_ws/firmware/build/include \
+       /home/$USER/workspace/microros_lib/
 #+END_SRC
 
 Many parameters are available to be set up in the IDE for the compilation tool-chain, but
@@ -1100,10 +1100,10 @@ to recognize the include files and to be able to use them for compiling the firm
 With both of these setup in your project and as a minimal test to see if the setup was made correctly,
 you should be able to include the following micro-ROS libraries into your project:
 #+BEGIN_SRC C
-  #include <rcl/rcl.h>
-  #include <rcl/error_handling.h>
-  #include <rclc/rclc.h>
-  #include <rclc/executor.h>
+#include <rcl/rcl.h>
+#include <rcl/error_handling.h>
+#include <rclc/rclc.h>
+#include <rclc/executor.h>
 #+END_SRC
 
 The details for the inclusions and the use-case of the library will depend on the implementation
@@ -1113,8 +1113,8 @@ But in general, as the firmware is successfully built and an ~.elf~ file is avai
 firmware to the Kria board (or any remote server accessible through ~SSH~, for that matter) with the following
 command[fn:10]:
 #+BEGIN_SRC sh
-  scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
-      Debug/rpmsg_pingpong_microros_lib.elf  ubuntu@192.168.1.10:/home/ubuntu/
+scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
+    Debug/rpmsg_pingpong_microros_lib.elf  ubuntu@192.168.1.10:/home/ubuntu/
 #+END_SRC
 #+LATEX: \pagebreak
 
@@ -1227,10 +1227,10 @@ fulfilled:
   and ~make~, obviously.
 
 #+BEGIN_SRC sh
-  cd /tmp
-  git clone https://gitlab.com/sunoc/libmicroros_kv260.git
-  cd libmicroros_kv260/Debug
-  make
+cd /tmp
+git clone https://gitlab.com/sunoc/libmicroros_kv260.git
+cd libmicroros_kv260/Debug
+make
 #+END_SRC
 
 From there, you will have the binary ~rpmsg_pingpong_microros_lib.elf~ file created and ready to be deployed
@@ -1241,8 +1241,8 @@ While the version of the firmware since the tag ~0.1~[fn:23] are functional, abl
 an Agent placed on the neighbour Linux, some work, improvements and tweaks are still to be made.
 
 *** WAIT [#A] Firmware stop / crash / reboot
-  maybe a complete re-implementation with a different os / else
-  would be better.
+maybe a complete re-implementation with a different os / else
+would be better.
 This is maybe the most annoying issue that is currently still ongoing: if the firmware
 is not stopped in a "clean" way, the RPMsg task is not kill, making a full reboot of the board
 needed in order to re-launch the firmware and having an established communication.
@@ -1258,21 +1258,21 @@ on the Cortex micro-controller side.
 As a reminder, the firmware can be loaded from the host machine IDE workspace
 to the Kria board through ~SSH~ using the following command:
 #+BEGIN_SRC sh
-  scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
-      Debug/rpmsg_pingpong_microros_lib.elf  ubuntu@192.168.1.10:/home/ubuntu/
+scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
+    Debug/rpmsg_pingpong_microros_lib.elf  ubuntu@192.168.1.10:/home/ubuntu/
 #+END_SRC
 
 The following instructions will show how to use this binary file, and
 in particular how to upload and start the firmware on the R5F real time core
 from the Linux user-space[fn:11], to test a basic RPMsg setup[fn:12]:
 #+BEGIN_SRC sh
-  sudo -s
-  mv image_echo_test /lib/firmware
-  echo image_echo_test  > /sys/class/remoteproc/\
-       remoteproc0/firmware
-  echo start > /sys/class/remoteproc/remoteproc0/state
-  echo_test
-  echo stop > /sys/class/remoteproc/remoteproc0/state
+sudo -s
+mv image_echo_test /lib/firmware
+echo image_echo_test  > /sys/class/remoteproc/\
+     remoteproc0/firmware
+echo start > /sys/class/remoteproc/remoteproc0/state
+echo_test
+echo stop > /sys/class/remoteproc/remoteproc0/state
 #+END_SRC
 
 In this setup you need to be careful for the name of the ~.elf~ binary to be exactly used
@@ -1319,52 +1319,52 @@ We will be following this guide here[fn:14].
 Firstly, we need to update the locals, enable the universe Ubuntu repository,
 get the key and add the repository for ROS2. This can be done as follow:
 #+BEGIN_SRC sh
-  locale  # check for UTF-8
-  sudo apt update && sudo apt install -y locales
-  sudo locale-gen en_US en_US.UTF-8
-  sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
-  export LANG=en_US.UTF-8
-  locale  # verify settings
+locale  # check for UTF-8
+sudo apt update && sudo apt install -y locales
+sudo locale-gen en_US en_US.UTF-8
+sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+export LANG=en_US.UTF-8
+locale  # verify settings
 
-  sudo apt install -y software-properties-common
-  sudo add-apt-repository universe
-  sudo apt update && sudo apt install -y curl wget
+sudo apt install -y software-properties-common
+sudo add-apt-repository universe
+sudo apt update && sudo apt install -y curl wget
 
-  wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key
-  sudo mv ros.key /usr/share/keyrings/ros-archive-keyring.gpg
+wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key
+sudo mv ros.key /usr/share/keyrings/ros-archive-keyring.gpg
 #+END_SRC
 
 Then, a thicc one-liner is available to add the ROS2 repository to our system:
 #+BEGIN_SRC sh
-  echo "deb [arch=$(dpkg --print-architecture) \
-  signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
-  http://packages.ros.org/ros2/ubuntu $(. \
-  /etc/os-release && echo $UBUNTU_CODENAME) main" | \
-  sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+echo "deb [arch=$(dpkg --print-architecture) \
+signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
+http://packages.ros.org/ros2/ubuntu $(. \
+/etc/os-release && echo $UBUNTU_CODENAME) main" | \
+    sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
 #+END_SRC
 
 It is then possible to install ROS2[fn:15] as follow:
 #+BEGIN_SRC sh
-  sudo apt update
-  sudo apt upgrade -y
-  sudo apt install -y ros-humble-desktop \
-       ros-humble-ros-base \
-       python3-argcomplete \
-       ros-dev-tools
+sudo apt update
+sudo apt upgrade -y
+sudo apt install -y ros-humble-desktop \
+     ros-humble-ros-base \
+     python3-argcomplete \
+     ros-dev-tools
 #+END_SRC
 
 Once installed, it is possible to test the system with a provided example.
 You need to open two terminals and log wish SSH onto the board, then running
 respectively:
 #+BEGIN_SRC sh
-  source /opt/ros/humble/setup.bash
-  ros2 run demo_nodes_cpp talker
+source /opt/ros/humble/setup.bash
+ros2 run demo_nodes_cpp talker
 #+END_SRC
 
 And then:
 #+BEGIN_SRC sh
-  source /opt/ros/humble/setup.bash
-  ros2 run demo_nodes_py listener
+source /opt/ros/humble/setup.bash
+ros2 run demo_nodes_py listener
 #+END_SRC
 
 You should be able to see the first terminal sending "Hello world" messages,
@@ -1388,29 +1388,29 @@ If everything went smoothly, you should see something similar to what is present
 in the figure [[fig:hello-docker]] below, after the commands:
 
 #+BEGIN_SRC sh
-  sudo apt-get update
-  sudo apt-get install ca-certificates curl sudo
-  gnupg install -m 0755 -d /etc/apt/keyrings
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-      sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo apt-get update
+sudo apt-get install ca-certificates curl sudo
+gnupg install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+    sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
-  sudo chmod a+r /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
-  echo \
-      "deb [arch="$(dpkg --print-architecture)" \
-    signed-by=/etc/apt/keyrings/docker.gpg] \
-    https://download.docker.com/linux/ubuntu \
-    "$(. /etc/os-release && \
-           echo "$VERSION_CODENAME")" stable" | \
-      sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+echo \
+    "deb [arch="$(dpkg --print-architecture)" \
+  signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && \
+         echo "$VERSION_CODENAME")" stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-  sudo apt-get update
-  sudo apt-get install docker-ce docker-ce-cli \
-       containerd.io docker-buildx-plugin docker-compose-plugin
-  sudo usermod -aG docker $USER
-  newgrp docker
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli \
+     containerd.io docker-buildx-plugin docker-compose-plugin
+sudo usermod -aG docker $USER
+newgrp docker
 
-  docker run hello-world
+docker run hello-world
 #+END_SRC
 
 #+ATTR_LATEX: :width .7\textwidth
@@ -1425,51 +1425,51 @@ A key part for having access to the interfaces (serial) is the mapping of the wh
 range of devices from the host machine to the internal ~/dev~ of the container[fn:16].
 With the second command, we can execute ~bash~ as a way to open a terminal to the "inside" the container:
 #+BEGIN_SRC sh
-  docker run -d --name ros_agent -it --net=host -v \
-         /dev:/dev --privileged ros:iron
-  docker exec -it ros_agent bash
+docker run -d --name ros_agent -it --net=host -v \
+       /dev:/dev --privileged ros:iron
+docker exec -it ros_agent bash
 #+END_SRC
 
 From there, it becomes possible to simply use ROS2 as you would for a bare-metal install,
 and as presented in the section [[On the host Linux ("bare-metal")]] above:
 #+BEGIN_SRC sh
-  source /opt/ros/$ROS_DISTRO/setup.bash
+source /opt/ros/$ROS_DISTRO/setup.bash
 
-  # Create a workspace and download the micro-ROS tools
-  mkdir microros_ws
-  cd microros_ws
-  git clone -b $ROS_DISTRO https://github.com/micro-ROS/\
-      micro_ros_setup.git src/micro_ros_setup
+# Create a workspace and download the micro-ROS tools
+mkdir microros_ws
+cd microros_ws
+git clone -b $ROS_DISTRO https://github.com/micro-ROS/\
+    micro_ros_setup.git src/micro_ros_setup
 
-  # Update dependencies using rosdep
-  sudo apt update && rosdep update
-  rosdep install --from-paths src --ignore-src -y
+# Update dependencies using rosdep
+sudo apt update && rosdep update
+rosdep install --from-paths src --ignore-src -y
 
-  # Install pip
-  sudo apt-get install python3-pip
+# Install pip
+sudo apt-get install python3-pip
 
-  # Build micro-ROS tools and source them
-  colcon build
+# Build micro-ROS tools and source them
+colcon build
 
-  # Download micro-ROS-Agent packages
-  source install/local_setup.bash
-  ros2 run micro_ros_setup create_agent_ws.sh
+# Download micro-ROS-Agent packages
+source install/local_setup.bash
+ros2 run micro_ros_setup create_agent_ws.sh
 
-  # Build step
-  ros2 run micro_ros_setup build_agent.sh
+# Build step
+ros2 run micro_ros_setup build_agent.sh
 
-  # Run a micro-ROS agent
-  ros2 run micro_ros_agent micro_ros_agent serial \
-       --dev /dev/ttyUSB1
+# Run a micro-ROS agent
+ros2 run micro_ros_agent micro_ros_agent serial \
+     --dev /dev/ttyUSB1
 #+END_SRC
 
 Then once again in a similar way to the bare-metal deployment,  it is possible to run a demonstration
 the ping-pong topic communication from a different shell[fn:17]:
 #+BEGIN_SRC sh
-  source /opt/ros/$ROS_DISTRO/setup.bash
+source /opt/ros/$ROS_DISTRO/setup.bash
 
-  # Subscribe to micro-ROS ping topic
-  ros2 topic echo /microROS/ping
+# Subscribe to micro-ROS ping topic
+ros2 topic echo /microROS/ping
 #+END_SRC
 #+LATEX: \pagebreak
 
@@ -1502,20 +1502,20 @@ and eventually modified.
 
 
 #+BEGIN_SRC sh
-  sudo nano /microros_ws/build/micro_ros_agent/agent/src/xrceagent/src/cpp/transport/custom/CustomAgent.cpp
+sudo nano /microros_ws/build/micro_ros_agent/agent/src/xrceagent/src/cpp/transport/custom/CustomAgent.cpp
 #+END_SRC
 The same file is available online as a reference, on eProsima repository[fn:27].
 
 #+BEGIN_SRC sh
-  git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
-  cd Micro-XRCE-DDS-Agent/
+git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+cd Micro-XRCE-DDS-Agent/
 
-  rm -rf examples/
-  git clone https://gitlab.com/sunoc/rpmsg-micro-ros-agent.git ./examples/custom_agent
+rm -rf examples/
+git clone https://gitlab.com/sunoc/rpmsg-micro-ros-agent.git ./examples/custom_agent
 
-  mkdir build && cd build
-  cmake -DUAGENT_BUILD_USAGE_EXAMPLES=ON ..
-  make
+mkdir build && cd build
+cmake -DUAGENT_BUILD_USAGE_EXAMPLES=ON ..
+make
 #+END_SRC
 
 The custom agent is then available to run from the ~./src/examples/custom_agent/CustomXRCEAgent~.
@@ -1544,18 +1544,18 @@ The same command presented above for running a custom agent "bare-metal" can be
 run inside a Docker.
 
 #+BEGIN_SRC sh
-  docker run -d --name XRCE_DDS_Agent -it --net=host -v \
-         /dev:/dev --privileged ros:iron
-  docker exec -it XRCE_DDS_Agent bash
+docker run -d --name XRCE_DDS_Agent -it --net=host -v \
+       /dev:/dev --privileged ros:iron
+docker exec -it XRCE_DDS_Agent bash
 #+END_SRC
 
 
 #+BEGIN_SRC sh
-  git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
-  cd Micro-XRCE-DDS-Agent
-  docker build -t xrce-dds-agent .
-  docker run -it --privileged -v /dev:/dev xrce-dds-agent serial \
-         --dev /dev/ttyACM0
+git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+cd Micro-XRCE-DDS-Agent
+docker build -t xrce-dds-agent .
+docker run -it --privileged -v /dev:/dev xrce-dds-agent serial \
+       --dev /dev/ttyACM0
 #+END_SRC
 
 ** Building the Agent version with a modified transport
@@ -1567,26 +1567,26 @@ The build process it the same as usual, just pulling from my fork of eProsima re
 and using the ~develop~ branch:
 
 #+BEGIN_SRC sh
-  git clone https://github.com/sunoc/Micro-XRCE-DDS-Agent.git -b develop
-  cd Micro-XRCE-DDS-Agent
-  mkdir build
-  cd build
-  cmake ..
-  make
+git clone https://github.com/sunoc/Micro-XRCE-DDS-Agent.git -b develop
+cd Micro-XRCE-DDS-Agent
+mkdir build
+cd build
+cmake ..
+make
 #+END_SRC
 
 Giving that your are working from an environment in which the ROS2 tools are available, it is then possible
 to run the Agent as follow[fn:21] [fn:22]:
 
 #+BEGIN_SRC sh
-  source /opt/ros/$ROS_DISTRO/setup.bash
+source /opt/ros/$ROS_DISTRO/setup.bash
 
-  ./MicroXRCEAgent serial --dev /dev/null --verbose 6
+./MicroXRCEAgent serial --dev /dev/null --verbose 6
 #+END_SRC
 
 ** WAIT [#C] Separated RPMsg transport created for XRCE-DDS Agent
-  now focusing on updating my knowledge about the techo.
-    gotta update the doc latec
+now focusing on updating my knowledge about the techo.
+gotta update the doc latec
 - [ ] Implementation done
 - [ ] Successfully tested
 - [ ] Pull request done to the eProsima repository
@@ -1594,9 +1594,9 @@ to run the Agent as follow[fn:21] [fn:22]:
 ** Creating a custom transport agent                      :WORK_IN_PROGRESS:
 These command allows to go build the agent and run it with maximum verbosity (for debugging purpose).
 #+BEGIN_SRC sh
-  cd /Micro-XRCE-DDS-Agent/build
-  make clean && make -j4
-  ./MicroXRCEAgent serial --dev /dev/null --verbose 6
+cd /Micro-XRCE-DDS-Agent/build
+make clean && make -j4
+./MicroXRCEAgent serial --dev /dev/null --verbose 6
 #+END_SRC
 
 
@@ -1646,12 +1646,12 @@ directly at the ~libmicroros_kv260~ repository: [[https://gitlab.com/sunoc/libmi
 
 ** header file
 #+BEGIN_SRC C
-  /**< Microseconds per second. */
-  #define MICROSECONDS_PER_SECOND    ( 1000000LL )  
-  /**< Nanoseconds per second. */
-  #define NANOSECONDS_PER_SECOND     ( 1000000000LL ) 
-  /**< Nanoseconds per FreeRTOS tick. */  
-  #define NANOSECONDS_PER_TICK       ( NANOSECONDS_PER_SECOND / configTICK_RATE_HZ ) 
+/**< Microseconds per second. */
+#define MICROSECONDS_PER_SECOND    ( 1000000LL )  
+/**< Nanoseconds per second. */
+#define NANOSECONDS_PER_SECOND     ( 1000000000LL ) 
+/**< Nanoseconds per FreeRTOS tick. */  
+#define NANOSECONDS_PER_TICK       ( NANOSECONDS_PER_SECOND / configTICK_RATE_HZ ) 
 #+END_SRC
 
 
@@ -1667,22 +1667,22 @@ directly at the ~libmicroros_kv260~ repository: [[https://gitlab.com/sunoc/libmi
 
 ** header file
 #+BEGIN_SRC C
-  #ifndef _ALLOCATORS_H_
-  #define _ALLOCATORS_H_
+#ifndef _ALLOCATORS_H_
+#define _ALLOCATORS_H_
 
-  #include "microros.h"
+#include "microros.h"
 
-  extern int absoluteUsedMemory;
-  extern int usedMemory;
+extern int absoluteUsedMemory;
+extern int usedMemory;
 
 
-  void * __freertos_allocate(size_t size, void * state);
-  void __freertos_deallocate(void * pointer, void * state);
-  void * __freertos_reallocate(void * pointer, size_t size, void * state);
-  void * __freertos_zero_allocate(size_t number_of_elements,
-  size_t size_of_element, void * state);
+void * __freertos_allocate(size_t size, void * state);
+void __freertos_deallocate(void * pointer, void * state);
+void * __freertos_reallocate(void * pointer, size_t size, void * state);
+void * __freertos_zero_allocate(size_t number_of_elements,
+				size_t size_of_element, void * state);
 
-  #endif // _ALLOCATORS_H_
+#endif // _ALLOCATORS_H_
 #+END_SRC
 
 * Footnotes
@@ -1785,7 +1785,7 @@ but it disables the PWM for the CPU fan, which will then run at full speed, maki
 [fn:4] A [[https://zenn.dev/ryuz88/articles/kv260_setup_memo_ubuntu22 ][blog post]] (JP) shows all major steps on how to enable the ~remoteproc~.
 
 [fn:3] A [[https://speakerdeck.com/fixstars/fpga-seminar-12-fixstars-corporation-20220727][slideshow]] (JP) from Fixstar employees presents how to use the device
-  tree to enable the communication between the cores.
+tree to enable the communication between the cores.
 
 [fn:2] The ~snap~ packages depends on each others. Dependencies
 cannot be remove before the package(s) that depends on them,

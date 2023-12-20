@@ -159,14 +159,15 @@ as in the following example (the serial port that "appeared" was the ~/dev/ttyUS
 and the 115200 bit-rate is the default value for the board):
 
 #+BEGIN_SRC sh
-  sudo picocom /dev/ttyUSB1 -b 115200
+sudo picocom /dev/ttyUSB1 -b 115200
 #+END_SRC
 
 In my case, I am using Emacs's ~serial-term~:
 #+BEGIN_SRC sh
-  M-x serial-term RET /dev/ttyUSB1 RET 115200 RET
+M-x serial-term RET /dev/ttyUSB1 RET 115200 RET
 #+END_SRC
 
+The default username / password pair for the very first boot is ~ubuntu~ and ~ubuntu~. You will then be prompted to enter a new passwork.
 
 Once logged in, it is typically easier and more convenient to connect the board
 using SSH. When the board is connected to the network, it is possible to know

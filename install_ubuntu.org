@@ -1,0 +1,446 @@
+:PROPERTIES:
+:ID:       582fe4ef-a301-4b53-b908-a5c2b5b6d694
+:END:
+#+title: KRIA board Ubuntu LTS 22.04 Install
+#+filetags: :export:
+#+author: Vincent Conus
+#+email: vincent.conus@protonmail.com
+#+date: 2023-12-22
+#+DESCRIPTION: A separated export for the Ubuntu install process
+#+LANGUAGE: English
+
+#+OPTIONS: H:3 toc:t date:t title:t email:t
+
+#+LATEX_COMPILER:
+
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS:[10pt]
+#+LATEX_HEADER: \usepackage[a4paper, total={6.5in, 9in}]{geometry}
+
+#+LATEX_HEADER: \usepackage{minted}
+#+LATEX_HEADER: \setminted{breaklines}
+#+LATEX_HEADER: \usepackage[AUTO]{inputenc}
+#+LATEX_HEADER: \renewcommand{\familydefault}{\sfdefault}
+#+LATEX_HEADER: \usemintedstyle{vs}
+
+#+LATEX_HEADER: \usepackage[most]{tcolorbox}
+
+#+LATEX_HEADER: \usepackage{CJKutf8}
+#+LATEX_HEADER: \usepackage{xurl}
+#+LATEX_HEADER: \usepackage{fontawesome5}
+#+LATEX_HEADER: \usepackage{hyperref}
+#+LATEX_HEADER: \usepackage{graphicx}
+#+LATEX_HEADER: \usepackage{float}
+
+Withe the boot firmware being up-to-date, we can proceed to install a Linux distribution
+on our Kria board. The step needed to archive a full installation of Ubuntu LTS 22.04
+will be presented in this section[fn:1]. The figure [[fig:map_linux]] below shows
+where this operating system sits in the general system we are implementing.
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: The Linux operating system (red border)runs on the
+#+CAPTION: APU (application, general purpose) side of the Kria board CPU.
+#+CAPTION: It is the base layer for the ROS2 system.
+#+NAME: fig:map_linux
+[[file:./img/map_linux.png]]
+
+** Integration in my org-roam system                              :noexport:
+#+BEGIN_SRC sh
+  ln -s $PWD/install_ubuntu.org ~/Nextcloud/zettel/install_ubuntu_kria.org
+#+END_SRC
+
+#+RESULTS:
+
+** Preparing and booting a Ubuntu 22.04 media
+An [[https://ubuntu.com/download/amd-xilinx][official Ubuntu image]] exists and is
+provided by Xilinx, allowing the OS installation to be quick and
+straightforward.
+Ubuntu is a common and easy to use distribution. Furthermore,
+it allows to install ROS2 as a package, which is most convenient and will be
+done later in this guide.
+
+Once the image has been downloaded at [[https://ubuntu.com/download/amd-xilinx][Canonical's page]]
+we can flash it onto the SD card, with the following instructions.
+
+#+LATEX: \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black]
+*DANGER*: The next part involve the ~dd~ command writing on disks!!!
+As always with the dd command, thou have to be *VERY* careful on what arguments
+thou give. Selecting the wrong disk will result on the destruction of
+thy data !!
+_If you are unsure of what to do, seek assistance !_
+#+LATEX: \end{tcolorbox}
+
+With the image available on thy machine and a SD card visible as ~/dev/sda~ device[fn:6]
+one can simply run the ~dd~ command as follow to write the image to a previously formatted drive (here ~/dev/sda~):
+
+#+BEGIN_SRC sh
+unxz iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img.xz
+sudo dd if=iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img \
+     of=/dev/sda status=progress bs=8M && sync
+#+END_SRC
+
+
+Once the SD card is flashed and put back in the board, the micro-USB cable can be
+connected from the PC to the board. It is then possible to
+connect to the board in serial with an appropriate tool, for example ~picocom~,
+as in the following example (the serial port that "appeared" was the ~/dev/ttyUSB1~ in this case,
+and the 115200 bit-rate is the default value for the board):
+
+#+BEGIN_SRC sh
+sudo picocom /dev/ttyUSB1 -b 115200
+#+END_SRC
+
+In my case, I am using Emacs's ~serial-term~:
+#+BEGIN_SRC sh
+M-x serial-term RET /dev/ttyUSB1 RET 115200 RET
+#+END_SRC
+
+The default username / password pair for the very first boot is ~ubuntu~ and ~ubuntu~. You will then be prompted to enter a new passwork.
+
+Once logged in, it is typically easier and more convenient to connect the board
+using SSH. When the board is connected to the network, it is possible to know
+it's IP address with the ~IP~ command; then it is possible to connect to
+the board with ssh, as follow (example, with the first command to be run on the board
+and the second one on the host PC, both without the first placeholder hostnames):
+#+BEGIN_SRC sh
+kria# ip addr
+
+host# ssh ubuntu@192.168.4.11
+#+END_SRC
+
+** Network and admin setups
+This section presents a variety of extra convenience configurations
+that can be used when setting-up the Kria board.
+
+*** Static IP address
+A static IP can be set by writing the following
+configuration into your ~netplan~ configuration file[fn:36].
+
+The name of the files might vary:
+#+BEGIN_SRC sh
+sudo chmod 0600 /etc/netplan/50-cloud-init.yaml 
+sudo nano /etc/netplan/50-cloud-init.yaml
+#+END_SRC
+
+You can then set the wanted IP as follow[fn:37]:
+#+BEGIN_SRC yaml
+network:
+  renderer: NetworkManager
+  version: 2
+  ethernets:
+    eth0:
+      dhcp4: false
+      addresses:
+        - 192.168.11.107/24
+      routes:
+        - to: default
+          via: 192.168.11.1
+      nameservers:
+        addresses: [192.168.11.1]
+#+END_SRC
+
+Finally, the change in settings can be applied
+as follow:
+
+#+BEGIN_SRC sh
+sudo netplan apply
+#+END_SRC
+
+*** Proxy and DNS
+An issue that can occur when connecting the board to the internet is the
+conflicting situation with the university proxy.
+Indeed, as the network at Nanzan University requires to go through a proxy,
+some DNS errors appeared.
+
+In that case, it might become needed to setup the proxy for the school.
+
+This can be done as follow, by exporting a https base proxy configuration
+containing you AXIA credentials (this is specific to Nanzan University IT system),
+then by consolidating the configuration for other types of connections in the ~bashrc~:
+
+#+BEGIN_SRC sh
+export https_proxy="http://<AXIA_username>:\
+       <AXIA_psw>@proxy.ic.nanzan-u.ac.jp:8080"
+
+echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc
+echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc
+echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc
+echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" >> ~/.bashrc
+#+END_SRC
+
+Eventually the board can be rebooted in order for the setup to get applied cleanly.
+
+*** ~root~ password
+#+LATEX: \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
+*WARNING*: Depending on your use-case, the setup presented in this
+subsection can be a critical security breach as it remove the need for a root
+password to access the admin functions of the board's Linux.
+_When in doubt, do not apply this configuration!!_
+#+LATEX: \end{tcolorbox}
+
+If you board does not hold important data
+and is available to you only, for test or development,
+it might be convenient for the ~sudo~ tool to not ask for the
+password all the time.
+This change can be done by editing the sudoers file, and
+adding the parameter ~NOPASSWD~
+at the ~sudo~ line:
+
+#+BEGIN_SRC sh
+sudo visudo
+
+%sudo   ALL=(ALL:ALL) NOPASSWD: ALL
+#+END_SRC
+
+Again, this is merely a convenience setup for devices staying at you desk. If
+the board is meant to be used in any kind of production setup, a password
+should be set for making administration tasks.
+
+With all of these settings, you should be able to update the software of your
+board without any issues:
+#+BEGIN_SRC sh
+sudo apt-get update
+sudo apt-get dist-upgrade
+sudo reboot now
+#+END_SRC
+
+*** Purging ~snap~
+As the desktop-specific software are not used at all in the case
+of our project, there are some packages that can be purges in order for the
+system to become more lightweight.
+
+In particular, the main issue with Ubuntu systems is the forced integration of
+Snap packages. Here are the command to use in order to remove all of that.
+These steps take a lot of time and need to be executed in that specific order[fn:2],
+but the system fan runs sensibly slower without all of this stuff:
+
+#+BEGIN_SRC sh
+sudo systemctl disable snapd.service
+sudo systemctl disable snapd.socket
+sudo systemctl disable snapd.seeded.service
+
+sudo snap list #show installed package, remove then all:
+sudo snap remove --purge firefox
+sudo snap remove --purge gnome-3-38-2004
+sudo snap remove --purge gnome-42-2204
+sudo snap remove --purge gtk-common-themes
+sudo snap remove --purge snapd-desktop-integration
+sudo snap remove --purge snap-store
+sudo snap remove --purge bare
+sudo snap remove --purge core20
+sudo snap remove --purge core22
+sudo snap remove --purge snapd
+sudo snap list # check that everything is uninstalled
+
+sudo rm -rf /var/cache/snapd/
+sudo rm -rf ~/snap
+sudo apt autoremove --purge snapd
+
+# check once more that there is no more snap on the system
+systemctl list-units | grep snapd 
+#+END_SRC
+
+*** Other unused heavy packages
+Some other pieces of software can safely be removed since the desktop is
+not to be used:
+
+#+BEGIN_SRC sh
+sudo apt-get autoremove --purge yaru-theme-icon \
+     fonts-noto-cjk yaru-theme-gtk vim-runtime \
+     ubuntu-wallpapers-jammy humanity-icon-theme
+
+sudo apt-get autoclean
+sudo reboot now
+#+END_SRC
+
+#+LATEX: \pagebreak
+*** Jupyter notebook setup
+Here are some instruction on how to install and setup Jupyter on a KRIA board,
+accessing it remotely and using it for making data analysis.
+
+The following commands will set the required packages and install Jupyter itself[fn:30]:
+#+BEGIN_SRC sh
+sudo apt-get update && sudo apt-get install python3 python3-pip python3-venv python3-virtualenv
+
+virtualenv myjupyter
+source ./myjupyter/bin/activate
+python3 -m pip install jupyter pandas numpy matplotlib scipy
+
+sudo reboot now
+#+END_SRC
+
+Then in a terminal on your host machine (not on the KRIA board), you can run the following command[fn:38] to bind local ports:
+#+BEGIN_SRC sh
+ssh -L 8888:localhost:8888 ubuntu@192.168.11.107
+#+END_SRC
+
+Then on the opened SSH shell to the KRIA board:
+#+BEGIN_SRC sh
+source ./myjupyter/bin/activate
+jupyter notebook
+#+END_SRC
+
+From there, it is possible to use the displayed URL (something that looks like
+~http://localhost:8888/tree?token~) to access the remote Notebook system from a local web browser.
+It is possible to do so with ~localhost~ since we have the ~ssh~ port map connection going on.
+
+Eventually creating Notebooks and stuff, it is possible to obtain a situation like shown in the figure [[fig:jupyter]] below.
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: A test Jupyter Notebook for CSV data analysis.
+#+NAME: fig:jupyter
+[[file:./img/jupyter.png]]
+
+*** Enabling ~remoteproc~ with Device-Tree Overlay patching
+One of the advantage of this Kria board, as cited previously, is the presence of
+multiple types of core (APU, MCU, FPGA) on the same chip.
+
+The part in focus in this guide is the usage of both the APU, running
+a Linux distribution and ROS2; and the MCU, running FreeRTOS and micro-ROS.
+Online available guides[fn:3] [fn:4] also provide information on how to deploy these types
+of systems and enabling ~remoteproc~ for the Kria board, but this guide
+will show a step-by-step, tried process to have a heterogeneous system
+up and running.
+
+The communication between both side is meant to be done using shared memory, but
+some extra setup is required in order to be running the real-time firmware, in particular
+for deploying micro-ROS on it.
+
+As a first step in that direction, this section of the report
+will present how to setup and use as an example firmware that utilizes the
+~remoteproc~ device in Linux in order to access shared memory
+and communicate with the real-time firmware using the RPMsg system.
+
+The communication system and interaction from the Linux side towards the real-time capable core
+is not enabled by default within the Ubuntu image provided by Xilinx.
+
+In that regard, some modification of the device tree overlay (DTO) is required in order to have
+the ~remoteproc~ system starting.
+
+Firstly, we need to get the original firmware device tree, converted
+into a readable format (DTS):
+
+#+BEGIN_SRC sh
+sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
+#+END_SRC
+
+Then, a custom-made patch file can be downloaded and applied.
+This file is available at the URL visible in the command below
+but also in this report appendix [[DTO patch]].
+
+#+BEGIN_SRC sh
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch
+
+patch system.dts < system.patch
+#+END_SRC
+
+As for the board to be able to reserve the correct amount of memory with the new settings, some
+~cma~ kernel configuration is needed[fn:5]:
+
+#+BEGIN_SRC sh
+sudo nano /etc/default/flash-kernel
+
+LINUX_KERNEL_CMDLINE="quiet splash cma=512M cpuidle.off=1"
+LINUX_KERNEL_CMDLINE_DEFAULTS=""
+sudo flash-kernel
+#+END_SRC
+
+Now the DTS file has been modified, one can regenerate the binary and place it on the ~/boot~ partition
+and reboot the board:
+
+#+BEGIN_SRC sh
+dtc -I dts -O dtb system.dts -o user-override.dtb
+sudo mv user-override.dtb /boot/firmware/
+sudo reboot now
+#+END_SRC
+
+After rebooting, you can check the content of the \verb|remoteproc| system directory,
+and a ~remoteproc0~ device should be visible, as follow:
+
+#+BEGIN_SRC sh
+ls /sys/class/remoteproc/
+#  remoteproc0
+#+END_SRC
+
+If it is the case, it means that the patch was successful and  that the remote processor is
+ready to be used!
+#+LATEX: \pagebreak
+
+*** Installing Docker
+It is possible to have a version of Docker installed simply by using the available repository,
+but since we are on Ubuntu, a PPA is available from Docker in order to have the most up-to-date version.
+
+Following [[https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository][the official documentation]], the following steps can be taken to install the latest version of
+Docker on a Ubuntu system. The last command is meant to test the install.
+If everything went smoothly, you should see something similar to what is presented
+in the figure [[fig:hello-docker]] below, after the commands:
+
+#+BEGIN_SRC sh
+sudo apt-get update
+sudo apt-get install ca-certificates
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+    sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo \
+    "deb [arch="$(dpkg --print-architecture)" \
+  signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && \
+         echo "$VERSION_CODENAME")" stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli \
+     containerd.io docker-buildx-plugin docker-compose-plugin
+sudo usermod -aG docker $USER
+newgrp docker
+
+docker run hello-world
+#+END_SRC
+
+#+ATTR_LATEX: :width .7\textwidth
+#+CAPTION: The return of a successful run of the ~hello world~ test Docker container.
+#+NAME: fig:hello-docker
+[[file:./img/hello-docker.png]]
+
+
+#+LATEX: \pagebreak
+#+LATEX: \appendix
+* DTO patch
+This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch][system.patch]]
+#+LATEX: \inputminted[linenos, frame=single]{diff}{./src/system.patch}
+
+
+* Footnotes
+
+[fn:30] Alongside other packages useful for data analysis, such as ~pandas~ or ~numpy~. 
+
+
+[fn:38] In this example, the full ~username@IP~ is used, but a ~.ssh/config~ is aslo usable. 
+
+[fn:37] For the routing part, it is key to have the ~to~ with a ~'-'~ in front of
+it; and then the ~via~ without, but alligned with the ~t~.
+
+[fn:36] The ~chmod~ command is used to update the permissions and silence some warnings
+
+[fn:6] Again, it is _critical_ to be 100\% certain that you are working with
+the correct device!  
+
+[fn:5] The overlapping memory will not prevent the board to boot,
+but it disables the PWM for the CPU fan, which will then run at full speed, making noise. 
+
+[fn:4] A [[https://zenn.dev/ryuz88/articles/kv260_setup_memo_ubuntu22 ][blog post]] (JP) shows all major steps on how to enable the ~remoteproc~.
+
+[fn:3] A [[https://speakerdeck.com/fixstars/fpga-seminar-12-fixstars-corporation-20220727][slideshow]] (JP) from Fixstar employees presents how to use the device
+tree to enable the communication between the cores.
+
+[fn:2] The ~snap~ packages depends on each others. Dependencies
+cannot be remove before the package(s) that depends on them,
+thus the specific delete order.
+
+[fn:1] The same procedure should work for other versions of Ubuntu, as long as they
+support the Kria board, but for this report and project, only the LTS 22.04 was tested
+(as of 2023-08-30). 

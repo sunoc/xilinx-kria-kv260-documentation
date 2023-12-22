@@ -8,7 +8,7 @@
 #+subtitle: \begin{CJK}{UTF8}{min}南山大学\end{CJK}
 #+author: Vincent Conus
 #+email: vincent.conus@protonmail.com
-#+date: 2023-8-30
+#+date: 2023-12-22
 
 * Headers and LaTeX settings for export                            :noexport:
 A large amount of headers and parameters are needed in order
@@ -110,18 +110,7 @@ are trying to archive.
 #+INCLUDE: "./boot_firmware.org" :minlevel 2 :lines "7-"
 ** COMMENT LINK: [[id:be2ce0ab-07db-49e6-be50-72f2db76cde3][KRIA board boot firmware update]]
 
-* Installing Linux (Ubuntu LTS 22.04 option)
-Withe the boot firmware being up-to-date, we can proceed to install a Linux distribution
-on our Kria board. The step needed to archive a full installation of Ubuntu LTS 22.04
-will be presented in this section[fn:7]. The figure [[fig:map_linux]] below shows
-where this operating system sits in the general system we are implementing.
-
-#+ATTR_LATEX: :width .6\textwidth
-#+CAPTION: The Linux operating system (red border)runs on the
-#+CAPTION: APU (application, general purpose) side of the Kria board CPU.
-#+CAPTION: It is the base layer for the ROS2 system.
-#+NAME: fig:map_linux
-[[file:./img/map_linux.png]]
+* Installing Ubuntu LTS 22.04
 
 ** Preparing and booting a Ubuntu 22.04 media
 An [[https://ubuntu.com/download/amd-xilinx][official Ubuntu image]] exists and is
@@ -184,23 +173,47 @@ host# ssh ubuntu@192.168.4.11
 This section presents a variety of extra convenience configurations
 that can be used when setting-up the Kria board.
 
+*** Static IP address
+A static IP can be set by writing the following
+configuration into your ~netplan~ configuration file[fn:36].
+
+The name of the files might vary:
+#+BEGIN_SRC sh
+sudo chmod 0600 /etc/netplan/50-cloud-init.yaml 
+sudo nano /etc/netplan/50-cloud-init.yaml
+#+END_SRC
+
+You can then set the wanted IP as follow[fn:37]:
+#+BEGIN_SRC yaml
+network:
+  renderer: NetworkManager
+  version: 2
+  ethernets:
+    eth0:
+      dhcp4: false
+      addresses:
+        - 192.168.11.107/24
+      routes:
+        - to: default
+          via: 192.168.11.1
+      nameservers:
+        addresses: [192.168.11.1]
+#+END_SRC
+
+Finally, the change in settings can be applied
+as follow:
+
+#+BEGIN_SRC sh
+sudo netplan apply
+#+END_SRC
+
 *** Proxy and DNS
 An issue that can occur when connecting the board to the internet is the
 conflicting situation with the university proxy.
 Indeed, as the network at Nanzan University requires to go through a proxy,
 some DNS errors appeared.
 
-Firstly, it is possible to set a DNS IP address in ~/etc/resolv.conf~ by
-editing it and adding your favorite DNS, for example ~nameserver 1.1.1.1~
-next to the other ~nameserver~ entry. The resolver can then be restarted.
-
-#+BEGIN_SRC sh
-sudo nano /etc/resolv.conf
-
-sudo systemctl restart systemd-resolved
-#+END_SRC
-
-Secondly, it might become needed to setup the proxy for the school.
+In that case, it might become needed to setup the proxy for the school.
 
 This can be done as follow, by exporting a https base proxy configuration
 containing you AXIA credentials (this is specific to Nanzan University IT system),
@@ -210,11 +223,10 @@ then by consolidating the configuration for other types of connections in the ~b
 export https_proxy="http://<AXIA_username>:\
        <AXIA_psw>@proxy.ic.nanzan-u.ac.jp:8080"
 
-echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc \
-     echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc \
-     echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc \
-     echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" \
-     >> ~/.bashrc
+echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc
+echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc
+echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc
+echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" >> ~/.bashrc
 #+END_SRC
 
 Eventually the board can be rebooted in order for the setup to get applied cleanly.
@@ -253,41 +265,6 @@ sudo apt-get dist-upgrade
 sudo reboot now
 #+END_SRC
 
-*** Static IP address
-A static IP can be set by writing the following
-configuration into your ~netplan~ configuration file.
-
-The name of the files might vary:
-#+BEGIN_SRC sh
-sudo nano /etc/netplan/50-cloud-init.yaml
-#+END_SRC
-
-You can then set the wanted IP as follow. Note that a custom DNS was
-also set in that case.
-#+BEGIN_SRC yaml
-  network:
-    renderer: NetworkManager
-    version: 2
-    ethernets:
-      eth0:
-        addresses:
-          - 192.168.11.103/24
-          routes:
-            - to: default
-              via: 192.168.11.1
-              nameservers:
-                addresses:
-                  - 8.8.8.8
-                  - 1.1.1.1
-#+END_SRC
-
-Finally, the change in settings can be applied
-as follow:
-
-#+BEGIN_SRC sh
-sudo netplan apply
-#+END_SRC
-
 *** Purging ~snap~
 As the desktop-specific software are not used at all in the case
 of our project, there are some packages that can be purges in order for the
@@ -320,7 +297,8 @@ sudo rm -rf /var/cache/snapd/
 sudo rm -rf ~/snap
 sudo apt autoremove --purge snapd
 
-systemctl list-units | grep snapd
+# check once more that there is no more snap on the system
+systemctl list-units | grep snapd 
 #+END_SRC
 
 *** Other unused heavy packages
@@ -337,7 +315,7 @@ sudo reboot now
 #+END_SRC
 
 #+LATEX: \pagebreak
-** Jupyter notebook setup
+*** Jupyter notebook setup
 Here are some instruction on how to install and setup Jupyter on a KRIA board,
 accessing it remotely and using it for making data analysis.
 
@@ -352,10 +330,9 @@ python3 -m pip install jupyter pandas numpy matplotlib scipy
 sudo reboot now
 #+END_SRC
 
-Then in a terminal on your host machine (not on the KRIA board), you can run the following command to bind local ports
-
+Then in a terminal on your host machine (not on the KRIA board), you can run the following command[fn:38] to bind local ports:
 #+BEGIN_SRC sh
-ssh -L 8888:localhost:8888 kria
+ssh -L 8888:localhost:8888 ubuntu@192.168.11.107
 #+END_SRC
 
 Then on the opened SSH shell to the KRIA board:
@@ -375,292 +352,7 @@ Eventually creating Notebooks and stuff, it is possible to obtain a situation li
 #+NAME: fig:jupyter
 [[file:./img/jupyter.png]]
 
-* Installing Linux (PetaLinux option)
-This part is an alternative to the previous section [[Installing Linux (Ubuntu LTS
-22.04 option)]], where the installation of PetaLinux as a host system[fn:24]
-will be presented, as being an alternative to the Ubuntu LTS. Here are some
-reasoning why you'd prefer to use PetaLinux instead of Ubuntu:
-+ Direct support from Xilinx. While Ubuntu is also an official port, it is
-  provided through Canonical.
-+ If you plan to use ROS2 in containers.
-
-It is also to be noted that the building process of a PetaLinux image is not as
-trivial as simply flashing a downloaded ISO file. It takes some time to
-configure it and even more time to be built, especially if you are working on a
-lower-end machine.
-
-** General installation
-The indication on how to install PetaLinux on a KRIA board is detailed in the
-official documentation[fn:25], but for the KV260 board with an older release of
-the Linux. This guide will try to keep an up-to-date version of the guide, in
-particular for the KR260 KRIA board and, at the time of writing, the PetaLinux
-in version 2023.2 for the installer.  The 2022.2 version is recommended for this
-board's latest updated boot firmware, as presented in the Section [[Boot firmware]]
-above; however I happened to have issues with the building process from a system
-based on Ubuntu 22.04. Thus the choice of the 2023.2 that should be compatible.
-
-Two tools should be downloaded upfront in order to be ready and create the
-PetaLinux image for our target board. Both can be obtained at the Xilinx
-official download page[fn:26]. Login with an AMD account is required in order to
-download the files we need, namely, we'll have to get:
-+ The installer tool: ~petalinux-v2023.2-10121855-installer.run~ or similar name.
-+ The SOM board support package: ~xilinx-kr260-starterkit-v2023.2-10140544.bsp~ or similar name[fn:29].
-The specific name of the utils you'll get to download will evolve over time.
-
-For the following command, I will assume that both files were downloaded into
-the same directory and that you have a shell open in said directory.
-
-Firstly, a crap ton of dependencies are needed. They are detailed in the
-release notes of the version of the tool you are downloading and it depends on
-your distribution, but here is a one-liner that works for the PetaLinux 2023.2
-to be built on Ubuntu(-based) 22.04 LTS:
-#+BEGIN_SRC sh
-sudo apt-get install iproute2 gawk python3 build-essential gcc git make \
-     net-tools libncurses5-dev tftpd zlib1g-dev libssl-dev flex bison libselinux1 \
-     gnupg wget git-core diffstat chrpath socat xterm autoconf libtool tar unzip \
-     texinfo zlib1g-dev gcc-multilib automake zlib1g:i386 screen pax gzip cpio \
-     python3-pip python3-pexpect xz-utils debianutils iputils-ping python3-git \
-     python3-jinja2 libegl1-mesa libsdl1.2-dev pylint asciidoc
-#+END_SRC
-
-Installing the petalinux tools can be done with the ~.run~ script[fn:28], as follow:
-#+BEGIN_SRC sh
-sudo chmod +x ./petalinux-v2023.2-10121855-installer.run
-./petalinux-v2023.2-10121855-installer.run
-bash
-source settings.sh
-#+END_SRC
-
-A project can then be created, using the ~.bsp~ file. From there it is possible to
-build the image file meant to be booted by the board:
-#+BEGIN_SRC sh
-petalinux-create -t project -s xilinx-kr260-starterkit-v2023.2-10140544.bsp
-cd xilinx-kr260-starterkit-2023.2/
-#+END_SRC
-
-
-The more general option allows to enable stuff related to hardware
-configuration[fn:33]. For this step, it is possible to select the ~openamp~
-setting the the DTG Settings, as visible in the Figure [[fig:yocto_openamp_dtg]] below:
-#+BEGIN_SRC sh
-petalinux-config --get-hw-description  ./hardware/xilinx-kr260-starterkit-2023.2/kr260_starter_kit.xsa
-#+END_SRC
-
-Then, here are the options that we want to enable:
-#+ATTR_LATEX: :width .6\textwidth
-#+CAPTION: In the hardware config, it is possible to select the openamp device tree source.
-#+NAME: fig:yocto_openamp_dtg
-[[file:./img/yocto_openamp_dtg.png]]
-
-Some kernel and module configuration are needed in order for the petalinux system to work properly.
-These setup can be set using the following command:
-#+BEGIN_SRC sh
-petalinux-config -c rootfs
-#+END_SRC
-
-Then, here are the options that we want to enable:
-#+ATTR_LATEX: :width .6\textwidth
-#+CAPTION: In the rootfs config, it is possible to select the openamp package.
-#+NAME: fig:yocto_openamp
-[[file:./img/yocto_openamp.png]]
-
-
-#+ATTR_LATEX: :width .6\textwidth
-#+CAPTION: OpenSSH can be configure in the same rootfs config.
-#+NAME: fig:yocto_ssh
-[[file:./img/yocto_ssh.png]]
-
-It is then possible to build[fn:32] and package the image. Most critically compared to the example,
-the ~openamp.dtb~ overlay must be used in order for OpenAMP and subsequently RPMsg to become usable.
-#+BEGIN_SRC sh
-petalinux-build
-petalinux-package --wic --bootfiles "ramdisk.cpio.gz.u-boot boot.scr Image system.dtb"
-#+END_SRC
-
-#+LATEX: \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black]
-*DANGER*: The next part involve the ~dd~ command writing on disks!!!
-As always with the dd command, thou have to be *VERY* careful on what arguments
-thou give. Selecting the wrong disk will result on the destruction of
-thy data !!
-_If you are unsure of what to do, seek assistance !_
-#+LATEX: \end{tcolorbox}
-
-Finally, and now an image has been generated, it can be burnt to a micro-SD card the usual way:
-#+BEGIN_SRC sh
-sudo dd if=./images/linux/petalinux-sdimage.wic \
-     of=/dev/sda status=progress bs=8M && sync
-#+END_SRC
-
-From that point, the media can be ejected, put in the board and the boot process
-should happen successfully.
-
-** Testing openamp "echo-test"
-A good and out-of-the-box way to try and confirm that the OpenAMP setup was done
-properly is to run the so-called "echo-test". This program will basically send
-series of packages to the R5F core and expect them to be returned.
-
-As presented in the official documentation[fn:34], this can be simply done with
-the following commands. If the return of the ~echo_test~ commands states that zero
-error occurs, the system should be good to go:
-#+BEGIN_SRC sh
-sudo -s
-echo image_echo_test  > /sys/class/remoteproc/remoteproc0/firmware
-echo start > /sys/class/remoteproc/remoteproc0/state
-echo_test
-echo stop > /sys/class/remoteproc/remoteproc0/state
-#+END_SRC
-
-** "echo-test" performance comparison
-
-*** Raw plot of the package measurement                          :noexport:
-#+BEGIN_SRC python :results file :eval no-export
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import scipy.stats as stats
-
-df_kr = pd.read_csv('./csv/kr260_echo_test.csv', names=['time KR260 (PetaLinux)'])
-df_kv = pd.read_csv('./csv/kv260_echo_test.csv', names=['time KV260 (Ubuntu)'])
-
-df_payload = pd.DataFrame([s] for l in range(0, 10, 1) for s in range(17, 489, 1))
-
-df_tot_2 = pd.concat([df_kr, df_kv, df_payload], sort=False, axis=1)
-
-df_tot_2 = df_tot_2.rename(columns={0:'Payload size'})
-
-df_tot_2['time KR260 (PetaLinux)'] = df_tot_2['time KR260 (PetaLinux)'].div(df_tot_2['Payload size'])
-df_tot_2['time KV260 (Ubuntu)'] = df_tot_2['time KV260 (Ubuntu)'].div(df_tot_2['Payload size'])
-
-df_tot_2 = df_tot_2.sort_values(by=['Payload size'], ascending=True)
-df_tot_2 = df_tot_2.drop(columns=['Payload size'])
-
-df_tot_2 = df_tot_2.reset_index(drop=True)
-
-df_tot_2 = 1/df_tot_2
-df_tot_2 = df_tot_2.mul(1000)
-
-plt.rc('font', size=10)
-
-scatterplot = df_tot_2.plot(style='.', grid='true')
-scatterplot.set_xlabel('Package sent [n]')
-scatterplot.set_ylabel('Data throughput [MB/s]')
-# scatterplot.set_yscale("log");
-# densityplot = df_tot_2.plot.density(grid='true', xlim=[0.2, 0.9])
-# densityplot.set_xlabel('Round trip time for one RPMsg package [us]')
-# densityplot.set_ylabel('Probability density [%]')
-plt.savefig('./img/kr260_echo_test_density.png', dpi=400, bbox_inches='tight')
-return './img/kr260_echo_test_density.png'
-#+END_SRC
-
-#+RESULTS:
-[[file:./img/kr260_echo_test_density.png]]
-
-
-*** Report :ignore:
-Now we have a working demonstration for RPMsg, a goal was to compare this system between boards.
-
-Here is the complete sequence in order to archive a timely measured ~echo_test~ run, namely:
-- Installation of the build dependencies
-- Clone of the Xilinx repository
-- Patching of the main source to add the time measurement
-- Building of the test software
-- Communication with the R5F, with reload of the firmware
-#+BEGIN_SRC sh
-sudo dnf install git make gcc binutils packagegroup-core-buildessential
-sudo ln -s /usr/bin/aarch64-xilinx-linux-gcc /bin/cc
-git clone https://github.com/OpenAMP/openamp-system-reference.git
-cd openamp-system-reference/examples/linux/rpmsg-echo-test/
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/echo_test.patch
-patch -u -b echo_test.c -i echo_test.patch
-make
-sudo -s
-echo image_echo_test  > /sys/class/remoteproc/remoteproc0/firmware
-echo start > /sys/class/remoteproc/remoteproc0/state
-./echo_test
-echo stop > /sys/class/remoteproc/remoteproc0/state
-#+END_SRC
-
-The figure [[fig:kr260_echo_test_density]] below shows a comparison for the data
-throughput that is reachable for a packages round trip of individual RPMsg
-packages for both PetaLinux running on the KR260 board and Ubuntu running on the
-KV260.
-
-A difference exist but it is not as significant as to explain the rather slow
-transfer rate when used in combination with ROS2 DDS.
-
-#+ATTR_LATEX: :width .6\textwidth
-#+CAPTION: A graph of the data transfer rate for individual packages to be transmitted and received back from the Linux.
-#+NAME: fig:kr260_echo_test_density
-[[file:./img/kr260_echo_test_density.png]]
-
-This fast delay for data transmission was later confirmed by measurement done using an external logic analyser[fn:35].
-
-** Setting up a static IP address for PetaLinux
-This is not a trivial task in petalinux.
-
-As it appears, the classic ~/etc/network/interfaces~ must be modified, however and
-for some unknown reason the DHCP keep being used even when disabled, and the
-actual static interface is not used until restarted.
-
-Multiple steps are required in order to mitigate all of this.
-
-First, we can make our standard ~interfaces~ configuration, in the  ~/etc/network/interfaces~:
-#+BEGIN_SRC sh
-# Wired or wireless interfaces
-auto eth0
-iface eth0 inet static
-address 192.168.11.107
-netmask 255.255.255.0
-network 192.168.11.0
-gateway 192.168.11.1
-#+END_SRC
-
-Then we need to have ~systemd~ to run a script after boot time to restart the ~eth0~ interface.
-
-A very basic script, as follow need to be placed somewhere on the system, for example here, in the ~/home/root/net.sh~:
-#+BEGIN_SRC sh
-#!/bin/sh -e
-ifdown eth0
-ifup eth0
-exit 0
-#+END_SRC
-
-Then, we want to create a ~systemd~ service that will run this script as ~idle~,
-i.e. after all the rest. Said file, in our case named ~updown.service~ must be
-placed in the ~/etc/systemd/system/~ directory:
-#+BEGIN_SRC systemd
-[Unit]
-Description=Restart once more the eth0 network to enable the static IP
-
-[Service]
-Type=idle
-ExecStart=/bin/sh /home/root/net.sh
-
-[Install]
-WantedBy=multi-user.target
-#+END_SRC
-
-Finally, as a ~root~ we need to set the correct right for these files and finally enabling the service before reboot:
-#+BEGIN_SRC sh
-sudo -s
-chmod +x /home/root/net.sh
-chmod 644 /etc/systemd/system/updown.service
-systemctl enable updown.service
-reboot now
-#+END_SRC
-
-With all of this, on the next reboot of the board, the static IP should be available alongside the DHCP IP.
-
-** Note: good points for PetaLinux over Ubuntu :noexport:
-+ The boot process in insanely faster: a few seconds for PetaLinux versus multiple minutes with Ubuntu.
-+ +The fan is silent all the way through, and seemingly managed in a better way.+
-  This seems to stop being true once we update the board packages with
-  ~dnf~. Unknown reason for now. There is an issue with the ZynqMP Linux PIN
-  control system, as visible in the ~dmesg~ log.
-+ OpenAMP and the echo test app works fairly "out of the box" if configured
-  properly during the build process.
-
-* Enabling ~remoteproc~
+*** Enabling ~remoteproc~ with Device-Tree Overlay patching
 One of the advantage of this Kria board, as cited previously, is the presence of
 multiple types of core (APU, MCU, FPGA) on the same chip.
 
@@ -680,7 +372,6 @@ will present how to setup and use as an example firmware that utilizes the
 ~remoteproc~ device in Linux in order to access shared memory
 and communicate with the real-time firmware using the RPMsg system.
 
-** Device-Tree Overlay patching
 The communication system and interaction from the Linux side towards the real-time capable core
 is not enabled by default within the Ubuntu image provided by Xilinx.
 
@@ -699,8 +390,7 @@ This file is available at the URL visible in the command below
 but also in this report appendix [[DTO patch]].
 
 #+BEGIN_SRC sh
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/\
-     blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch
 
 patch system.dts < system.patch
 #+END_SRC
@@ -736,6 +426,46 @@ ls /sys/class/remoteproc/
 If it is the case, it means that the patch was successful and  that the remote processor is
 ready to be used!
 #+LATEX: \pagebreak
+
+*** Installing Docker
+It is possible to have a version of Docker installed simply by using the available repository,
+but since we are on Ubuntu, a PPA is available from Docker in order to have the most up-to-date version.
+
+Following [[https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository][the official documentation]], the following steps can be taken to install the latest version of
+Docker on a Ubuntu system. The last command is meant to test the install.
+If everything went smoothly, you should see something similar to what is presented
+in the figure [[fig:hello-docker]] below, after the commands:
+
+#+BEGIN_SRC sh
+sudo apt-get update
+sudo apt-get install ca-certificates
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+    sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo \
+    "deb [arch="$(dpkg --print-architecture)" \
+  signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && \
+         echo "$VERSION_CODENAME")" stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli \
+     containerd.io docker-buildx-plugin docker-compose-plugin
+sudo usermod -aG docker $USER
+newgrp docker
+
+docker run hello-world
+#+END_SRC
+
+#+ATTR_LATEX: :width .7\textwidth
+#+CAPTION: The return of a successful run of the ~hello world~ test Docker container.
+#+NAME: fig:hello-docker
+[[file:./img/hello-docker.png]]
 
 * Building an example RPMsg real-time firmware
 As visible on the official [[https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1837006921/OpenAMP+Base+Hardware+Configurations\#Build-RPU-firmware][Xilinx documentation about building a demo firmware]],
@@ -1377,48 +1107,9 @@ of you system.
 
 This part of the guide will present how to install Docker on the
 Kria board and then how to use it to deploy the latest version of ROS2.
+This section of the report assumes that Docker was installer on the target system
+as presented in section [[Installing Docker]].
 
-*** Installing Docker on Ubuntu
-It is possible to have a version of Docker installed simply by using the available repository,
-but since we are on Ubuntu, a PPA is available from Docker in order to have the most up-to-date version.
-
-Following [[https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository][the official documentation]], the following steps can be taken to install the latest version of
-Docker on a Ubuntu system. The last command is meant to test the install.
-If everything went smoothly, you should see something similar to what is presented
-in the figure [[fig:hello-docker]] below, after the commands:
-
-#+BEGIN_SRC sh
-sudo apt-get update
-sudo apt-get install ca-certificates curl sudo
-gnupg install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-    sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-
-echo \
-    "deb [arch="$(dpkg --print-architecture)" \
-  signed-by=/etc/apt/keyrings/docker.gpg] \
-  https://download.docker.com/linux/ubuntu \
-  "$(. /etc/os-release && \
-         echo "$VERSION_CODENAME")" stable" | \
-    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli \
-     containerd.io docker-buildx-plugin docker-compose-plugin
-sudo usermod -aG docker $USER
-newgrp docker
-
-docker run hello-world
-#+END_SRC
-
-#+ATTR_LATEX: :width .7\textwidth
-#+CAPTION: The return of a successful run of the ~hello world~ test Docker container.
-#+NAME: fig:hello-docker
-[[file:./img/hello-docker.png]]
-
-*** Running a ROS2 container
 The following commands will pull a ROS container, version ~iron~, and name it ~ros_build~.
 
 A key part for having access to the interfaces (serial) is the mapping of the whole ~/dev~
@@ -1617,7 +1308,6 @@ In order to have this node up and running, you need to set basically all the pre
 
 * Conclusion & future                                      :WORK_IN_PROGRESS:
 
-
 #+LATEX: \pagebreak
 #+LATEX: \appendix
 * DTO patch
@@ -1684,8 +1374,306 @@ void * __freertos_zero_allocate(size_t number_of_elements,
 
 #endif // _ALLOCATORS_H_
 #+END_SRC
+* [deprecated] Installing Linux (PetaLinux option)
+This part is an alternative to the previous section [[Installing Ubuntu LTS 22.04]],
+where the installation of PetaLinux as a host system[fn:24] will be presented,
+as being an alternative to the Ubuntu LTS. Here are some reasoning why you'd
+prefer to use PetaLinux instead of Ubuntu:
++ Direct support from Xilinx. While Ubuntu is also an official port, it is
+  provided through Canonical.
++ If you plan to use ROS2 in containers.
+
+It is also to be noted that the building process of a PetaLinux image is not as
+trivial as simply flashing a downloaded ISO file. It takes some time to
+configure it and even more time to be built, especially if you are working on a
+lower-end machine.
+
+** General installation
+The indication on how to install PetaLinux on a KRIA board is detailed in the
+official documentation[fn:25], but for the KV260 board with an older release of
+the Linux. This guide will try to keep an up-to-date version of the guide, in
+particular for the KR260 KRIA board and, at the time of writing, the PetaLinux
+in version 2023.2 for the installer.  The 2022.2 version is recommended for this
+board's latest updated boot firmware, as presented in the Section [[Boot firmware]]
+above; however I happened to have issues with the building process from a system
+based on Ubuntu 22.04. Thus the choice of the 2023.2 that should be compatible.
+
+Two tools should be downloaded upfront in order to be ready and create the
+PetaLinux image for our target board. Both can be obtained at the Xilinx
+official download page[fn:26]. Login with an AMD account is required in order to
+download the files we need, namely, we'll have to get:
++ The installer tool: ~petalinux-v2023.2-10121855-installer.run~ or similar name.
++ The SOM board support package: ~xilinx-kr260-starterkit-v2023.2-10140544.bsp~ or similar name[fn:29].
+The specific name of the utils you'll get to download will evolve over time.
+
+For the following command, I will assume that both files were downloaded into
+the same directory and that you have a shell open in said directory.
+
+Firstly, a crap ton of dependencies are needed. They are detailed in the
+release notes of the version of the tool you are downloading and it depends on
+your distribution, but here is a one-liner that works for the PetaLinux 2023.2
+to be built on Ubuntu(-based) 22.04 LTS:
+#+BEGIN_SRC sh
+sudo apt-get install iproute2 gawk python3 build-essential gcc git make \
+     net-tools libncurses5-dev tftpd zlib1g-dev libssl-dev flex bison libselinux1 \
+     gnupg wget git-core diffstat chrpath socat xterm autoconf libtool tar unzip \
+     texinfo zlib1g-dev gcc-multilib automake zlib1g:i386 screen pax gzip cpio \
+     python3-pip python3-pexpect xz-utils debianutils iputils-ping python3-git \
+     python3-jinja2 libegl1-mesa libsdl1.2-dev pylint asciidoc
+#+END_SRC
+
+Installing the petalinux tools can be done with the ~.run~ script[fn:28], as follow:
+#+BEGIN_SRC sh
+sudo chmod +x ./petalinux-v2023.2-10121855-installer.run
+./petalinux-v2023.2-10121855-installer.run
+bash
+source settings.sh
+#+END_SRC
+
+A project can then be created, using the ~.bsp~ file. From there it is possible to
+build the image file meant to be booted by the board:
+#+BEGIN_SRC sh
+petalinux-create -t project -s xilinx-kr260-starterkit-v2023.2-10140544.bsp
+cd xilinx-kr260-starterkit-2023.2/
+#+END_SRC
+
+
+The more general option allows to enable stuff related to hardware
+configuration[fn:33]. For this step, it is possible to select the ~openamp~
+setting the the DTG Settings, as visible in the Figure [[fig:yocto_openamp_dtg]] below:
+#+BEGIN_SRC sh
+petalinux-config --get-hw-description  ./hardware/xilinx-kr260-starterkit-2023.2/kr260_starter_kit.xsa
+#+END_SRC
+
+Then, here are the options that we want to enable:
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: In the hardware config, it is possible to select the openamp device tree source.
+#+NAME: fig:yocto_openamp_dtg
+[[file:./img/yocto_openamp_dtg.png]]
+
+Some kernel and module configuration are needed in order for the petalinux system to work properly.
+These setup can be set using the following command:
+#+BEGIN_SRC sh
+petalinux-config -c rootfs
+#+END_SRC
+
+Then, here are the options that we want to enable:
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: In the rootfs config, it is possible to select the openamp package.
+#+NAME: fig:yocto_openamp
+[[file:./img/yocto_openamp.png]]
+
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: OpenSSH can be configure in the same rootfs config.
+#+NAME: fig:yocto_ssh
+[[file:./img/yocto_ssh.png]]
+
+It is then possible to build[fn:32] and package the image. Most critically compared to the example,
+the ~openamp.dtb~ overlay must be used in order for OpenAMP and subsequently RPMsg to become usable.
+#+BEGIN_SRC sh
+petalinux-build
+petalinux-package --wic --bootfiles "ramdisk.cpio.gz.u-boot boot.scr Image system.dtb"
+#+END_SRC
+
+#+LATEX: \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black]
+*DANGER*: The next part involve the ~dd~ command writing on disks!!!
+As always with the dd command, thou have to be *VERY* careful on what arguments
+thou give. Selecting the wrong disk will result on the destruction of
+thy data !!
+_If you are unsure of what to do, seek assistance !_
+#+LATEX: \end{tcolorbox}
+
+Finally, and now an image has been generated, it can be burnt to a micro-SD card the usual way:
+#+BEGIN_SRC sh
+sudo dd if=./images/linux/petalinux-sdimage.wic \
+     of=/dev/sda status=progress bs=8M && sync
+#+END_SRC
+
+From that point, the media can be ejected, put in the board and the boot process
+should happen successfully.
+
+** Testing openamp "echo-test"
+A good and out-of-the-box way to try and confirm that the OpenAMP setup was done
+properly is to run the so-called "echo-test". This program will basically send
+series of packages to the R5F core and expect them to be returned.
+
+As presented in the official documentation[fn:34], this can be simply done with
+the following commands. If the return of the ~echo_test~ commands states that zero
+error occurs, the system should be good to go:
+#+BEGIN_SRC sh
+sudo -s
+echo image_echo_test  > /sys/class/remoteproc/remoteproc0/firmware
+echo start > /sys/class/remoteproc/remoteproc0/state
+echo_test
+echo stop > /sys/class/remoteproc/remoteproc0/state
+#+END_SRC
+
+** "echo-test" performance comparison
+
+*** Raw plot of the package measurement                          :noexport:
+#+BEGIN_SRC python :results file :eval no-export
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.stats as stats
+
+df_kr = pd.read_csv('./csv/kr260_echo_test.csv', names=['time KR260 (PetaLinux)'])
+df_kv = pd.read_csv('./csv/kv260_echo_test.csv', names=['time KV260 (Ubuntu)'])
+
+df_payload = pd.DataFrame([s] for l in range(0, 10, 1) for s in range(17, 489, 1))
+
+df_tot_2 = pd.concat([df_kr, df_kv, df_payload], sort=False, axis=1)
+
+df_tot_2 = df_tot_2.rename(columns={0:'Payload size'})
+
+df_tot_2['time KR260 (PetaLinux)'] = df_tot_2['time KR260 (PetaLinux)'].div(df_tot_2['Payload size'])
+df_tot_2['time KV260 (Ubuntu)'] = df_tot_2['time KV260 (Ubuntu)'].div(df_tot_2['Payload size'])
+
+df_tot_2 = df_tot_2.sort_values(by=['Payload size'], ascending=True)
+df_tot_2 = df_tot_2.drop(columns=['Payload size'])
+
+df_tot_2 = df_tot_2.reset_index(drop=True)
+
+df_tot_2 = 1/df_tot_2
+df_tot_2 = df_tot_2.mul(1000)
+
+plt.rc('font', size=10)
+
+scatterplot = df_tot_2.plot(style='.', grid='true')
+scatterplot.set_xlabel('Package sent [n]')
+scatterplot.set_ylabel('Data throughput [MB/s]')
+# scatterplot.set_yscale("log");
+# densityplot = df_tot_2.plot.density(grid='true', xlim=[0.2, 0.9])
+# densityplot.set_xlabel('Round trip time for one RPMsg package [us]')
+# densityplot.set_ylabel('Probability density [%]')
+plt.savefig('./img/kr260_echo_test_density.png', dpi=400, bbox_inches='tight')
+return './img/kr260_echo_test_density.png'
+#+END_SRC
+
+#+RESULTS:
+[[file:./img/kr260_echo_test_density.png]]
+
+
+*** Report :ignore:
+Now we have a working demonstration for RPMsg, a goal was to compare this system between boards.
+
+Here is the complete sequence in order to archive a timely measured ~echo_test~ run, namely:
+- Installation of the build dependencies
+- Clone of the Xilinx repository
+- Patching of the main source to add the time measurement
+- Building of the test software
+- Communication with the R5F, with reload of the firmware
+#+BEGIN_SRC sh
+sudo dnf install git make gcc binutils packagegroup-core-buildessential
+sudo ln -s /usr/bin/aarch64-xilinx-linux-gcc /bin/cc
+git clone https://github.com/OpenAMP/openamp-system-reference.git
+cd openamp-system-reference/examples/linux/rpmsg-echo-test/
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/echo_test.patch
+patch -u -b echo_test.c -i echo_test.patch
+make
+sudo -s
+echo image_echo_test  > /sys/class/remoteproc/remoteproc0/firmware
+echo start > /sys/class/remoteproc/remoteproc0/state
+./echo_test
+echo stop > /sys/class/remoteproc/remoteproc0/state
+#+END_SRC
+
+#+RESULTS:
+| patching | file | echo_test.c |                    |                    |
+| cc       | -c   | -o         | echo_test.o         | echo_test.c         |
+| cc       | -c   | -o         | ../common/common.o | ../common/common.c |
+| cc       | -o   | echo_test   | echo_test.o         | ../common/common.o |
+|          |      |            |                    |                    |
+| Echo     | test | start      |                    |                    |
+
+The figure [[fig:kr260_echo_test_density]] below shows a comparison for the data
+throughput that is reachable for a packages round trip of individual RPMsg
+packages for both PetaLinux running on the KR260 board and Ubuntu running on the
+KV260.
+
+A difference exist but it is not as significant as to explain the rather slow
+transfer rate when used in combination with ROS2 DDS.
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: A graph of the data transfer rate for individual packages to be transmitted and received back from the Linux.
+#+NAME: fig:kr260_echo_test_density
+[[file:./img/kr260_echo_test_density.png]]
+
+This fast delay for data transmission was later confirmed by measurement done using an external logic analyser[fn:35].
+
+** Setting up a static IP address for PetaLinux
+This is not a trivial task in petalinux.
+
+As it appears, the classic ~/etc/network/interfaces~ must be modified, however and
+for some unknown reason the DHCP keep being used even when disabled, and the
+actual static interface is not used until restarted.
+
+Multiple steps are required in order to mitigate all of this.
+
+First, we can make our standard ~interfaces~ configuration, in the  ~/etc/network/interfaces~:
+#+BEGIN_SRC sh
+# Wired or wireless interfaces
+auto eth0
+iface eth0 inet static
+address 192.168.11.107
+netmask 255.255.255.0
+network 192.168.11.0
+gateway 192.168.11.1
+#+END_SRC
+
+Then we need to have ~systemd~ to run a script after boot time to restart the ~eth0~ interface.
+
+A very basic script, as follow need to be placed somewhere on the system, for example here, in the ~/home/root/net.sh~:
+#+BEGIN_SRC sh
+#!/bin/sh -e
+ifdown eth0
+ifup eth0
+exit 0
+#+END_SRC
+
+Then, we want to create a ~systemd~ service that will run this script as ~idle~,
+i.e. after all the rest. Said file, in our case named ~updown.service~ must be
+placed in the ~/etc/systemd/system/~ directory:
+#+BEGIN_SRC yaml
+[Unit]
+Description=Restart once more the eth0 network to enable the static IP
+
+[Service]
+Type=idle
+ExecStart=/bin/sh /home/root/net.sh
+
+[Install]
+WantedBy=multi-user.target
+#+END_SRC
+
+Finally, as a ~root~ we need to set the correct right for these files and finally enabling the service before reboot:
+#+BEGIN_SRC sh
+sudo -s
+chmod +x /home/root/net.sh
+chmod 644 /etc/systemd/system/updown.service
+systemctl enable updown.service
+reboot now
+#+END_SRC
+
+With all of this, on the next reboot of the board, the static IP should be available alongside the DHCP IP.
+
+** Note: good points for PetaLinux over Ubuntu :noexport:
++ The boot process in insanely faster: a few seconds for PetaLinux versus multiple minutes with Ubuntu.
++ +The fan is silent all the way through, and seemingly managed in a better way.+
+  This seems to stop being true once we update the board packages with
+  ~dnf~. Unknown reason for now. There is an issue with the ZynqMP Linux PIN
+  control system, as visible in the ~dmesg~ log.
++ OpenAMP and the echo test app works fairly "out of the box" if configured
+  properly during the build process.
 
 * Footnotes
+[fn:38] In this example, the full ~username@IP~ is used, but a ~.ssh/config~ is aslo usable. 
+
+[fn:37] For the routing part, it is key to have the ~to~ with a ~'-'~ in front of
+it; and then the ~via~ without, but alligned with the ~t~.
+
+[fn:36] The ~chmod~ command is used to update the permissions and silence some warnings 
 
 [fn:35] https://gitlab.com/sunoc/saleae-logic-8-documentation
 
@@ -1771,10 +1759,6 @@ and [[Custom Colcon meta settings]] the end of this report.}
 
 [fn:8] If Docker is not set up on your machine, you can follow the guide on [[https://docs.docker.com/engine/install/ubuntu/][the official website]].
 When you can successfully run the "hello-world" container, you are good to go.
-
-[fn:7] The same procedure should work for other versions of Ubuntu, as long as they
-support the Kria board, but for this report and project, only the LTS 22.04 was tested
-(as of 2023-08-30).
 
 [fn:6] The name of the installer binary file might change as a new version of the IDE
 is release every year or so.

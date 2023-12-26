@@ -329,10 +329,11 @@ This file is available at the URL visible in the command below
 but also in this report appendix [[DTO patch]].
 
 #+BEGIN_SRC sh
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/90aca1dfe54875384c1962b75570c33d4b4fec00/src/system.patch
 
 patch system.dts < system.patch
 #+END_SRC
+
 
 As for the board to be able to reserve the correct amount of memory with the new settings, some
 ~cma~ kernel configuration is needed[fn:5]:

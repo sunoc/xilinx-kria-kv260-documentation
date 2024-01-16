@@ -104,14 +104,14 @@ are trying to archive.
 #+CAPTION: communicate with the real-time, FreeRTOS and micro-ROS
 #+CAPTION: side (blue) using RPMsg (shared memory).
 #+NAME: fig:map
-[[file:./img/map.png]]
+[[file:img/map.png]]
 
 * Boot firmware
 #+INCLUDE: "./boot_firmware.org" :minlevel 2 :lines "6-"
 ** COMMENT LINK: [[id:be2ce0ab-07db-49e6-be50-72f2db76cde3][KRIA board boot firmware update]]
 
 * Installing Ubuntu LTS 22.04
-#+INCLUDE: "./install_ubuntu.org" :minlevel 2 :lines "34-409"
+#+INCLUDE: "./install_ubuntu.org" :minlevel 2 :lines "34-469"
 ** COMMENT LINK: [[id:582fe4ef-a301-4b53-b908-a5c2b5b6d694][KRIA board Ubuntu LTS 22.04 Install]]
 
 * Building an example RPMsg real-time firmware
@@ -724,8 +724,8 @@ It is then possible to install ROS2[fn:15] as follow:
 #+BEGIN_SRC sh
 sudo apt update
 sudo apt upgrade -y
-sudo apt install -y ros-humble-desktop \
-     ros-humble-ros-base \
+sudo apt install -y ros-$ROS_DISTRO-desktop \
+     ros-$ROS_DISTRO-ros-base \
      python3-argcomplete \
      ros-dev-tools
 #+END_SRC
@@ -734,13 +734,13 @@ Once installed, it is possible to test the system with a provided example.
 You need to open two terminals and log wish SSH onto the board, then running
 respectively:
 #+BEGIN_SRC sh
-source /opt/ros/humble/setup.bash
+source /opt/ros/$ROS_DISTRO/setup.bash
 ros2 run demo_nodes_cpp talker
 #+END_SRC
 
 And then:
 #+BEGIN_SRC sh
-source /opt/ros/humble/setup.bash
+source /opt/ros/$ROS_DISTRO/setup.bash
 ros2 run demo_nodes_py listener
 #+END_SRC
 
@@ -828,7 +828,7 @@ This part of the guide will focus on it.
 #+NAME: fig:map_agent
 [[file:./img/map_agent.png]]
 
-** Building a eProsima bare-metal example agent
+** [irrelevent] Building a eProsima bare-metal example agent
 A key aspect to understand about modifying the agent (as
 this will be needed later on to support our new communication system),
 is that the default system and instruction provided by micro-ROS does not
@@ -932,6 +932,7 @@ gotta update the doc latec
 ** Creating a custom transport agent                      :WORK_IN_PROGRESS:
 These command allows to go build the agent and run it with maximum verbosity (for debugging purpose).
 #+BEGIN_SRC sh
+source /opt/ros/$ROS_DISTRO/setup.bash
 cd /Micro-XRCE-DDS-Agent/build
 make clean && make -j4
 ./MicroXRCEAgent serial --dev /dev/null --verbose 6
@@ -1226,13 +1227,6 @@ echo start > /sys/class/remoteproc/remoteproc0/state
 echo stop > /sys/class/remoteproc/remoteproc0/state
 #+END_SRC
 
-#+RESULTS:
-| patching | file | echo_test.c |                    |                    |
-| cc       | -c   | -o         | echo_test.o         | echo_test.c         |
-| cc       | -c   | -o         | ../common/common.o | ../common/common.c |
-| cc       | -o   | echo_test   | echo_test.o         | ../common/common.o |
-|          |      |            |                    |                    |
-| Echo     | test | start      |                    |                    |
 
 The figure [[fig:kr260_echo_test_density]] below shows a comparison for the data
 throughput that is reachable for a packages round trip of individual RPMsg

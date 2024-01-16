@@ -95,7 +95,7 @@ In my case, I am using Emacs's ~serial-term~:
 M-x serial-term RET /dev/ttyUSB1 RET 115200 RET
 #+END_SRC
 
-The default username / password pair for the very first boot is ~ubuntu~ and ~ubuntu~. You will then be prompted to enter a new passwork.
+The default username / password pair for the very first boot is ~ubuntu~ and ~ubuntu~. You will then be prompted to enter a new password.
 
 Once logged in, it is typically easier and more convenient to connect the board
 using SSH. When the board is connected to the network, it is possible to know
@@ -204,6 +204,16 @@ sudo apt-get dist-upgrade
 sudo reboot now
 #+END_SRC
 
+*** Adding Xilinx specific repositories
+The following commands will add ~PPA~ repositories that are specific for Xilinx boards using Ubuntu.
+It is then possible to update the package list and eventually upgrade to some new packages.
+#+BEGIN_SRC sh
+sudo add-apt-repository ppa:ubuntu-xilinx/updates
+sudo add-apt-repository ppa:xilinx-apps/ppa
+sudo apt update
+sudo apt upgrade
+#+END_SRC
+
 *** Purging ~snap~
 As the desktop-specific software are not used at all in the case
 of our project, there are some packages that can be purges in order for the
@@ -254,6 +264,25 @@ sudo reboot now
 #+END_SRC
 
 #+LATEX: \pagebreak
+
+*** Slow boot services to disable
+These packages (in particular the first one) are taking up a LOT of time at boot while providing no benefits[fn:7].
+
+It is possible to disable them as follow:
+#+BEGIN_SRC sh
+sudo systemctl disable systemd-networkd-wait-online.service
+sudo systemctl disable NetworkManager-wait-online.service
+sudo systemctl disable cups.service
+sudo systemctl disable docker.service
+sudo systemctl disable containerd.service
+sudo systemctl disable cloud-init-local.service
+#+END_SRC
+
+Additional, potentially unused services can be found using the very handy command:
+#+BEGIN_SRC sh
+sudo systemd-analyze blame
+#+END_SRC
+
 *** Jupyter notebook setup
 Here are some instruction on how to install and setup Jupyter on a KRIA board,
 accessing it remotely and using it for making data analysis.
@@ -289,7 +318,7 @@ Eventually creating Notebooks and stuff, it is possible to obtain a situation li
 #+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: A test Jupyter Notebook for CSV data analysis.
 #+NAME: fig:jupyter
-[[file:./img/jupyter.png]]
+[[file:img/jupyter.png]]
 
 *** Enabling ~remoteproc~ with Device-Tree Overlay patching
 One of the advantage of this Kria board, as cited previously, is the presence of
@@ -405,7 +434,39 @@ docker run hello-world
 #+ATTR_LATEX: :width .7\textwidth
 #+CAPTION: The return of a successful run of the ~hello world~ test Docker container.
 #+NAME: fig:hello-docker
-[[file:./img/hello-docker.png]]
+[[file:img/hello-docker.png]]
+
+*** Adding a swap partition
+This part is very optional, in particular as it might slow down a bit the
+boot time of the board (~2s), however it might become handy to have swap memory
+available to avoid system failure under heavy use.
+
+This whole procedure must be done externally, with the board system SD card
+mounted on a host PC as an external volume.  As it is highly platform dependant,
+I will not give a detailed explanation on how to do it, yet here are the key
+points that should be done:
++ Shutdown the Kria board, take out the SD card and put it in a host machine.
++ Make sure the disk is visible.
++ Make sure all volumes are *unmounted*.
++ Resize the main ~root~ partition (*not* the ~boot~) so a space the size of the
+  wanted swap is free *after* the partition. You'd want something around 1GB.
++ In the empty space, create a new partition, which type is "linux swap".
++ Find and take note of the UUID of the new partition. This is useful hereafter.
++ ~sync~
++ Un-mount everything, eject SD card.
++ Put the SD card back in the Kria.
++ Boot back to Ubuntu.
+
+Going back on the Kria board Ubuntu after boot, the ~/etc/fstab~ file can be
+updated as follow, modulo your actual UUID for the newly created partition, to
+enable swap at boot time.
+#+BEGIN_SRC sh
+sudo -s
+echo "UUID=8b13ed05-a91d-4x50-a44a-e654a0c67a2c none   swap    sw      0       0" >> /etc/fstab
+reboot now
+#+END_SRC
+
+*** TODO Using a PetaLinux kernel in Ubuntu
 
 
 #+LATEX: \pagebreak
@@ -416,14 +477,15 @@ This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kri
 
 
 * Footnotes
+[fn:7] The CUPS and Docker services will be activated when used instead of during boot time. 
 
 [fn:30] Alongside other packages useful for data analysis, such as ~pandas~ or ~numpy~. 
 
 
-[fn:38] In this example, the full ~username@IP~ is used, but a ~.ssh/config~ is aslo usable. 
+[fn:38] In this example, the full ~username@IP~ is used, but a ~.ssh/config~ is also usable. 
 
 [fn:37] For the routing part, it is key to have the ~to~ with a ~'-'~ in front of
-it; and then the ~via~ without, but alligned with the ~t~.
+it; and then the ~via~ without, but aligned with the ~t~.
 
 [fn:36] The ~chmod~ command is used to update the permissions and silence some warnings
 

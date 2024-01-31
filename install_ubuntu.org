@@ -263,8 +263,6 @@ sudo apt-get autoclean
 sudo reboot now
 #+END_SRC
 
-#+LATEX: \pagebreak
-
 *** Slow boot services to disable
 These packages (in particular the first one) are taking up a LOT of time at boot while providing no benefits[fn:7].
 

@@ -14,7 +14,7 @@ The procedure is available in the official documentation[fn:2],
 but I will present it step by step here.
 ** Integration in my org-roam system                              :noexport:
 #+BEGIN_SRC sh
-  ln -s $PWD/boot_firmware.org ~/Nextcloud/zettel/boot_firmware.org
+ln -fs $PWD/boot_firmware.org ~/Nextcloud/zettel/boot_firmware.org
 #+END_SRC
 
 #+RESULTS:

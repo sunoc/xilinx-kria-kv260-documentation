@@ -9,7 +9,13 @@ report:
     - pip install pygments
     - pdflatex --shell-escape README.tex
     - pdflatex --shell-escape README.tex
+    - pdflatex --shell-escape install_ubuntu.tex
+    - pdflatex --shell-escape install_ubuntu.tex
+    - pdflatex --shell-escape vitis_ide.tex
+    - pdflatex --shell-escape vitis_ide.tex
 
   artifacts:
     paths:
       - README.pdf
+      - install_ubuntu.pdf
+      - vitis_ide.pdf

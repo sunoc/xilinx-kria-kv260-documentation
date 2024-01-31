@@ -1,21 +1,47 @@
-image: sunoc/latex:latest
+stages:
+  - setup
+  - build
 
-report:
-  stage: build
+default:
+  image: sunoc/latex:latest
+
+init_setup:
+  stage: setup
 
   script:
     - apt-get update -y
     - apt-get install -y python3 python3-pip
     - pip install pygments
+
+main_report:
+  stage: build
+  needs: [init_setup]
+  script:
     - pdflatex --shell-escape README.tex
     - pdflatex --shell-escape README.tex
+
+  artifacts:
+    paths:
+      - README.pdf
+
+ubuntu_report:
+  stage: build
+  needs: [init_setup]
+  script:
     - pdflatex --shell-escape install_ubuntu.tex
     - pdflatex --shell-escape install_ubuntu.tex
+
+  artifacts:
+    paths:
+      - install_ubuntu.pdf
+
+vitis_report:
+  stage: build
+  needs: [init_setup]
+  script:
     - pdflatex --shell-escape vitis_ide.tex
     - pdflatex --shell-escape vitis_ide.tex
 
   artifacts:
     paths:
-      - README.pdf
-      - install_ubuntu.pdf
       - vitis_ide.pdf

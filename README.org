@@ -71,6 +71,14 @@ and stays hidden in a :noexport: section in this report.
 			     "\\pagebreak\n"))
 #+end_src
 
+* Integration in my org-roam system                                   :noexport:
+#+BEGIN_SRC sh
+ln -fs $PWD/README.org ~/Nextcloud/zettel/Xilinx_KRIA_KV260.org # org-roam
+ln -fs $PWD/README.org ~/Nextcloud/todo/xilinx_kria.org # org-agenda
+#+END_SRC
+
+#+RESULTS:
+
 * Building this report from the LaTeX file                         :noexport:
 The base file for this report is actually this README.org file itself.
 However, upon local build, this file is regularly exported as

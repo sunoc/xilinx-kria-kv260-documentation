@@ -128,8 +128,18 @@ are trying to archive.
 #+INCLUDE: "./vitis_ide.org" :minlevel 2 :lines "34-"
 ** COMMENT LINK: [[id:dfc7e5d2-fe7b-432e-8dcc-e1227929fc62][KRIA board Vitis IDE setup]]
 
-* TODO R5F firmware without an IDE
-SCHEDULED: <2024-01-31 水 13:00>
+* DONE R5F firmware without an IDE
+CLOSED: [2024-02-13 火 15:28] SCHEDULED: <2024-02-13 火 13:00>
+
+- State "DONE"       from "TODO"       [2024-02-13 火 15:28]
+The Section [[Setting up a Vitis IDE project]] was merely a presentation on how
+bootstrap a brand new development project using Xilinx provided templates in their crap IDE.
+
+Once the project exist, one can simply compile it again using the generated ~Makefile~.
+
+The information on how to handle the project are available directly in the
+repository of said project[fn:1] and it's various branches for ongoing feature
+development.
 
 
 #+LATEX: \pagebreak
@@ -175,20 +185,15 @@ The cross-compilation tool can then be extracted, set as our ~toolchain~ variabl
 then passed as a parameter when creating the Docker container:
 #+BEGIN_SRC sh
 pushd /home/$USER/Downloads
-wget https://developer.arm.com/-/media/Files/downloads/\
-     gnu/12.2.mpacbti-rel1/binrel/arm-gnu-toolchain-12.2\
-     .mpacbti-rel1-x86_64-arm-none-eabi.tar.xz
-tar -xvf arm-gnu-toolchain-12.2.mpacbti-rel1-x86_64-\
-    arm-none-eabi.tar.xz
+wget https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
+tar -xvf arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
 popd
 
-toolchain="/home/$USER/Downloads/arm-gnu-toolchain-\
-12.2.mpacbti-rel1-x86_64-arm-none-eabi/"
+toolchain="/home/$USER/Downloads/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/"
 
 
 docker run -d --name ros_build -it --net=host \
        --hostname ros_build \
-       -v /dev:/dev \
        -v $toolchain:/armr5-toolchain \
        --privileged ros:iron
 #+END_SRC
@@ -202,6 +207,7 @@ docker exec -it ros_build bash
 Now we are in the ROS2 container, we can build the micro-ROS firmware as presented
 in the [[https://micro.ros.org/docs/tutorials/advanced/create\_custom\_static\_library][dedicated micro-ROS guide]]:
 #+BEGIN_SRC sh
+echo 127.0.0.1 $HOSTNAME >> /etc/hosts
 sudo apt update 
 sudo apt-get -y install python3-pip \
      wget \
@@ -225,24 +231,23 @@ colcon build
 ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
 #+END_SRC
 
+
 From that point, we will need some extra configuration files for our Cortex R5F.
 
 Both configuration files[fn:9] will be downloaded from my repository;
 we also are going to copy the cross-compiler into the microros workspace,
 then we can build the library with the following ros2 command:
 #+BEGIN_SRC sh
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
-     documentation/-/raw/main/src/custom_r5f_toolchain.cmake
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/custom_r5f_toolchain.cmake
 
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-\
-     documentation/-/raw/main/src/custom_r5f_colcon.meta
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/custom_r5f_colcon.meta
 
 cp -r /armr5-toolchain/ $(pwd)/firmware/toolchain && \
     export PATH=$PATH:$(pwd)/firmware/toolchain/bin
 
 ros2 run micro_ros_setup build_firmware.sh \
-     $(pwd)/custom_r5f_toolchain.cmake $(pwd)/\
-     custom_r5f_colcon.meta
+     $(pwd)/custom_r5f_toolchain.cmake \
+     $(pwd)/custom_r5f_colcon.meta
 #+END_SRC
 #+LATEX: \pagebreak
 
@@ -640,7 +645,7 @@ This part of the guide will focus on it.
 #+NAME: fig:map_agent
 [[file:./img/map_agent.png]]
 
-** [irrelevent] Building a eProsima bare-metal example agent
+** [irrelevant] Building a eProsima bare-metal example agent
 A key aspect to understand about modifying the agent (as
 this will be needed later on to support our new communication system),
 is that the default system and instruction provided by micro-ROS does not
@@ -1121,6 +1126,7 @@ With all of this, on the next reboot of the board, the static IP should be avail
   properly during the build process.
 
 * Footnotes
+[fn:1] https://gitlab.com/sunoc/libmicroros_kv260 
 
 [fn:35] https://gitlab.com/sunoc/saleae-logic-8-documentation
 

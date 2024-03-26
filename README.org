@@ -198,6 +198,8 @@ docker run -d --name ros_build -it --net=host \
        --privileged ros:iron
 #+END_SRC
 
+#+RESULTS:
+
 Now the container named ~ros_build~ was created, it is possible to "enter" it, and having access
 to the tools in it by running the following command that will open a ~bash~ shell in said container:
 #+BEGIN_SRC sh
@@ -887,6 +889,16 @@ sudo apt-get install iproute2 gawk python3 build-essential gcc git make \
      python3-jinja2 libegl1-mesa libsdl1.2-dev pylint asciidoc
 #+END_SRC
 
+Testing, if building on Debian 12 the following variante of the same command has been confirmed to work:
+#+BEGIN_SRC sh
+sudo apt-get install iproute2 gawk python3 build-essential gcc git make \
+net-tools libncurses5-dev tftpd-hpa zlib1g-dev libssl-dev flex bison libselinux1 \
+gnupg wget git-core diffstat chrpath socat xterm autoconf libtool tar unzip \
+texinfo zlib1g-dev gcc-multilib automake zlib1g screen pax gzip cpio python3-pip \
+python3-pexpect xz-utils debianutils iputils-ping python3-git python3-jinja2 \
+libegl1-mesa libsdl1.2-dev pylint asciidoc
+#+END_SRC
+
 Installing the petalinux tools can be done with the ~.run~ script[fn:28], as follow:
 #+BEGIN_SRC sh
 sudo chmod +x ./petalinux-v2023.2-10121855-installer.run
@@ -957,6 +969,10 @@ sudo dd if=./images/linux/petalinux-sdimage.wic \
 
 From that point, the media can be ejected, put in the board and the boot process
 should happen successfully.
+
+** First login
+On the first start, if you have a serial terminal open to the KR260 board, you'll be prompter to enter a login.
+The default user it ~petalinux~. You'll then be prompted to enter a password.
 
 ** Testing openamp "echo-test"
 A good and out-of-the-box way to try and confirm that the OpenAMP setup was done
@@ -1060,6 +1076,7 @@ transfer rate when used in combination with ROS2 DDS.
 
 This fast delay for data transmission was later confirmed by measurement done using an external logic analyser[fn:35].
 
+** Enabling SSH
 ** Setting up a static IP address for PetaLinux
 This is not a trivial task in petalinux.
 

@@ -647,55 +647,6 @@ This part of the guide will focus on it.
 #+NAME: fig:map_agent
 [[file:./img/map_agent.png]]
 
-** [irrelevant] Building a eProsima bare-metal example agent
-A key aspect to understand about modifying the agent (as
-this will be needed later on to support our new communication system),
-is that the default system and instruction provided by micro-ROS does not
-allow such modification[fn:18].
-
-In order to avoid that, one can get and run a ROS2 node design by eProsima,
-that can be deployed on it's own (without other ROS2 application and nodes)
-and eventually modified.
-
-
-#+BEGIN_SRC sh
-sudo nano /microros_ws/build/micro_ros_agent/agent/src/xrceagent/src/cpp/transport/custom/CustomAgent.cpp
-#+END_SRC
-The same file is available online as a reference, on eProsima repository[fn:27].
-
-#+BEGIN_SRC sh
-git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
-cd Micro-XRCE-DDS-Agent/
-
-rm -rf examples/
-git clone https://gitlab.com/sunoc/rpmsg-micro-ros-agent.git ./examples/custom_agent
-
-mkdir build && cd build
-cmake -DUAGENT_BUILD_USAGE_EXAMPLES=ON ..
-make
-#+END_SRC
-
-The custom agent is then available to run from the ~./src/examples/custom_agent/CustomXRCEAgent~.
-
-All the diff when the custom agent system was added:
-https://github.com/eProsima/Micro-XRCE-DDS-Agent/pull/205/files
-
-For rebuilding the custom agent with a simple ~make clean && make all~ will
-conveniently only rebuild the part that was modify.
-Which means that once all the libraries have been compiled once,
-the subsequent re-compilation of the agent itself can be done quickly !
-
-Major details on how to implement a custom agent specified here:
-https://github.com/eProsima/Micro-XRCE-DDS-Agent/issues/195#issuecomment-721002153
-
-# Running the custom agent executable can be executed as is as the transport we want to use is already
-# built in. ~kmod~ package is needed though.
-# #+BEGIN_SRC sh
-#   sudo apt-get update
-#   sudo apt-get install kmod
-#     ./examples/custom_agent/CustomXRCEAgent
-# #+END_SRC
-
 ** Building a XRCE-DDS agent in a Docker
 The same command presented above for running a custom agent "bare-metal" can be
 run inside a Docker.

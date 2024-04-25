@@ -115,7 +115,19 @@ and is prone to failures (regarding missing dependencies, typically),
 so your schedule should be arranged accordingly.
 #+LATEX: \end{tcolorbox}
 
-*** Platform configuration file generation
+*** Platform configuration file
+With a Xilinx account, a ~.bsp~ archive can be downloaded for the taget platform[fn:7].
+
+Once the file is downloaded, the following commands allows to "un-tar" it,
+making th needed ~.xsa~ file accessible via a file explorer.
+
+#+BEGIN_SRC sh
+tar xvfz xilinx-kr260-starterkit-v2022.2-10141622.bsp
+ls xilinx-kr260-starterkit-2022.2/hardware/xilinx-kr260-starterkit-2022.2/
+#+END_SRC
+
+
+*** [DEPRECATED] Platform configuration file generation
 In order to have the libraries and configurations in the IDE ready to be used for our board,
 we need to obtain some configuration files that are specific for the Kria KV260,
 as presented in the Xilinx guide for Kria and Vitis[fn:4].
@@ -145,6 +157,7 @@ export XILINX_VIVADO=/home/$USER/Xilinx/Vivado/2022.2/
 export XILINX_VITIS=/home/$USER/Xilinx/Vitis/2022.2/
 make platform PLATFORM=k26_base_starter_kit
 #+END_SRC
+
 
 ** Setting up and building a new project for the Kria board
 With the platform configuration files available, we can now use the IDE to generate a
@@ -179,17 +192,17 @@ captions.
 [[file:./img/vitis_new/project4.png]]
 
 #+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: Here, we want to select "freertos10 xilinx" as our Operating System.
+#+CAPTION: The rest can remain unchanged.
+#+NAME: fig:project6
+[[file:./img/vitis_new/project6.png]]
+
+#+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: In this next window, we can give a name to our firmware project.
 #+CAPTION: It is also critical here to select the core we want to build for.
 #+CAPTION: Once again, we want to use the "psu cortex5 0".
 #+NAME: fig:project5
 [[file:./img/vitis_new/project5.png]]
-
-#+ATTR_LATEX: :width .6\textwidth
-#+CAPTION: Here, we want to select "freertos10 xilinx" as our Operating System.
-#+CAPTION: The rest can remain unchanged.
-#+NAME: fig:project6
-[[file:./img/vitis_new/project6.png]]
 
 #+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: Finally, we can select the demonstration template we are going to use;
@@ -247,6 +260,8 @@ before the ~#include "FreeRTOS.h"~ in order to override the setting from this in
 ** Importing an existing project
 
 * Footnotes
+[fn:7] https://www.xilinx.com/member/forms/download/xef.html?filename=xilinx-kr260-starterkit-v2022.2-10141622.bsp 
+
 [fn:6] https://support.xilinx.com/s/question/0D52E00006jrzsYSAQ/platform-project-cannot-be-created-on-vitis?language=en_US 
 
 [fn:5] https://github.com/Xilinx/kria-vitis-platforms

@@ -356,7 +356,7 @@ This file is available at the URL visible in the command below
 but also in this report appendix [[DTO patch]].
 
 #+BEGIN_SRC sh
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/90aca1dfe54875384c1962b75570c33d4b4fec00/src/system.patch
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/7a8f7c4e66e09b9d66aba8d2e08fc446ff485ca8/src/system.patch
 
 patch system.dts < system.patch
 #+END_SRC

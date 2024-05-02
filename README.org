@@ -8,7 +8,7 @@
 #+subtitle: \begin{CJK}{UTF8}{min}南山大学\end{CJK}
 #+author: Vincent Conus
 #+email: vincent.conus@protonmail.com
-#+date: 2023-12-22
+#+date: 2024-05-02
 
 * Headers and LaTeX settings for export                            :noexport:
 A large amount of headers and parameters are needed in order
@@ -432,19 +432,6 @@ make
 From there, you will have the binary ~rpmsg_pingpong_microros_lib.elf~ file created and ready to be deployed
 on the KRIA board.
 
-** Improvement to be made
-While the version of the firmware since the tag ~0.1~[fn:23] are functional, able to communicate with
-an Agent placed on the neighbour Linux, some work, improvements and tweaks are still to be made.
-
-*** WAIT [#A] Firmware stop / crash / reboot
-maybe a complete re-implementation with a different os / else
-would be better.
-This is maybe the most annoying issue that is currently still ongoing: if the firmware
-is not stopped in a "clean" way, the RPMsg task is not kill, making a full reboot of the board
-needed in order to re-launch the firmware and having an established communication.
-
-Something need to be done about that.
-
 #+LATEX: \pagebreak
 * Loading the firmware
 Having a version of our ~.elf~ firmware (with or without the included
@@ -691,13 +678,6 @@ source /opt/ros/$ROS_DISTRO/setup.bash
 
 ./MicroXRCEAgent serial --dev /dev/null --verbose 6
 #+END_SRC
-
-** WAIT [#C] Separated RPMsg transport created for XRCE-DDS Agent
-now focusing on updating my knowledge about the techo.
-gotta update the doc latec
-- [ ] Implementation done
-- [ ] Successfully tested
-- [ ] Pull request done to the eProsima repository
 
 ** Creating a custom transport agent                      :WORK_IN_PROGRESS:
 These command allows to go build the agent and run it with maximum verbosity (for debugging purpose).

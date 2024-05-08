@@ -1,11 +1,9 @@
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_CROSSCOMPILING 1)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
-set(CMAKE_INSTALL_LIBDIR /usr/)
-set(PLATFORM_NAME "LwIP")
 
 
-set(ARCH_CPU_FLAGS "-mcpu=cortex-r5 -mthumb -mfpu=vfpv3-d16 -mfloat-abi=hard -DARMR5 -O2 -Wall -fdata-sections -ffunction-sections -fno-tree-loop-distribute-patterns -Wno-unused-parameter -Wno-unused-value -Wno-unused-variable -Wno-unused-function -Wno-unused-but-set-variable -Wl,--gc-sections" CACHE STRING "" FORCE)
+set(ARCH_CPU_FLAGS "-O2 -ffunction-sections -fdata-sections -fno-exceptions -mcpu=cortex-r5 -mfpu=vfpv3-d16 -mfloat-abi=hard -Wl,--gc-sections -nostdlib --param max-inline-insns-single=500 -DF_CPU=84000000L -D'RCUTILS_LOG_MIN_SEVERITY=RCUTILS_LOG_MIN_SEVERITY_NONE'")
 set(ARCH_OPT_FLAGS "")
 
 set(CMAKE_C_COMPILER arm-none-eabi-gcc)

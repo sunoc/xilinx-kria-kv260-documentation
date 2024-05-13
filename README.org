@@ -468,8 +468,119 @@ return of the board (typically a ~/dev/ttyUSB1~), but two things are to be noted
   or the new binary itself is impossible to run.
 + In general, if the ~echo_test~ runs, it means that everything is okay and that
   the RPMsg system worked successfully.
-#+LATEX: \pagebreak
 
+#+LATEX: \pagebreak
+* Loading the firmware using JTAG and Vitis IDE
+This is more of an alternative way, but it is possible to load the Client
+firmware onto the Cortex R5F onto the boad from a host PC IDE, without booting or
+using the Linux on the KRIA board itself.
+
+This section will present the way to do so, and most critically, the steps that must
+be taken beforehand on the host machine for that system to work.
+
+There are two key advantaged to using this methode:
+- The load time for the firmware is real fast. In particular, re-loading the
+  firmware doesn't require to reboot the entire Linux system.
+- IDE debugging available. Running the JTAG on the board allows for the firmware
+  to be debugger in a easier way.
+
+** Testing ~xsct~ and running the drivers
+Firstly, this part of the guide assumes that a version of the Vitis Classic IDE
+was installed on the host system. Some of the needed tools to test the working of the JTAG
+system are located in the installation directory of the IDE.
+
+In my case, I'll have to go to ~~/tools/Xilinx/Vitis/2023.2~, but your milage might vary
+depending on the settings you choose during the IDE installation and also the version of
+the IDE itself.
+
+*** Drivers
+Firstly, we need to load some drivers in order for the JTAG USB system to work:
+#+BEGIN_SRC bash
+sudo ./data/xicom/cable_drivers/lin64/install_script/install_drivers/install_drivers
+#+END_SRC
+
+*** ~dialout~ access
+It is also much needed for the user that runs the IDE to have read/write access to the
+USB devices. This can be done as follow, as root:
+#+BEGIN_SRC sh :dir "/sudo::"
+usermod -aG dialout ${USER}
+#+END_SRC
+
+You'll need to log out and log back it for the changes to apply though.
+
+*** TCL JTAG boot
+A short TCL program was provided by Honda-sensei and should be loaded in order
+for the board to boot in JTAG mode.
+The following code block shows the TCL, and it should be saved somewhere, for exemple
+in ~~/Downloads/boot_jtag.tcl~:
+#+BEGIN_SRC tcl :tangle ~/Downloads/boot_jtag.tcl
+proc boot_jtag { } {
+############################
+# Switch to JTAG boot mode #
+############################
+targets -set -filter {name =~ "PSU"}
+# update multiboot to ZERO
+mwr 0xffca0010 0x0
+# change boot mode to JTAG
+mwr 0xff5e0200 0x0100
+# reset
+rst -system
+}
+
+
+# Jtag connection 
+connect
+puts stdout "Connect Jtag"
+
+# Switching to JtagBoot
+puts -nonewline stdout "Start transition to jtag boot mode..."
+boot_jtag
+puts stdout "done."
+
+# Jtag disconnection
+puts -nonewline stdout "Disconnect Jtag..."
+disconnect
+puts stdout "done."
+#+END_SRC
+
+Eventually it is possible to load the JTAG boot script as follow:
+#+BEGIN_SRC bash
+cd ~/tools/Xilinx/Vitis/2023.2
+source settings64.sh
+xsct -norlwrap ~/Downloads/boot_jtag.tcl
+#+END_SRC
+
+** Vitis IDE classic
+Note that the steps presented here must be taken after running the ~xsct~ command; without rebooting the board in the mean time.
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: With a project meant to be build and run on the Cortex R5F,
+#+CAPTION: you must first produce the ~.elf~ binary file.
+#+NAME: fig:map_ros
+[[file:./img/jtag/design.png]]
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: Then you can open the Debuc Configuration window.
+#+NAME: fig:map_ros
+[[file:./img/jtag/debug_config.png]]
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: All parameters should stay the same. You can then run "Debug".
+#+NAME: fig:map_ros
+[[file:./img/jtag/debug_config2.png]]
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: The XSCT console will confirm the successful load of the firmware.
+#+CAPTION: If not, you will get error messages and should reboot the board.
+#+NAME: fig:map_ros
+[[file:./img/jtag/console.png]]
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: Selecting the Cortex R5, core #0, you can then run the application.
+#+NAME: fig:map_ros
+[[file:./img/jtag/run.png]]
+
+#+LATEX: \pagebreak
 * Running a ROS2 node
 This section as well as the next one are rather "separated" from the rest of the report, as
 they are focused on the ROS2 system being used on the Kria board.

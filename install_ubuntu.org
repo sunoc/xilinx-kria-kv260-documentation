@@ -44,13 +44,6 @@ where this operating system sits in the general system we are implementing.
 #+NAME: fig:map_linux
 [[file:./img/map_linux.png]]
 
-** Integration in my org-roam system                              :noexport:
-#+BEGIN_SRC sh
-  ln -s $PWD/install_ubuntu.org ~/Nextcloud/zettel/install_ubuntu_kria.org
-#+END_SRC
-
-#+RESULTS:
-
 ** Preparing and booting a Ubuntu 22.04 media
 An [[https://ubuntu.com/download/amd-xilinx][official Ubuntu image]] exists and is
 provided by Xilinx, allowing the OS installation to be quick and

@@ -71,14 +71,6 @@ and stays hidden in a :noexport: section in this report.
 			     "\\pagebreak\n"))
 #+end_src
 
-* Integration in my org-roam system                                   :noexport:
-#+BEGIN_SRC sh
-ln -fs $PWD/README.org ~/Nextcloud/zettel/Xilinx_KRIA_KV260.org # org-roam
-ln -fs $PWD/README.org ~/Nextcloud/todo/xilinx_kria.org # org-agenda
-#+END_SRC
-
-#+RESULTS:
-
 * Building this report from the LaTeX file                         :noexport:
 The base file for this report is actually this README.org file itself.
 However, upon local build, this file is regularly exported as
@@ -97,14 +89,14 @@ pdflatex README.tex
 #+END_SRC
 
 * Introduction & motivation
-This guide will present how to setup and use Xilinx's KRIA board, in particular
+This guide will present how to setup and use Xilinx's KRIA boards, in particular
 for running ROS on a host Ubuntu system, as well as for deploying
 micro-ROS[[cite:&Belsare2023]] as a firmware on the MCU part of this board's chip.
 
 The use of this device in particular is interesting because of the presence of a
-CPU comprising both a general purpose ARM core, capable of running a Linux
+SoC comprising both a general purpose ARM core (Cortex A53), capable of running a Linux
 distribution, as well as another ARM core, real-time enabled, capable to run a
-RTOS. The figure [[fig:map]] below shows a schematic view of the overall system we
+RTOS (Cortex R5F). The figure [[fig:map]] below shows a schematic view of the overall system we
 are trying to archive.
 
 #+ATTR_LATEX: :width .6\textwidth
@@ -114,7 +106,12 @@ are trying to archive.
 #+NAME: fig:map
 [[file:img/map.png]]
 
-* Boot firmware
+This document will give a step-by-setep, chapter by chapter indication on how to go from a new board
+to a system ready to be used for testing internal communication for ROS, between both types of cores
+using the SoC shared memory.
+
+#+latex: \pagebreak
+* Boot firmware update
 #+INCLUDE: "./boot_firmware.org" :minlevel 2 :lines "6-"
 ** COMMENT LINK: [[id:be2ce0ab-07db-49e6-be50-72f2db76cde3][KRIA board boot firmware update]]
 
@@ -122,28 +119,17 @@ are trying to archive.
 #+INCLUDE: "./install_ubuntu.org" :minlevel 2 :lines "34-469"
 ** COMMENT LINK: [[id:582fe4ef-a301-4b53-b908-a5c2b5b6d694][KRIA board Ubuntu LTS 22.04 Install]]
 
+* Building micro-ROS as a static library
+#+INCLUDE: "./libmicroros.org" :minlevel 2 :lines "6-"
+** COMMENT LINK: [[id:54ac81d8-2545-47ac-b2d0-a18417086f2c][KRIA board Building micro-ROS as a static library]]
 
-#+LATEX: \pagebreak
 * Setting up a Vitis IDE project
 #+INCLUDE: "./vitis_ide.org" :minlevel 2 :lines "34-"
 ** COMMENT LINK: [[id:dfc7e5d2-fe7b-432e-8dcc-e1227929fc62][KRIA board Vitis IDE setup]]
 
-* DONE R5F firmware without an IDE
-CLOSED: [2024-02-13 火 15:28] SCHEDULED: <2024-02-13 火 13:00>
-
-- State "DONE"       from "TODO"       [2024-02-13 火 15:28]
-The Section [[Setting up a Vitis IDE project]] was merely a presentation on how
-bootstrap a brand new development project using Xilinx provided templates in their crap IDE.
-
-Once the project exist, one can simply compile it again using the generated ~Makefile~.
-
-The information on how to handle the project are available directly in the
-repository of said project[fn:1] and it's various branches for ongoing feature
-development.
-
-
-#+LATEX: \pagebreak
-* RPMsg ~echo_test~ software
+* RPMsg standalone evaluation
+** RPMsg Cortex R5F demonstration firmware
+** RPMsg ~echo_test~ software
 In order to test the deployment of the firmware on the R5F side, and in particular
 to test the RPMsg function, we need some program on the Linux side of the Kria
 board to "talk" with the real-time side.
@@ -167,152 +153,6 @@ sudo ln -s $(pwd)/echo_test /usr/bin/
 
 Once this is done, it it possible to run the test program from the Kria board's Ubuntu
 by running the ~echo_test~ command.
-
-* Building micro-ROS as a static library
-In this section, the goal is to build the micro-ROS library in order to be
-able to integrate it's functions into our Cortex R5F firmware.
-
-All of this should be done via cross-compiling on a host machine, however
-it is most common in the guides about micro-ROS to build the firmware and libraries within a Docker,
-so we can have access of the ROS environment without installing it permanently.
-
-One can simply run this command to summon a ROS2 Docker[fn:8] with the wanted version,
-but first we also need to check the cross-compilation tools.
-
-We are downloading the latest ~arm-none-eabi~ gcc compiler directly from the ARM website.
-
-The cross-compilation tool can then be extracted, set as our ~toolchain~ variable,
-then passed as a parameter when creating the Docker container:
-#+BEGIN_SRC sh
-pushd /home/$USER/Downloads
-wget https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
-tar -xvf arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
-popd
-
-toolchain="/home/$USER/Downloads/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/"
-
-
-docker run -d --name ros_build -it --net=host \
-       --hostname ros_build \
-       -v $toolchain:/armr5-toolchain \
-       --privileged ros:iron
-#+END_SRC
-
-#+RESULTS:
-
-Now the container named ~ros_build~ was created, it is possible to "enter" it, and having access
-to the tools in it by running the following command that will open a ~bash~ shell in said container:
-#+BEGIN_SRC sh
-docker exec -it ros_build bash
-#+END_SRC
-
-Now we are in the ROS2 container, we can build the micro-ROS firmware as presented
-in the [[https://micro.ros.org/docs/tutorials/advanced/create\_custom\_static\_library][dedicated micro-ROS guide]]:
-#+BEGIN_SRC sh
-echo 127.0.0.1 $HOSTNAME >> /etc/hosts
-sudo apt update 
-sudo apt-get -y install python3-pip \
-     wget \
-     nano
-
-. /opt/ros/$ROS_DISTRO/setup.bash
-
-mkdir microros_ws
-cd microros_ws
-git clone -b $ROS_DISTRO \
-    https://github.com/micro-ROS/micro_ros_setup.git \
-    src/micro_ros_setup
-
-sudo rosdep fix-permissions &&\
-    rosdep update &&\
-    rosdep install --from-paths src --ignore-src -y
-
-colcon build
-. ./install/local_setup.bash
-
-ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
-#+END_SRC
-
-
-From that point, we will need some extra configuration files for our Cortex R5F.
-
-Both configuration files[fn:9] will be downloaded from my repository;
-we also are going to copy the cross-compiler into the microros workspace,
-then we can build the library with the following ros2 command:
-#+BEGIN_SRC sh
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/custom_r5f_toolchain.cmake
-
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/custom_r5f_colcon.meta
-
-cp -r /armr5-toolchain/ $(pwd)/firmware/toolchain && \
-    export PATH=$PATH:$(pwd)/firmware/toolchain/bin
-
-ros2 run micro_ros_setup build_firmware.sh \
-     $(pwd)/custom_r5f_toolchain.cmake \
-     $(pwd)/custom_r5f_colcon.meta
-#+END_SRC
-#+LATEX: \pagebreak
-
-* Including micro-ROS to the real-time firmware
-Now we have a Vitis demonstration project available and the ~libmicroros~ static library
-available, we can combine both by including this library into our Kria project.
-
-On the host machine running the IDE, we can download the static library
-and the include files from the Docker builder.
-Here, we assume your Vitis IDE workspace sits in you home directory, at ~~/workspace~,
-and that the Docker container is named ~ros_build~:
-#+BEGIN_SRC sh
-mkdir /home/$USER/workspace/microros_lib
-
-docker cp ros_build:/microros_ws/firmware/build/\
-       libmicroros.a /home/$USER/workspace/microros_lib/
-
-docker cp ros_build:/microros_ws/firmware/build/include \
-       /home/$USER/workspace/microros_lib/
-#+END_SRC
-
-Many parameters are available to be set up in the IDE for the compilation tool-chain, but
-the figures [[fig:include]] and [[fig:include2]] below will show you a setup that worked to have the IDE
-to recognize the include files and to be able to use them for compiling the firmware.
-
-#+ATTR_LATEX: :width .8\textwidth
-#+CAPTION: Firstly, in the "C/C++ Build" settings of your firmware project,
-#+CAPTION: under the "Settings" menu, you should find the gcc compiler "Directories".
-#+CAPTION: In here you should add the "include" directory of your library.
-#+CAPTION: Be careful however, if your include files are in a second layer of directory
-#+CAPTION: (as it is the case for libmicroros) you will need to include each sub-directory individually,
-#+CAPTION: as visible in this figure.
-#+NAME: fig:include
-[[file:./img/vitis_new/include.png]]
-
-#+ATTR_LATEX: :width .8\textwidth
-#+CAPTION: Secondly, in the gcc linker "Libraries", you can add the top level directory of your library.
-#+CAPTION: In our case, it is the directory that contains both the "include" directory added earlier,
-#+CAPTION: and also the "libmicroros.a" file.
-#+NAME: fig:include2
-[[file:./img/vitis_new/include2.png]]
-
-#+LATEX: \pagebreak
-With both of these setup in your project and as a minimal test to see if the setup was made correctly,
-you should be able to include the following micro-ROS libraries into your project:
-#+BEGIN_SRC C
-#include <rcl/rcl.h>
-#include <rcl/error_handling.h>
-#include <rclc/rclc.h>
-#include <rclc/executor.h>
-#+END_SRC
-
-The details for the inclusions and the use-case of the library will depend on the implementation
-of the firmware itself.
-
-But in general, as the firmware is successfully built and an ~.elf~ file is available and can be uploaded as a
-firmware to the Kria board (or any remote server accessible through ~SSH~, for that matter) with the following
-command[fn:10]:
-#+BEGIN_SRC sh
-scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
-    Debug/rpmsg_pingpong_microros_lib.elf  ubuntu@192.168.1.10:/home/ubuntu/
-#+END_SRC
-#+LATEX: \pagebreak
 
 * micro-ROS adaptation for the firmware
 Beyond the inclusion of the library itself, actually using the micro-ROS system
@@ -338,7 +178,7 @@ simply be implemented with some FreeRTOS time functions.
 The end result for these implementation are visible in the appendix [[Firmware time functions]],
 and can be reused as-if for the Kria board setups.
 
-** Memory allocators
+** [DEPRECATED] Memory allocators
 Similarly to the time function, it is required to re-implement some form of memory allocating
 functions in order for the library to be able to work with such functions in a formalized way.
 
@@ -409,28 +249,6 @@ of the execution of the firmware:
 + Finally, the ping-pong function become effective with the micro-ROS task
   polling to receive some message and sending it back to the sender.
 
-** Building the updated firmware outside of the IDE       :WORK_IN_PROGRESS:
-While the use of the IDE presented in the previous sections is much needed in order to first create
-a RPMsg-ready base firmware, it might be inconvenient having to carry this extremely heavy tool
-for any modification or rebuild of the firmware.
-
-Fortunately, the Vitis IDE projects have a very handy function: they general a pure ~Makefile~, with
-all the needed dependencies and path for library set.
-This ~make~ system can be used externally, however, and as explained previously, two conditions must be
-fulfilled:
-+ The cross-compiler needs to be in the ~$PATH~.
-+ Standard building tools must be installer, in particular ~git~ in order to obtain the repository,
-  and ~make~, obviously.
-
-#+BEGIN_SRC sh
-cd /tmp
-git clone https://gitlab.com/sunoc/libmicroros_kv260.git
-cd libmicroros_kv260/Debug
-make
-#+END_SRC
-
-From there, you will have the binary ~rpmsg_pingpong_microros_lib.elf~ file created and ready to be deployed
-on the KRIA board.
 
 #+LATEX: \pagebreak
 * Loading the firmware
@@ -472,13 +290,13 @@ return of the board (typically a ~/dev/ttyUSB1~), but two things are to be noted
 #+LATEX: \pagebreak
 * Loading the firmware using JTAG and Vitis IDE
 This is more of an alternative way, but it is possible to load the Client
-firmware onto the Cortex R5F onto the boad from a host PC IDE, without booting or
+firmware onto the Cortex R5F onto the board from a host PC IDE, without booting or
 using the Linux on the KRIA board itself.
 
 This section will present the way to do so, and most critically, the steps that must
 be taken beforehand on the host machine for that system to work.
 
-There are two key advantaged to using this methode:
+There are two key advantaged to using this method:
 - The load time for the firmware is real fast. In particular, re-loading the
   firmware doesn't require to reboot the entire Linux system.
 - IDE debugging available. Running the JTAG on the board allows for the firmware
@@ -489,7 +307,7 @@ Firstly, this part of the guide assumes that a version of the Vitis Classic IDE
 was installed on the host system. Some of the needed tools to test the working of the JTAG
 system are located in the installation directory of the IDE.
 
-In my case, I'll have to go to ~~/tools/Xilinx/Vitis/2023.2~, but your milage might vary
+In my case, I'll have to go to ~~/tools/Xilinx/Vitis/2023.2~, but your mileage might vary
 depending on the settings you choose during the IDE installation and also the version of
 the IDE itself.
 
@@ -511,7 +329,7 @@ You'll need to log out and log back it for the changes to apply though.
 *** TCL JTAG boot
 A short TCL program was provided by Honda-sensei and should be loaded in order
 for the board to boot in JTAG mode.
-The following code block shows the TCL, and it should be saved somewhere, for exemple
+The following code block shows the TCL, and it should be saved somewhere, for example
 in ~~/Downloads/boot_jtag.tcl~:
 #+BEGIN_SRC tcl :tangle ~/Downloads/boot_jtag.tcl
 proc boot_jtag { } {
@@ -560,7 +378,7 @@ Note that the steps presented here must be taken after running the ~xsct~ comman
 [[file:./img/jtag/design.png]]
 
 #+ATTR_LATEX: :width .6\textwidth
-#+CAPTION: Then you can open the Debuc Configuration window.
+#+CAPTION: Then you can open the Debug Configuration window.
 #+NAME: fig:map_ros
 [[file:./img/jtag/debug_config.png]]
 
@@ -628,7 +446,7 @@ wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key
 sudo mv ros.key /usr/share/keyrings/ros-archive-keyring.gpg
 #+END_SRC
 
-Then, a thicc one-liner is available to add the ROS2 repository to our system:
+Then, a thick one-liner is available to add the ROS2 repository to our system:
 #+BEGIN_SRC sh
 echo "deb [arch=$(dpkg --print-architecture) \
 signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
@@ -903,7 +721,7 @@ official documentation[fn:25], but for the KV260 board with an older release of
 the Linux. This guide will try to keep an up-to-date version of the guide, in
 particular for the KR260 KRIA board and, at the time of writing, the PetaLinux
 in version 2023.2 for the installer.  The 2022.2 version is recommended for this
-board's latest updated boot firmware, as presented in the Section [[Boot firmware]]
+board's latest updated boot firmware, as presented in the Section Boot firmware
 above; however I happened to have issues with the building process from a system
 based on Ubuntu 22.04. Thus the choice of the 2023.2 that should be compatible.
 
@@ -931,7 +749,7 @@ sudo apt-get install iproute2 gawk python3 build-essential gcc git make \
      python3-jinja2 libegl1-mesa libsdl1.2-dev pylint asciidoc
 #+END_SRC
 
-Testing, if building on Debian 12 the following variante of the same command has been confirmed to work:
+Testing, if building on Debian 12 the following variant of the same command has been confirmed to work:
 #+BEGIN_SRC sh
 sudo apt-get install iproute2 gawk python3 build-essential gcc git make \
 net-tools libncurses5-dev tftpd-hpa zlib1g-dev libssl-dev flex bison libselinux1 \
@@ -958,7 +776,7 @@ cd xilinx-kr260-starterkit-2023.2/
 
 
 The more general option allows to enable stuff related to hardware
-configuration[fn:33]. For this step, it is possible to select the ~openamp~
+configuration[fn:33]. For this step, it is possible to select the ~openAMP~
 setting the the DTG Settings, as visible in the Figure [[fig:yocto_openamp_dtg]] below:
 #+BEGIN_SRC sh
 petalinux-config --get-hw-description  ./hardware/xilinx-kr260-starterkit-2023.2/kr260_starter_kit.xsa
@@ -1185,8 +1003,6 @@ With all of this, on the next reboot of the board, the static IP should be avail
   properly during the build process.
 
 * Footnotes
-[fn:1] https://gitlab.com/sunoc/libmicroros_kv260 
-
 [fn:35] https://gitlab.com/sunoc/saleae-logic-8-documentation
 
 [fn:34] https://xilinx.github.io/kria-apps-docs/openamp/build/html/openamp_landing.html#openamp-demos 
@@ -1257,18 +1073,6 @@ is visible in the section [[RPMsg ~echo_test~ software]].
 
 [fn:11] In this sequence, we are entering a root shell with ~sudo -s~, but this can
 also be archived by putting the commands in a script to be executed with ~sudo~. 
-
-[fn:10] Note that in that case, we are retrieving the binary for a project
-named ~rpmsg_pingpong_microros_lib~.
-You own path will vary depending on how your project was named in the first place.
-Obviously, the ~SSH~ connection parameters will also be specific to your case.
-The ~ubuntu@192.168.1.10~ set here are merely an example.
-
-[fn:9] Both files are also visible in the appendixes [[Custom tool-chain CMake settings]]
-and [[Custom Colcon meta settings]] the end of this report.}
-
-[fn:8] If Docker is not set up on your machine, you can follow the guide on [[https://docs.docker.com/engine/install/ubuntu/][the official website]].
-When you can successfully run the "hello-world" container, you are good to go.
 
 * References
 [[bibliographystyle:ieeetr]]

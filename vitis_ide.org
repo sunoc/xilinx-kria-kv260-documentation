@@ -48,15 +48,7 @@ is positioned in the global project.
 #+NAME: fig:map_microros
 [[file:./img/map_microros.png]]
 
-** Integration in my org-roam system                              :noexport:
-#+BEGIN_SRC sh
-ln -fs $PWD/vitis_ide.org ~/Nextcloud/zettel/vitis_ide.org
-#+END_SRC
-
-#+RESULTS:
-
-
-** Setting up the IDE
+* Setting up the IDE
 Xilinx's Vitis IDE is the recommended tool used to build software for the Xilinx boards.
 It also include the tools to interact with the FPGA part, making the whole
 software very large (around 200GB of disk usage).
@@ -76,7 +68,7 @@ with this tool during the development stages.
 This guide will present a setup procedure that supposedly works for all distributions based on the newest
 LTS from Ubuntu. For other Linux distributions or operating system, please refer to the official documentation.
 
-*** Dependencies & installation
+** Dependencies & installation
 Some packages are required to be installed on the host system
 in order for the installation process to happen successfully:
 
@@ -115,7 +107,7 @@ and is prone to failures (regarding missing dependencies, typically),
 so your schedule should be arranged accordingly.
 #+LATEX: \end{tcolorbox}
 
-*** Platform configuration file
+** Platform configuration file
 With a Xilinx account, a ~.bsp~ archive can be downloaded for the taget platform[fn:7].
 
 Once the file is downloaded, the following commands allows to "un-tar" it,
@@ -127,7 +119,7 @@ ls xilinx-kr260-starterkit-2022.2/hardware/xilinx-kr260-starterkit-2022.2/
 #+END_SRC
 
 
-*** [DEPRECATED] Platform configuration file generation
+** [DEPRECATED] Platform configuration file generation
 In order to have the libraries and configurations in the IDE ready to be used for our board,
 we need to obtain some configuration files that are specific for the Kria KV260,
 as presented in the Xilinx guide for Kria and Vitis[fn:4].
@@ -158,8 +150,7 @@ export XILINX_VITIS=/home/$USER/Xilinx/Vitis/2022.2/
 make platform PLATFORM=k26_base_starter_kit
 #+END_SRC
 
-
-** Setting up and building a new project for the Kria board
+* Setting up and building a new project for the Kria board
 With the platform configuration files available, we can now use the IDE to generate a
 new project for our board. The whole process will be described with screen captures and
 captions.
@@ -229,8 +220,7 @@ jump directly in further sections to see how to deploy and use your firmware.
 
 The section in between will present setup specifically needed for micro-ROS.
 
-
-** Enabling the Stream Buffer system
+* Enabling the Stream Buffer system
 This is a subpart in the general configuration in the project related to some specific
 functions for FreeRTOS threads messaging system, however, this point in particular
 created so much pain I needed to include in early in this guide for not to forget about it
@@ -257,7 +247,57 @@ In that case, you must include ~#define configUSE_SB_COMPLETED_CALLBACK 1~ on th
 file (in our project, this will happen in the ~microros.h~ header file),
 before the ~#include "FreeRTOS.h"~ in order to override the setting from this include.
 
-** Importing an existing project
+* Including micro-ROS to the real-time firmware
+Now we have a Vitis demonstration project available and the ~libmicroros~ static library
+available, we can combine both by including this library into our Kria project.
+
+On the host machine running the IDE, we can download the static library
+and the include files from the Docker builder.
+Here, we assume your Vitis IDE workspace sits in you home directory, at ~~/workspace~,
+and that the Docker container is named ~ros_build~:
+#+BEGIN_SRC sh
+mkdir /home/$USER/workspace/microros_lib
+
+docker cp ros_build:/microros_ws/firmware/build/\
+       libmicroros.a /home/$USER/workspace/microros_lib/
+
+docker cp ros_build:/microros_ws/firmware/build/include \
+       /home/$USER/workspace/microros_lib/
+#+END_SRC
+
+Many parameters are available to be set up in the IDE for the compilation tool-chain, but
+the figures [[fig:include]] and [[fig:include2]] below will show you a setup that worked to have the IDE
+to recognize the include files and to be able to use them for compiling the firmware.
+
+#+ATTR_LATEX: :width .8\textwidth
+#+CAPTION: Firstly, in the "C/C++ Build" settings of your firmware project,
+#+CAPTION: under the "Settings" menu, you should find the gcc compiler "Directories".
+#+CAPTION: In here you should add the "include" directory of your library.
+#+CAPTION: Be careful however, if your include files are in a second layer of directory
+#+CAPTION: (as it is the case for libmicroros) you will need to include each sub-directory individually,
+#+CAPTION: as visible in this figure.
+#+NAME: fig:include
+[[file:./img/vitis_new/include.png]]
+
+#+ATTR_LATEX: :width .8\textwidth
+#+CAPTION: Secondly, in the gcc linker "Libraries", you can add the top level directory of your library.
+#+CAPTION: In our case, it is the directory that contains both the "include" directory added earlier,
+#+CAPTION: and also the "libmicroros.a" file.
+#+NAME: fig:include2
+[[file:./img/vitis_new/include2.png]]
+
+#+LATEX: \pagebreak
+With both of these setup in your project and as a minimal test to see if the setup was made correctly,
+you should be able to include the following micro-ROS libraries into your project:
+#+BEGIN_SRC C
+#include <rcl/rcl.h>
+#include <rcl/error_handling.h>
+#include <rclc/rclc.h>
+#include <rclc/executor.h>
+#+END_SRC
+
+The details for the inclusions and the use-case of the library will depend on the implementation
+of the firmware itself.
 
 * Footnotes
 [fn:7] https://www.xilinx.com/member/forms/download/xef.html?filename=xilinx-kr260-starterkit-v2022.2-10141622.bsp 

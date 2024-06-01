@@ -44,7 +44,7 @@ where this operating system sits in the general system we are implementing.
 #+NAME: fig:map_linux
 [[file:./img/map_linux.png]]
 
-** Preparing and booting a Ubuntu 22.04 media
+* Preparing and booting a Ubuntu 22.04 media
 An [[https://ubuntu.com/download/amd-xilinx][official Ubuntu image]] exists and is
 provided by Xilinx, allowing the OS installation to be quick and
 straightforward.
@@ -101,11 +101,11 @@ kria# ip addr
 host# ssh ubuntu@192.168.4.11
 #+END_SRC
 
-** Network and admin setups
+* Network and admin setups
 This section presents a variety of extra convenience configurations
 that can be used when setting-up the Kria board.
 
-*** Static IP address
+** Static IP address
 A static IP can be set by writing the following
 configuration into your ~netplan~ configuration file[fn:36].
 
@@ -139,7 +139,7 @@ as follow:
 sudo netplan apply
 #+END_SRC
 
-*** Proxy and DNS
+** Proxy and DNS
 An issue that can occur when connecting the board to the internet is the
 conflicting situation with the university proxy.
 Indeed, as the network at Nanzan University requires to go through a proxy,
@@ -163,7 +163,7 @@ echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" >> ~/.bashrc
 
 Eventually the board can be rebooted in order for the setup to get applied cleanly.
 
-*** ~root~ password
+** ~root~ password
 #+LATEX: \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 *WARNING*: Depending on your use-case, the setup presented in this
 subsection can be a critical security breach as it remove the need for a root
@@ -197,7 +197,7 @@ sudo apt-get dist-upgrade
 sudo reboot now
 #+END_SRC
 
-*** Adding Xilinx specific repositories
+** Adding Xilinx specific repositories
 The following commands will add ~PPA~ repositories that are specific for Xilinx boards using Ubuntu.
 It is then possible to update the package list and eventually upgrade to some new packages.
 #+BEGIN_SRC sh
@@ -207,7 +207,7 @@ sudo apt update
 sudo apt upgrade
 #+END_SRC
 
-*** Purging ~snap~
+** Purging ~snap~
 As the desktop-specific software are not used at all in the case
 of our project, there are some packages that can be purges in order for the
 system to become more lightweight.
@@ -243,7 +243,7 @@ sudo apt autoremove --purge snapd
 systemctl list-units | grep snapd 
 #+END_SRC
 
-*** Other unused heavy packages
+** Other unused heavy packages
 Some other pieces of software can safely be removed since the desktop is
 not to be used:
 
@@ -256,7 +256,7 @@ sudo apt-get autoclean
 sudo reboot now
 #+END_SRC
 
-*** Slow boot services to disable
+** Slow boot services to disable
 These packages (in particular the first one) are taking up a LOT of time at boot while providing no benefits[fn:7].
 
 It is possible to disable them as follow:
@@ -274,7 +274,7 @@ Additional, potentially unused services can be found using the very handy comman
 sudo systemd-analyze blame
 #+END_SRC
 
-*** Jupyter notebook setup
+** Jupyter notebook setup
 Here are some instruction on how to install and setup Jupyter on a KRIA board,
 accessing it remotely and using it for making data analysis.
 
@@ -311,7 +311,7 @@ Eventually creating Notebooks and stuff, it is possible to obtain a situation li
 #+NAME: fig:jupyter
 [[file:img/jupyter.png]]
 
-*** Enabling ~remoteproc~ with Device-Tree Overlay patching
+** Enabling ~remoteproc~ with Device-Tree Overlay patching
 One of the advantage of this Kria board, as cited previously, is the presence of
 multiple types of core (APU, MCU, FPGA) on the same chip.
 
@@ -387,7 +387,7 @@ If it is the case, it means that the patch was successful and  that the remote p
 ready to be used!
 #+LATEX: \pagebreak
 
-*** Installing Docker
+** Installing Docker
 It is possible to have a version of Docker installed simply by using the available repository,
 but since we are on Ubuntu, a PPA is available from Docker in order to have the most up-to-date version.
 
@@ -427,7 +427,7 @@ docker run hello-world
 #+NAME: fig:hello-docker
 [[file:img/hello-docker.png]]
 
-*** Adding a swap partition
+** Adding a swap partition
 This part is very optional, in particular as it might slow down a bit the
 boot time of the board (~2s), however it might become handy to have swap memory
 available to avoid system failure under heavy use.
@@ -457,8 +457,7 @@ echo "UUID=8b13ed05-a91d-4x50-a44a-e654a0c67a2c none   swap    sw      0       0
 reboot now
 #+END_SRC
 
-*** TODO Using a PetaLinux kernel in Ubuntu
-
+** TODO Using a PetaLinux kernel in Ubuntu
 
 #+LATEX: \pagebreak
 #+LATEX: \appendix

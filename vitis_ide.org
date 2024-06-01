@@ -48,7 +48,7 @@ is positioned in the global project.
 #+NAME: fig:map_microros
 [[file:./img/map_microros.png]]
 
-* Setting up the IDE
+** Setting up the IDE
 Xilinx's Vitis IDE is the recommended tool used to build software for the Xilinx boards.
 It also include the tools to interact with the FPGA part, making the whole
 software very large (around 200GB of disk usage).
@@ -68,7 +68,7 @@ with this tool during the development stages.
 This guide will present a setup procedure that supposedly works for all distributions based on the newest
 LTS from Ubuntu. For other Linux distributions or operating system, please refer to the official documentation.
 
-** Dependencies & installation
+*** Dependencies & installation
 Some packages are required to be installed on the host system
 in order for the installation process to happen successfully:
 
@@ -107,7 +107,7 @@ and is prone to failures (regarding missing dependencies, typically),
 so your schedule should be arranged accordingly.
 #+LATEX: \end{tcolorbox}
 
-** Platform configuration file
+*** Platform configuration file
 With a Xilinx account, a ~.bsp~ archive can be downloaded for the taget platform[fn:7].
 
 Once the file is downloaded, the following commands allows to "un-tar" it,
@@ -119,7 +119,7 @@ ls xilinx-kr260-starterkit-2022.2/hardware/xilinx-kr260-starterkit-2022.2/
 #+END_SRC
 
 
-** [DEPRECATED] Platform configuration file generation
+*** [DEPRECATED] Platform configuration file generation
 In order to have the libraries and configurations in the IDE ready to be used for our board,
 we need to obtain some configuration files that are specific for the Kria KV260,
 as presented in the Xilinx guide for Kria and Vitis[fn:4].
@@ -150,7 +150,7 @@ export XILINX_VITIS=/home/$USER/Xilinx/Vitis/2022.2/
 make platform PLATFORM=k26_base_starter_kit
 #+END_SRC
 
-* Setting up and building a new project for the Kria board
+** Setting up and building a new project for the Kria board
 With the platform configuration files available, we can now use the IDE to generate a
 new project for our board. The whole process will be described with screen captures and
 captions.
@@ -220,7 +220,7 @@ jump directly in further sections to see how to deploy and use your firmware.
 
 The section in between will present setup specifically needed for micro-ROS.
 
-* Enabling the Stream Buffer system
+** Enabling the Stream Buffer system
 This is a subpart in the general configuration in the project related to some specific
 functions for FreeRTOS threads messaging system, however, this point in particular
 created so much pain I needed to include in early in this guide for not to forget about it
@@ -247,7 +247,7 @@ In that case, you must include ~#define configUSE_SB_COMPLETED_CALLBACK 1~ on th
 file (in our project, this will happen in the ~microros.h~ header file),
 before the ~#include "FreeRTOS.h"~ in order to override the setting from this include.
 
-* Including micro-ROS to the real-time firmware
+** Including micro-ROS to the real-time firmware
 Now we have a Vitis demonstration project available and the ~libmicroros~ static library
 available, we can combine both by including this library into our Kria project.
 

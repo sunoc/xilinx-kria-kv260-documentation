@@ -1,0 +1,170 @@
+:PROPERTIES:
+:ID:       9a6622c8-2366-426d-a194-31cb79c3d571
+:END:
+#+title: Robot Operating System (ROS2) setup
+
+This is focused on the ROS2 system being used on the Kria board as a base to run and / or build
+micro-ROS components.
+
+The installation of ROS2 as a system will be presented, with
+two different ways of approaching the problem.
+
+As for the previous section, the figure [[fig:map_ros]] below shows what part
+of the overall system we are talking about here.
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: The ROS2 middle (red border) runs on top of the Linux,
+#+CAPTION: on the general-purpose core of the Kria board.
+#+NAME: fig:map_ros
+[[file:./img/map_ros.png]]
+
+#+ATTR_LATEX: :width .55\textwidth
+#+CAPTION: Methods architecture for the modified Agent node.
+#+NAME: fig:agent_arch
+[[file:./img/agent_arch.png]]
+
+** On the host Linux ("bare-metal")
+Since an Ubuntu distribution is installed on the board, the installation of ROS2
+can be done[fn:13] in a standard way, using the repository.
+
+An [[https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html][official documentation]] is provided with ROS2 themselves with a step-by-step guide on how to install
+ROS2 on a Ubuntu system{}.
+We will be following this guide here[fn:14].
+
+Firstly, we need to update the locals, enable the universe Ubuntu repository,
+get the key and add the repository for ROS2. This can be done as follow:
+#+BEGIN_SRC sh
+locale  # check for UTF-8
+sudo apt update && sudo apt install -y locales
+sudo locale-gen en_US en_US.UTF-8
+sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+export LANG=en_US.UTF-8
+locale  # verify settings
+
+sudo apt install -y software-properties-common
+sudo add-apt-repository universe
+sudo apt update && sudo apt install -y curl wget
+
+wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key
+sudo mv ros.key /usr/share/keyrings/ros-archive-keyring.gpg
+#+END_SRC
+
+Then, a thick one-liner is available to add the ROS2 repository to our system:
+#+BEGIN_SRC sh
+echo "deb [arch=$(dpkg --print-architecture) \
+signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
+http://packages.ros.org/ros2/ubuntu $(. \
+/etc/os-release && echo $UBUNTU_CODENAME) main" | \
+    sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+#+END_SRC
+
+It is then possible to install ROS2[fn:15] as follow:
+#+BEGIN_SRC sh
+sudo apt update
+sudo apt upgrade -y
+sudo apt install -y ros-$ROS_DISTRO-desktop \
+     ros-$ROS_DISTRO-ros-base \
+     python3-argcomplete \
+     ros-dev-tools
+#+END_SRC
+
+Once installed, it is possible to test the system with a provided example.
+You need to open two terminals and log wish SSH onto the board, then running
+respectively:
+#+BEGIN_SRC sh
+source /opt/ros/$ROS_DISTRO/setup.bash
+ros2 run demo_nodes_cpp talker
+#+END_SRC
+
+And then:
+#+BEGIN_SRC sh
+source /opt/ros/$ROS_DISTRO/setup.bash
+ros2 run demo_nodes_py listener
+#+END_SRC
+
+You should be able to see the first terminal sending "Hello world" messages,
+and the second one receiving then.
+
+** In a container (Docker)
+As containers are used to test and build micro-ROS configurations,
+running ROS2 in a Docker  is a great way to have a reproducible configuration
+of you system.
+
+This part of the guide will present how to install Docker on the
+Kria board and then how to use it to deploy the latest version of ROS2.
+This section of the report assumes that Docker was installer on the target system
+as presented in section [[Installing Docker]].
+
+The following commands will pull a ROS container, version ~iron~, and name it ~ros_build~.
+
+A key part for having access to the interfaces (serial) is the mapping of the whole ~/dev~
+range of devices from the host machine to the internal ~/dev~ of the container[fn:16].
+With the second command, we can execute ~bash~ as a way to open a terminal to the "inside" the container:
+#+BEGIN_SRC sh
+docker run -d --name ros_agent -it --net=host -v \
+       /dev:/dev --privileged ros:iron
+docker exec -it ros_agent bash
+#+END_SRC
+
+From there, it becomes possible to simply use ROS2 as you would for a bare-metal install,
+and as presented in the section [[On the host Linux ("bare-metal")]] above:
+#+BEGIN_SRC sh
+source /opt/ros/$ROS_DISTRO/setup.bash
+
+# Create a workspace and download the micro-ROS tools
+mkdir microros_ws
+cd microros_ws
+git clone -b $ROS_DISTRO https://github.com/micro-ROS/\
+    micro_ros_setup.git src/micro_ros_setup
+
+# Update dependencies using rosdep
+sudo apt update && rosdep update
+rosdep install --from-paths src --ignore-src -y
+
+# Install pip
+sudo apt-get install python3-pip
+
+# Build micro-ROS tools and source them
+colcon build
+
+# Download micro-ROS-Agent packages
+source install/local_setup.bash
+ros2 run micro_ros_setup create_agent_ws.sh
+
+# Build step
+ros2 run micro_ros_setup build_agent.sh
+
+# Run a micro-ROS agent
+ros2 run micro_ros_agent micro_ros_agent serial \
+     --dev /dev/ttyUSB1
+#+END_SRC
+
+Then once again in a similar way to the bare-metal deployment,  it is possible to run a demonstration
+the ping-pong topic communication from a different shell[fn:17]:
+#+BEGIN_SRC sh
+source /opt/ros/$ROS_DISTRO/setup.bash
+
+# Subscribe to micro-ROS ping topic
+ros2 topic echo /microROS/ping
+#+END_SRC
+
+* Footnotes
+[fn:17] You need to be careful to have you shell in the "correct" space: these command need to be run inside
+the container in which the previous setup were install, not on the host running the container system.
+The hostname should help you to figure out where you are.
+
+[fn:16] This is an example and this situation can become a security issue. It would be a better practice
+in a production environment to map only the devices that are actually in use.
+
+[fn:15] This command installs a complete "desktop" version of ROS2, containing many
+useful package for our project.
+If space is a constraint, different, less complete packages can be install.
+Please refer to the official documentation about it.
+
+[fn:14] The ~curl~ command from the guide does not work through the school proxy,
+but the command ~wget~ used instead does work. The key is then moved to the correct spot with ~mv~. 
+
+[fn:13] As always, this configuration was tested solely on Ubuntu LTS 22.04,
+with the ROS2 versions ~Humble~ and then ~Iron~ being deployed.
+Other combination of versions should work as well, but they are not
+tested for this guide. In case of doubt or problem, please refer to the official documentation. 

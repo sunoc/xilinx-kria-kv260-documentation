@@ -3,7 +3,10 @@
 :END:
 #+title: KRIA board Building micro-ROS as a static library
 
-* Initial setup
+This section will present the way to build manually the micro-ROS system as static library
+that can be used to port it to a different platform.
+
+** Initial setup
 In this section, the goal is to build the micro-ROS library in order to be
 able to integrate it's functions into our Cortex R5F firmware.
 
@@ -41,7 +44,7 @@ to the tools in it by running the following command that will open a ~bash~ shel
 docker exec -it ros_build bash
 #+END_SRC
 
-* Building the static library
+** Building the static library
 Now we are in the ROS2 container, we can build the micro-ROS firmware as presented
 in the [[https://micro.ros.org/docs/tutorials/advanced/create\_custom\_static\_library][dedicated micro-ROS guide]]:
 #+BEGIN_SRC sh

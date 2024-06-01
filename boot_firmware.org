@@ -70,7 +70,6 @@ From this "recovery" page, it is possible to upload the ~.bin~ file downloaded p
 the board using the "Recover Image" section at the bottom right of the page.
 
 The board can be re-booted afterwards.
-#+LATEX: \pagebreak
 
 * Footnotes
 [fn:4] Something that looks like ~BOOT-k26-starter-kit-20230516185703.bin~, at the time of writing this section. 

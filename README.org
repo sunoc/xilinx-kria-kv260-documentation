@@ -194,6 +194,7 @@ toolchain="/home/$USER/Downloads/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eab
 
 docker run -d --name ros_build -it --net=host \
        --hostname ros_build \
+       -v /dev:/dev \
        -v $toolchain:/armr5-toolchain \
        --privileged ros:iron
 #+END_SRC

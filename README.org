@@ -263,8 +263,8 @@ and that the Docker container is named ~ros_build~:
 #+BEGIN_SRC sh
 mkdir /home/$USER/workspace/microros_lib
 
-docker cp ros_build:/microros_ws/firmware/build/\
-       libmicroros.a /home/$USER/workspace/microros_lib/
+docker cp ros_build:/microros_ws/firmware/build/libmicroros.a \
+       /home/$USER/workspace/microros_lib/
 
 docker cp ros_build:/microros_ws/firmware/build/include \
        /home/$USER/workspace/microros_lib/

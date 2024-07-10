@@ -8,7 +8,7 @@
 #+subtitle: \begin{CJK}{UTF8}{min}南山大学\end{CJK}
 #+author: Vincent Conus
 #+email: vincent.conus@protonmail.com
-#+date: 2023-12-22
+#+date: 2024-05-02
 
 * Headers and LaTeX settings for export                            :noexport:
 A large amount of headers and parameters are needed in order
@@ -71,14 +71,6 @@ and stays hidden in a :noexport: section in this report.
 			     "\\pagebreak\n"))
 #+end_src
 
-* Integration in my org-roam system                                   :noexport:
-#+BEGIN_SRC sh
-ln -fs $PWD/README.org ~/Nextcloud/zettel/Xilinx_KRIA_KV260.org # org-roam
-ln -fs $PWD/README.org ~/Nextcloud/todo/xilinx_kria.org # org-agenda
-#+END_SRC
-
-#+RESULTS:
-
 * Building this report from the LaTeX file                         :noexport:
 The base file for this report is actually this README.org file itself.
 However, upon local build, this file is regularly exported as
@@ -97,14 +89,14 @@ pdflatex README.tex
 #+END_SRC
 
 * Introduction & motivation
-This guide will present how to setup and use Xilinx's KRIA board, in particular
+This guide will present how to setup and use Xilinx's KRIA boards, in particular
 for running ROS on a host Ubuntu system, as well as for deploying
 micro-ROS[[cite:&Belsare2023]] as a firmware on the MCU part of this board's chip.
 
 The use of this device in particular is interesting because of the presence of a
-CPU comprising both a general purpose ARM core, capable of running a Linux
+SoC comprising both a general purpose ARM core (Cortex A53), capable of running a Linux
 distribution, as well as another ARM core, real-time enabled, capable to run a
-RTOS. The figure [[fig:map]] below shows a schematic view of the overall system we
+RTOS (Cortex R5F). The figure [[fig:map]] below shows a schematic view of the overall system we
 are trying to archive.
 
 #+ATTR_LATEX: :width .6\textwidth
@@ -114,36 +106,25 @@ are trying to archive.
 #+NAME: fig:map
 [[file:img/map.png]]
 
-* Boot firmware
-#+INCLUDE: "./boot_firmware.org" :minlevel 2 :lines "6-"
+This document will give a step-by-setep, chapter by chapter indication on how to go from a new board
+to a system ready to be used for testing internal communication for ROS, between both types of cores
+using the SoC shared memory.
+
+#+latex: \pagebreak
+* Boot firmware update
+#+INCLUDE: "./boot_firmware.org" :minlevel 2 :lines "6-73"
+#+latex: \clearpage
 ** COMMENT LINK: [[id:be2ce0ab-07db-49e6-be50-72f2db76cde3][KRIA board boot firmware update]]
 
+
 * Installing Ubuntu LTS 22.04
-#+INCLUDE: "./install_ubuntu.org" :minlevel 2 :lines "34-469"
+#+INCLUDE: "./install_ubuntu.org" :minlevel 2 :lines "34-461"
+#+latex: \clearpage
 ** COMMENT LINK: [[id:582fe4ef-a301-4b53-b908-a5c2b5b6d694][KRIA board Ubuntu LTS 22.04 Install]]
 
-
-#+LATEX: \pagebreak
-* Setting up a Vitis IDE project
-#+INCLUDE: "./vitis_ide.org" :minlevel 2 :lines "34-"
-** COMMENT LINK: [[id:dfc7e5d2-fe7b-432e-8dcc-e1227929fc62][KRIA board Vitis IDE setup]]
-
-* DONE R5F firmware without an IDE
-CLOSED: [2024-02-13 火 15:28] SCHEDULED: <2024-02-13 火 13:00>
-
-- State "DONE"       from "TODO"       [2024-02-13 火 15:28]
-The Section [[Setting up a Vitis IDE project]] was merely a presentation on how
-bootstrap a brand new development project using Xilinx provided templates in their crap IDE.
-
-Once the project exist, one can simply compile it again using the generated ~Makefile~.
-
-The information on how to handle the project are available directly in the
-repository of said project[fn:1] and it's various branches for ongoing feature
-development.
-
-
-#+LATEX: \pagebreak
-* RPMsg ~echo_test~ software
+* RPMsg standalone evaluation
+** TODO RPMsg Cortex R5F demonstration firmware
+** RPMsg ~echo_test~ software
 In order to test the deployment of the firmware on the R5F side, and in particular
 to test the RPMsg function, we need some program on the Linux side of the Kria
 board to "talk" with the real-time side.
@@ -168,152 +149,24 @@ sudo ln -s $(pwd)/echo_test /usr/bin/
 Once this is done, it it possible to run the test program from the Kria board's Ubuntu
 by running the ~echo_test~ command.
 
+#+latex: \clearpage
 * Building micro-ROS as a static library
-In this section, the goal is to build the micro-ROS library in order to be
-able to integrate it's functions into our Cortex R5F firmware.
+#+INCLUDE: "./libmicroros.org" :minlevel 2 :lines "6-63"
+#+latex: \clearpage
+** COMMENT LINK: [[id:54ac81d8-2545-47ac-b2d0-a18417086f2c][KRIA board Building micro-ROS as a static library]]
 
-All of this should be done via cross-compiling on a host machine, however
-it is most common in the guides about micro-ROS to build the firmware and libraries within a Docker,
-so we can have access of the ROS environment without installing it permanently.
+* Setting up a Vitis IDE project
+#+INCLUDE: "./vitis_ide.org" :minlevel 2 :lines "34-301"
+#+latex: \clearpage
+** COMMENT LINK: [[id:dfc7e5d2-fe7b-432e-8dcc-e1227929fc62][KRIA board Vitis IDE setup]]
 
-One can simply run this command to summon a ROS2 Docker[fn:8] with the wanted version,
-but first we also need to check the cross-compilation tools.
+* ROS2 host system setup
+#+INCLUDE: "./ros_system.org" :minlevel 2 :lines "6-150"
+#+latex: \clearpage
+** COMMENT LINK: [[id:9a6622c8-2366-426d-a194-31cb79c3d571][Robot Operating System (ROS2) setup]]
 
-We are downloading the latest ~arm-none-eabi~ gcc compiler directly from the ARM website.
-
-The cross-compilation tool can then be extracted, set as our ~toolchain~ variable,
-then passed as a parameter when creating the Docker container:
-#+BEGIN_SRC sh
-pushd /home/$USER/Downloads
-wget https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
-tar -xvf arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
-popd
-
-toolchain="/home/$USER/Downloads/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/"
-
-
-docker run -d --name ros_build -it --net=host \
-       --hostname ros_build \
-       -v /dev:/dev \
-       -v $toolchain:/armr5-toolchain \
-       --privileged ros:iron
-#+END_SRC
-
-Now the container named ~ros_build~ was created, it is possible to "enter" it, and having access
-to the tools in it by running the following command that will open a ~bash~ shell in said container:
-#+BEGIN_SRC sh
-docker exec -it ros_build bash
-#+END_SRC
-
-Now we are in the ROS2 container, we can build the micro-ROS firmware as presented
-in the [[https://micro.ros.org/docs/tutorials/advanced/create\_custom\_static\_library][dedicated micro-ROS guide]]:
-#+BEGIN_SRC sh
-echo 127.0.0.1 $HOSTNAME >> /etc/hosts
-sudo apt update 
-sudo apt-get -y install python3-pip \
-     wget \
-     nano
-
-. /opt/ros/$ROS_DISTRO/setup.bash
-
-mkdir microros_ws
-cd microros_ws
-git clone -b $ROS_DISTRO \
-    https://github.com/micro-ROS/micro_ros_setup.git \
-    src/micro_ros_setup
-
-sudo rosdep fix-permissions &&\
-    rosdep update &&\
-    rosdep install --from-paths src --ignore-src -y
-
-colcon build
-. ./install/local_setup.bash
-
-ros2 run micro_ros_setup create_firmware_ws.sh generate_lib
-#+END_SRC
-
-
-From that point, we will need some extra configuration files for our Cortex R5F.
-
-Both configuration files[fn:9] will be downloaded from my repository;
-we also are going to copy the cross-compiler into the microros workspace,
-then we can build the library with the following ros2 command:
-#+BEGIN_SRC sh
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/custom_r5f_toolchain.cmake
-
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/custom_r5f_colcon.meta
-
-cp -r /armr5-toolchain/ $(pwd)/firmware/toolchain && \
-    export PATH=$PATH:$(pwd)/firmware/toolchain/bin
-
-ros2 run micro_ros_setup build_firmware.sh \
-     $(pwd)/custom_r5f_toolchain.cmake \
-     $(pwd)/custom_r5f_colcon.meta
-#+END_SRC
-#+LATEX: \pagebreak
-
-* Including micro-ROS to the real-time firmware
-Now we have a Vitis demonstration project available and the ~libmicroros~ static library
-available, we can combine both by including this library into our Kria project.
-
-On the host machine running the IDE, we can download the static library
-and the include files from the Docker builder.
-Here, we assume your Vitis IDE workspace sits in you home directory, at ~~/workspace~,
-and that the Docker container is named ~ros_build~:
-#+BEGIN_SRC sh
-mkdir /home/$USER/workspace/microros_lib
-
-docker cp ros_build:/microros_ws/firmware/build/libmicroros.a \
-       /home/$USER/workspace/microros_lib/
-
-docker cp ros_build:/microros_ws/firmware/build/include \
-       /home/$USER/workspace/microros_lib/
-#+END_SRC
-
-Many parameters are available to be set up in the IDE for the compilation tool-chain, but
-the figures [[fig:include]] and [[fig:include2]] below will show you a setup that worked to have the IDE
-to recognize the include files and to be able to use them for compiling the firmware.
-
-#+ATTR_LATEX: :width .8\textwidth
-#+CAPTION: Firstly, in the "C/C++ Build" settings of your firmware project,
-#+CAPTION: under the "Settings" menu, you should find the gcc compiler "Directories".
-#+CAPTION: In here you should add the "include" directory of your library.
-#+CAPTION: Be careful however, if your include files are in a second layer of directory
-#+CAPTION: (as it is the case for libmicroros) you will need to include each sub-directory individually,
-#+CAPTION: as visible in this figure.
-#+NAME: fig:include
-[[file:./img/vitis_new/include.png]]
-
-#+ATTR_LATEX: :width .8\textwidth
-#+CAPTION: Secondly, in the gcc linker "Libraries", you can add the top level directory of your library.
-#+CAPTION: In our case, it is the directory that contains both the "include" directory added earlier,
-#+CAPTION: and also the "libmicroros.a" file.
-#+NAME: fig:include2
-[[file:./img/vitis_new/include2.png]]
-
-#+LATEX: \pagebreak
-With both of these setup in your project and as a minimal test to see if the setup was made correctly,
-you should be able to include the following micro-ROS libraries into your project:
-#+BEGIN_SRC C
-#include <rcl/rcl.h>
-#include <rcl/error_handling.h>
-#include <rclc/rclc.h>
-#include <rclc/executor.h>
-#+END_SRC
-
-The details for the inclusions and the use-case of the library will depend on the implementation
-of the firmware itself.
-
-But in general, as the firmware is successfully built and an ~.elf~ file is available and can be uploaded as a
-firmware to the Kria board (or any remote server accessible through ~SSH~, for that matter) with the following
-command[fn:10]:
-#+BEGIN_SRC sh
-scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
-    Debug/rpmsg_pingpong_microros_lib.elf  ubuntu@192.168.1.10:/home/ubuntu/
-#+END_SRC
-#+LATEX: \pagebreak
-
-* micro-ROS adaptation for the firmware
+* micro-ROS Client
+** micro-ROS adaptation for the firmware
 Beyond the inclusion of the library itself, actually using the micro-ROS system
 within an external project require more than just importing the needed
 functions.
@@ -322,7 +175,7 @@ Indeed, if you would be just adding the various function for sending messages to
 the general ROS2 network, you would face issues with four key aspects.
 These are presented in the following dedicated sub-sections.
 
-** Time functions
+*** Time functions
 As micro-ROS can be used on a variety of board, it does not understand by itself
 what time functions are meant to be used.
 
@@ -337,7 +190,7 @@ simply be implemented with some FreeRTOS time functions.
 The end result for these implementation are visible in the appendix [[Firmware time functions]],
 and can be reused as-if for the Kria board setups.
 
-** Memory allocators
+*** [DEPRECATED] Memory allocators
 Similarly to the time function, it is required to re-implement some form of memory allocating
 functions in order for the library to be able to work with such functions in a formalized way.
 
@@ -345,7 +198,7 @@ As for now, the current version of the allocator function can be seen in the
 appendix [[Firmware memory allocation functions]], but the current setup is not
 completely "clean", some further formatting, test and modification will be needed.
 
-** Custom transport layer
+*** Custom transport layer
 This part is the key translation layer that needs to happen in order for the
 DDS system from the micro-ROS library to be using the communication channel we
 want it to.
@@ -408,44 +261,9 @@ of the execution of the firmware:
 + Finally, the ping-pong function become effective with the micro-ROS task
   polling to receive some message and sending it back to the sender.
 
-** Building the updated firmware outside of the IDE       :WORK_IN_PROGRESS:
-While the use of the IDE presented in the previous sections is much needed in order to first create
-a RPMsg-ready base firmware, it might be inconvenient having to carry this extremely heavy tool
-for any modification or rebuild of the firmware.
 
-Fortunately, the Vitis IDE projects have a very handy function: they general a pure ~Makefile~, with
-all the needed dependencies and path for library set.
-This ~make~ system can be used externally, however, and as explained previously, two conditions must be
-fulfilled:
-+ The cross-compiler needs to be in the ~$PATH~.
-+ Standard building tools must be installer, in particular ~git~ in order to obtain the repository,
-  and ~make~, obviously.
-
-#+BEGIN_SRC sh
-cd /tmp
-git clone https://gitlab.com/sunoc/libmicroros_kv260.git
-cd libmicroros_kv260/Debug
-make
-#+END_SRC
-
-From there, you will have the binary ~rpmsg_pingpong_microros_lib.elf~ file created and ready to be deployed
-on the KRIA board.
-
-** Improvement to be made
-While the version of the firmware since the tag ~0.1~[fn:23] are functional, able to communicate with
-an Agent placed on the neighbour Linux, some work, improvements and tweaks are still to be made.
-
-*** WAIT [#A] Firmware stop / crash / reboot
-maybe a complete re-implementation with a different os / else
-would be better.
-This is maybe the most annoying issue that is currently still ongoing: if the firmware
-is not stopped in a "clean" way, the RPMsg task is not kill, making a full reboot of the board
-needed in order to re-launch the firmware and having an established communication.
-
-Something need to be done about that.
-
-#+LATEX: \pagebreak
-* Loading the firmware
+#+LATEX: \clearpage
+** Loading the firmware
 Having a version of our ~.elf~ firmware (with or without the included
 micro-ROS library) built and loaded onto our Kria's Linux, we want to load and run it
 on the Cortex micro-controller side.
@@ -480,155 +298,119 @@ return of the board (typically a ~/dev/ttyUSB1~), but two things are to be noted
   or the new binary itself is impossible to run.
 + In general, if the ~echo_test~ runs, it means that everything is okay and that
   the RPMsg system worked successfully.
-#+LATEX: \pagebreak
 
-* Running a ROS2 node
-This section as well as the next one are rather "separated" from the rest of the report, as
-they are focused on the ROS2 system being used on the Kria board.
+#+LATEX: \clearpage
+*** Loading the firmware using JTAG and Vitis IDE
+This is more of an alternative way, but it is possible to load the Client
+firmware onto the Cortex R5F onto the board from a host PC IDE, without booting or
+using the Linux on the KRIA board itself.
 
-In this first section, the installation of ROS2 as a system will be presented, with
-two different ways of approaching the problem.
+This section will present the way to do so, and most critically, the steps that must
+be taken beforehand on the host machine for that system to work.
 
-As for the previous section, the figure [[fig:map_ros]] below shows what part
-of the overall system we are talking about here.
+There are two key advantaged to using this method:
+- The load time for the firmware is real fast. In particular, re-loading the
+  firmware doesn't require to reboot the entire Linux system.
+- IDE debugging available. Running the JTAG on the board allows for the firmware
+  to be debugger in a easier way.
+
+** Testing ~xsct~ and running the drivers
+Firstly, this part of the guide assumes that a version of the Vitis Classic IDE
+was installed on the host system. Some of the needed tools to test the working of the JTAG
+system are located in the installation directory of the IDE.
+
+In my case, I'll have to go to ~~/tools/Xilinx/Vitis/2023.2~, but your mileage might vary
+depending on the settings you choose during the IDE installation and also the version of
+the IDE itself.
+
+**** Drivers
+Firstly, we need to load some drivers in order for the JTAG USB system to work:
+#+BEGIN_SRC bash
+sudo ./data/xicom/cable_drivers/lin64/install_script/install_drivers/install_drivers
+#+END_SRC
+
+**** ~dialout~ access
+It is also much needed for the user that runs the IDE to have read/write access to the
+USB devices. This can be done as follow, as root:
+#+BEGIN_SRC sh :dir "/sudo::"
+usermod -aG dialout ${USER}
+#+END_SRC
+
+You'll need to log out and log back it for the changes to apply though.
+
+**** TCL JTAG boot
+A short TCL program was provided by Honda-sensei and should be loaded in order
+for the board to boot in JTAG mode.
+The following code block shows the TCL, and it should be saved somewhere, for example
+in ~~/Downloads/boot_jtag.tcl~:
+#+BEGIN_SRC tcl :tangle ~/Downloads/boot_jtag.tcl
+proc boot_jtag { } {
+############################
+# Switch to JTAG boot mode #
+############################
+targets -set -filter {name =~ "PSU"}
+# update multiboot to ZERO
+mwr 0xffca0010 0x0
+# change boot mode to JTAG
+mwr 0xff5e0200 0x0100
+# reset
+rst -system
+}
+
+
+# Jtag connection 
+connect
+puts stdout "Connect Jtag"
+
+# Switching to JtagBoot
+puts -nonewline stdout "Start transition to jtag boot mode..."
+boot_jtag
+puts stdout "done."
+
+# Jtag disconnection
+puts -nonewline stdout "Disconnect Jtag..."
+disconnect
+puts stdout "done."
+#+END_SRC
+
+Eventually it is possible to load the JTAG boot script as follow:
+#+BEGIN_SRC bash
+cd ~/tools/Xilinx/Vitis/2023.2
+source settings64.sh
+xsct -norlwrap ~/Downloads/boot_jtag.tcl
+#+END_SRC
+
+*** Vitis IDE classic
+Note that the steps presented here must be taken after running the ~xsct~ command; without rebooting the board in the mean time.
 
 #+ATTR_LATEX: :width .6\textwidth
-#+CAPTION: The ROS2 middle (red border) runs on top of the Linux,
-#+CAPTION: on the general-purpose core of the Kria board.
+#+CAPTION: With a project meant to be build and run on the Cortex R5F,
+#+CAPTION: you must first produce the ~.elf~ binary file.
 #+NAME: fig:map_ros
-[[file:./img/map_ros.png]]
+[[file:./img/jtag/design.png]]
 
-#+ATTR_LATEX: :width .55\textwidth
-#+CAPTION: Methods architecture for the modified Agent node.
-#+NAME: fig:agent_arch
-[[file:./img/agent_arch.png]]
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: Then you can open the Debug Configuration window.
+#+NAME: fig:map_ros
+[[file:./img/jtag/debug_config.png]]
 
-** On the host Linux ("bare-metal")
-Since an Ubuntu distribution is installed on the board, the installation of ROS2
-can be done[fn:13] in a standard way, using the repository.
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: All parameters should stay the same. You can then run "Debug".
+#+NAME: fig:map_ros
+[[file:./img/jtag/debug_config2.png]]
 
-An [[https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html][official documentation]] is provided with ROS2 themselves with a step-by-step guide on how to install
-ROS2 on a Ubuntu system{}.
-We will be following this guide here[fn:14].
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: The XSCT console will confirm the successful load of the firmware.
+#+CAPTION: If not, you will get error messages and should reboot the board.
+#+NAME: fig:map_ros
+[[file:./img/jtag/console.png]]
 
-Firstly, we need to update the locals, enable the universe Ubuntu repository,
-get the key and add the repository for ROS2. This can be done as follow:
-#+BEGIN_SRC sh
-locale  # check for UTF-8
-sudo apt update && sudo apt install -y locales
-sudo locale-gen en_US en_US.UTF-8
-sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
-export LANG=en_US.UTF-8
-locale  # verify settings
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: Selecting the Cortex R5, core #0, you can then run the application.
+#+NAME: fig:map_ros
+[[file:./img/jtag/run.png]]
 
-sudo apt install -y software-properties-common
-sudo add-apt-repository universe
-sudo apt update && sudo apt install -y curl wget
-
-wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key
-sudo mv ros.key /usr/share/keyrings/ros-archive-keyring.gpg
-#+END_SRC
-
-Then, a thicc one-liner is available to add the ROS2 repository to our system:
-#+BEGIN_SRC sh
-echo "deb [arch=$(dpkg --print-architecture) \
-signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
-http://packages.ros.org/ros2/ubuntu $(. \
-/etc/os-release && echo $UBUNTU_CODENAME) main" | \
-    sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
-#+END_SRC
-
-It is then possible to install ROS2[fn:15] as follow:
-#+BEGIN_SRC sh
-sudo apt update
-sudo apt upgrade -y
-sudo apt install -y ros-$ROS_DISTRO-desktop \
-     ros-$ROS_DISTRO-ros-base \
-     python3-argcomplete \
-     ros-dev-tools
-#+END_SRC
-
-Once installed, it is possible to test the system with a provided example.
-You need to open two terminals and log wish SSH onto the board, then running
-respectively:
-#+BEGIN_SRC sh
-source /opt/ros/$ROS_DISTRO/setup.bash
-ros2 run demo_nodes_cpp talker
-#+END_SRC
-
-And then:
-#+BEGIN_SRC sh
-source /opt/ros/$ROS_DISTRO/setup.bash
-ros2 run demo_nodes_py listener
-#+END_SRC
-
-You should be able to see the first terminal sending "Hello world" messages,
-and the second one receiving then.
-
-** In a container (Docker)
-As containers are used to test and build micro-ROS configurations,
-running ROS2 in a Docker  is a great way to have a reproducible configuration
-of you system.
-
-This part of the guide will present how to install Docker on the
-Kria board and then how to use it to deploy the latest version of ROS2.
-This section of the report assumes that Docker was installer on the target system
-as presented in section [[Installing Docker]].
-
-The following commands will pull a ROS container, version ~iron~, and name it ~ros_build~.
-
-A key part for having access to the interfaces (serial) is the mapping of the whole ~/dev~
-range of devices from the host machine to the internal ~/dev~ of the container[fn:16].
-With the second command, we can execute ~bash~ as a way to open a terminal to the "inside" the container:
-#+BEGIN_SRC sh
-docker run -d --name ros_agent -it --net=host -v \
-       /dev:/dev --privileged ros:iron
-docker exec -it ros_agent bash
-#+END_SRC
-
-From there, it becomes possible to simply use ROS2 as you would for a bare-metal install,
-and as presented in the section [[On the host Linux ("bare-metal")]] above:
-#+BEGIN_SRC sh
-source /opt/ros/$ROS_DISTRO/setup.bash
-
-# Create a workspace and download the micro-ROS tools
-mkdir microros_ws
-cd microros_ws
-git clone -b $ROS_DISTRO https://github.com/micro-ROS/\
-    micro_ros_setup.git src/micro_ros_setup
-
-# Update dependencies using rosdep
-sudo apt update && rosdep update
-rosdep install --from-paths src --ignore-src -y
-
-# Install pip
-sudo apt-get install python3-pip
-
-# Build micro-ROS tools and source them
-colcon build
-
-# Download micro-ROS-Agent packages
-source install/local_setup.bash
-ros2 run micro_ros_setup create_agent_ws.sh
-
-# Build step
-ros2 run micro_ros_setup build_agent.sh
-
-# Run a micro-ROS agent
-ros2 run micro_ros_agent micro_ros_agent serial \
-     --dev /dev/ttyUSB1
-#+END_SRC
-
-Then once again in a similar way to the bare-metal deployment,  it is possible to run a demonstration
-the ping-pong topic communication from a different shell[fn:17]:
-#+BEGIN_SRC sh
-source /opt/ros/$ROS_DISTRO/setup.bash
-
-# Subscribe to micro-ROS ping topic
-ros2 topic echo /microROS/ping
-#+END_SRC
-#+LATEX: \pagebreak
-
+#+LATEX: \clearpage
 * micro-ROS XRCE-DDS Agent
 The micro-ROS Agent on the ROS2 side is the last piece of the puzzle needed to
 allow our DDS environment to use RPMsg as a mean of communication, as visible
@@ -645,55 +427,6 @@ This part of the guide will focus on it.
 #+CAPTION: It is deployed on the Linux side, as a ROS2 node.
 #+NAME: fig:map_agent
 [[file:./img/map_agent.png]]
-
-** [irrelevant] Building a eProsima bare-metal example agent
-A key aspect to understand about modifying the agent (as
-this will be needed later on to support our new communication system),
-is that the default system and instruction provided by micro-ROS does not
-allow such modification[fn:18].
-
-In order to avoid that, one can get and run a ROS2 node design by eProsima,
-that can be deployed on it's own (without other ROS2 application and nodes)
-and eventually modified.
-
-
-#+BEGIN_SRC sh
-sudo nano /microros_ws/build/micro_ros_agent/agent/src/xrceagent/src/cpp/transport/custom/CustomAgent.cpp
-#+END_SRC
-The same file is available online as a reference, on eProsima repository[fn:27].
-
-#+BEGIN_SRC sh
-git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
-cd Micro-XRCE-DDS-Agent/
-
-rm -rf examples/
-git clone https://gitlab.com/sunoc/rpmsg-micro-ros-agent.git ./examples/custom_agent
-
-mkdir build && cd build
-cmake -DUAGENT_BUILD_USAGE_EXAMPLES=ON ..
-make
-#+END_SRC
-
-The custom agent is then available to run from the ~./src/examples/custom_agent/CustomXRCEAgent~.
-
-All the diff when the custom agent system was added:
-https://github.com/eProsima/Micro-XRCE-DDS-Agent/pull/205/files
-
-For rebuilding the custom agent with a simple ~make clean && make all~ will
-conveniently only rebuild the part that was modify.
-Which means that once all the libraries have been compiled once,
-the subsequent re-compilation of the agent itself can be done quickly !
-
-Major details on how to implement a custom agent specified here:
-https://github.com/eProsima/Micro-XRCE-DDS-Agent/issues/195#issuecomment-721002153
-
-# Running the custom agent executable can be executed as is as the transport we want to use is already
-# built in. ~kmod~ package is needed though.
-# #+BEGIN_SRC sh
-#   sudo apt-get update
-#   sudo apt-get install kmod
-#     ./examples/custom_agent/CustomXRCEAgent
-# #+END_SRC
 
 ** Building a XRCE-DDS agent in a Docker
 The same command presented above for running a custom agent "bare-metal" can be
@@ -740,25 +473,11 @@ source /opt/ros/$ROS_DISTRO/setup.bash
 ./MicroXRCEAgent serial --dev /dev/null --verbose 6
 #+END_SRC
 
-** WAIT [#C] Separated RPMsg transport created for XRCE-DDS Agent
-now focusing on updating my knowledge about the techo.
-gotta update the doc latec
-- [ ] Implementation done
-- [ ] Successfully tested
-- [ ] Pull request done to the eProsima repository
 
-** Creating a custom transport agent                      :WORK_IN_PROGRESS:
-These command allows to go build the agent and run it with maximum verbosity (for debugging purpose).
-#+BEGIN_SRC sh
-source /opt/ros/$ROS_DISTRO/setup.bash
-cd /Micro-XRCE-DDS-Agent/build
-make clean && make -j4
-./MicroXRCEAgent serial --dev /dev/null --verbose 6
-#+END_SRC
+#+LATEX: \clearpage
+* micro-ROS Talker
 
-
-#+LATEX: \pagebreak
-
+#+latex: \clearpage
 * Running the ping-pong node                               :WORK_IN_PROGRESS:
 A custom ping-pong node for ROS2 was developed in order to test the data transfer of the newly created
 Agent / Client system.
@@ -768,29 +487,31 @@ In order to have this node up and running, you need to set basically all the pre
 - On the same Linux you plan to run the node, you will need to run and keep the Agent, as presented
   in the section [[micro-ROS XRCE-DDS Agent]].
 - This ping-pong application is released as a ROS2 Python node. It is best to pull and run it
-  in a ROS2 environment to avoid having dependencies issues, as presented in the section [[Running a ROS2 node]].
+  in a ROS2 environment to avoid having dependencies issues, as presented in the section about ROS2.
 
+  #+latex: \clearpage
 * Monitoring and performances evaluation                   :WORK_IN_PROGRESS:
 
+#+latex: \clearpage
 * Conclusion & future                                      :WORK_IN_PROGRESS:
 
-#+LATEX: \pagebreak
+#+LATEX: \clearpage
 #+LATEX: \appendix
 * DTO patch
 This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch][system.patch]]
 #+LATEX: \inputminted[linenos, frame=single]{diff}{./src/system.patch}
 
-#+LATEX: \pagebreak
+#+LATEX: \clearpage
 * Custom tool-chain CMake settings
 This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom_r5f_toolchain.cmake][custom r5f toolchain.cmake]]
 #+LATEX: \inputminted[linenos, frame=single]{cmake}{./src/custom_r5f_toolchain.cmake}
 
-#+LATEX: \pagebreak
+#+LATEX: \clearpage
 * Custom Colcon meta settings
 This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom_r5f_colcon.meta][custom r5f colcon.meta]]
 #+LATEX: \inputminted[linenos, frame=single]{yaml}{./src/custom_r5f_colcon.meta}
 
-#+LATEX: \pagebreak
+#+LATEX: \clearpage
 * Firmware time functions
 
 ** main
@@ -811,7 +532,7 @@ directly at the ~libmicroros_kv260~ repository: [[https://gitlab.com/sunoc/libmi
 #+END_SRC
 
 
-#+LATEX: \pagebreak
+#+LATEX: \clearpage
 * Firmware memory allocation functions
 
 ** main
@@ -860,7 +581,7 @@ official documentation[fn:25], but for the KV260 board with an older release of
 the Linux. This guide will try to keep an up-to-date version of the guide, in
 particular for the KR260 KRIA board and, at the time of writing, the PetaLinux
 in version 2023.2 for the installer.  The 2022.2 version is recommended for this
-board's latest updated boot firmware, as presented in the Section [[Boot firmware]]
+board's latest updated boot firmware, as presented in the Section Boot firmware
 above; however I happened to have issues with the building process from a system
 based on Ubuntu 22.04. Thus the choice of the 2023.2 that should be compatible.
 
@@ -888,6 +609,16 @@ sudo apt-get install iproute2 gawk python3 build-essential gcc git make \
      python3-jinja2 libegl1-mesa libsdl1.2-dev pylint asciidoc
 #+END_SRC
 
+Testing, if building on Debian 12 the following variant of the same command has been confirmed to work:
+#+BEGIN_SRC sh
+sudo apt-get install iproute2 gawk python3 build-essential gcc git make \
+net-tools libncurses5-dev tftpd-hpa zlib1g-dev libssl-dev flex bison libselinux1 \
+gnupg wget git-core diffstat chrpath socat xterm autoconf libtool tar unzip \
+texinfo zlib1g-dev gcc-multilib automake zlib1g screen pax gzip cpio python3-pip \
+python3-pexpect xz-utils debianutils iputils-ping python3-git python3-jinja2 \
+libegl1-mesa libsdl1.2-dev pylint asciidoc
+#+END_SRC
+
 Installing the petalinux tools can be done with the ~.run~ script[fn:28], as follow:
 #+BEGIN_SRC sh
 sudo chmod +x ./petalinux-v2023.2-10121855-installer.run
@@ -905,7 +636,7 @@ cd xilinx-kr260-starterkit-2023.2/
 
 
 The more general option allows to enable stuff related to hardware
-configuration[fn:33]. For this step, it is possible to select the ~openamp~
+configuration[fn:33]. For this step, it is possible to select the ~openAMP~
 setting the the DTG Settings, as visible in the Figure [[fig:yocto_openamp_dtg]] below:
 #+BEGIN_SRC sh
 petalinux-config --get-hw-description  ./hardware/xilinx-kr260-starterkit-2023.2/kr260_starter_kit.xsa
@@ -958,6 +689,10 @@ sudo dd if=./images/linux/petalinux-sdimage.wic \
 
 From that point, the media can be ejected, put in the board and the boot process
 should happen successfully.
+
+** First login
+On the first start, if you have a serial terminal open to the KR260 board, you'll be prompter to enter a login.
+The default user it ~petalinux~. You'll then be prompted to enter a password.
 
 ** Testing openamp "echo-test"
 A good and out-of-the-box way to try and confirm that the OpenAMP setup was done
@@ -1061,6 +796,7 @@ transfer rate when used in combination with ROS2 DDS.
 
 This fast delay for data transmission was later confirmed by measurement done using an external logic analyser[fn:35].
 
+** Enabling SSH
 ** Setting up a static IP address for PetaLinux
 This is not a trivial task in petalinux.
 
@@ -1127,8 +863,6 @@ With all of this, on the next reboot of the board, the static IP should be avail
   properly during the build process.
 
 * Footnotes
-[fn:1] https://gitlab.com/sunoc/libmicroros_kv260 
-
 [fn:35] https://gitlab.com/sunoc/saleae-logic-8-documentation
 
 [fn:34] https://xilinx.github.io/kria-apps-docs/openamp/build/html/openamp_landing.html#openamp-demos 
@@ -1172,26 +906,6 @@ which has little documentation. Some [[https://github.com/micro-ROS/micro_ros_se
 
 [fn:18] This information was eventually found on a discussion in a [[https://github.com/micro-ROS/micro_ros_setup/issues/591][GitHub Issue thread]]. 
 
-[fn:17] You need to be careful to have you shell in the "correct" space: these command need to be run inside
-the container in which the previous setup were install, not on the host running the container system.
-The hostname should help you to figure out where you are.
-
-[fn:16] This is an example and this situation can become a security issue. It would be a better practice
-in a production environment to map only the devices that are actually in use.
-
-[fn:15] This command installs a complete "desktop" version of ROS2, containing many
-useful package for our project.
-If space is a constraint, different, less complete packages can be install.
-Please refer to the official documentation about it.
-
-[fn:14] The ~curl~ command from the guide does not work through the school proxy,
-but the command ~wget~ used instead does work. The key is then moved to the correct spot with ~mv~. 
-
-[fn:13] As always, this configuration was tested solely on Ubuntu LTS 22.04,
-with the ROS2 versions ~Humble~ and then ~Iron~ being deployed.
-Other combination of versions should work as well, but they are not
-tested for this guide. In case of doubt or problem, please refer to the official documentation. 
-
 [fn:12] It is also important to note that the ~echo_test~ part is specific for the
 RPMsg base demonstration firmware. It is not to be used for other firmware.
 The instruction to build and use this particular program on the Kria Linux
@@ -1199,18 +913,6 @@ is visible in the section [[RPMsg ~echo_test~ software]].
 
 [fn:11] In this sequence, we are entering a root shell with ~sudo -s~, but this can
 also be archived by putting the commands in a script to be executed with ~sudo~. 
-
-[fn:10] Note that in that case, we are retrieving the binary for a project
-named ~rpmsg_pingpong_microros_lib~.
-You own path will vary depending on how your project was named in the first place.
-Obviously, the ~SSH~ connection parameters will also be specific to your case.
-The ~ubuntu@192.168.1.10~ set here are merely an example.
-
-[fn:9] Both files are also visible in the appendixes [[Custom tool-chain CMake settings]]
-and [[Custom Colcon meta settings]] the end of this report.}
-
-[fn:8] If Docker is not set up on your machine, you can follow the guide on [[https://docs.docker.com/engine/install/ubuntu/][the official website]].
-When you can successfully run the "hello-world" container, you are good to go.
 
 * References
 [[bibliographystyle:ieeetr]]

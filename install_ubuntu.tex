@@ -1,4 +1,4 @@
-% Created 2024-01-16 火 09:48
+% Created 2024-05-02 Thu 16:18
 \documentclass[10pt]{article}
 \usepackage{graphicx}
 \usepackage{longtable}
@@ -31,7 +31,7 @@
  pdftitle={KRIA board Ubuntu LTS 22.04 Install},
  pdfkeywords={},
  pdfsubject={A separated export for the Ubuntu install process},
- pdfcreator={Emacs 30.0.50 (Org mode 9.6.10)}, 
+ pdfcreator={Emacs 30.0.50 (Org mode 9.6.15)}, 
  pdflang={English}}
 \begin{document}
 
@@ -39,7 +39,7 @@
 \tableofcontents
 
 \subsection{Preparing and booting a Ubuntu 22.04 media}
-\label{sec:org6fcb429}
+\label{sec:orgf64d852}
 An \href{https://ubuntu.com/download/amd-xilinx}{official Ubuntu image} exists and is
 provided by Xilinx, allowing the OS installation to be quick and
 straightforward.
@@ -98,12 +98,12 @@ host# ssh ubuntu@192.168.4.11
 \end{minted}
 
 \subsection{Network and admin setups}
-\label{sec:orgc5bf5f8}
+\label{sec:orgd9813a7}
 This section presents a variety of extra convenience configurations
 that can be used when setting-up the Kria board.
 
 \subsubsection{Static IP address}
-\label{sec:orgc79e33e}
+\label{sec:org8101c3d}
 A static IP can be set by writing the following
 configuration into your \texttt{netplan} configuration file\footnote{The \texttt{chmod} command is used to update the permissions and silence some warnings}.
 
@@ -139,7 +139,7 @@ sudo netplan apply
 \end{minted}
 
 \subsubsection{Proxy and DNS}
-\label{sec:org140ac9e}
+\label{sec:org55eb2ac}
 An issue that can occur when connecting the board to the internet is the
 conflicting situation with the university proxy.
 Indeed, as the network at Nanzan University requires to go through a proxy,
@@ -164,7 +164,7 @@ echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" >> ~/.bashrc
 Eventually the board can be rebooted in order for the setup to get applied cleanly.
 
 \subsubsection{\texttt{root} password}
-\label{sec:orge90928c}
+\label{sec:orgdb86631}
 \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 \textbf{WARNING}: Depending on your use-case, the setup presented in this
 subsection can be a critical security breach as it remove the need for a root
@@ -199,7 +199,7 @@ sudo reboot now
 \end{minted}
 
 \subsubsection{Adding Xilinx specific repositories}
-\label{sec:orge7b17c6}
+\label{sec:orgf2086b1}
 The following commands will add \texttt{PPA} repositories that are specific for Xilinx boards using Ubuntu.
 It is then possible to update the package list and eventually upgrade to some new packages.
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
@@ -210,7 +210,7 @@ sudo apt upgrade
 \end{minted}
 
 \subsubsection{Purging \texttt{snap}}
-\label{sec:org881e419}
+\label{sec:org8c9c818}
 As the desktop-specific software are not used at all in the case
 of our project, there are some packages that can be purges in order for the
 system to become more lightweight.
@@ -249,7 +249,7 @@ systemctl list-units | grep snapd
 \end{minted}
 
 \subsubsection{Other unused heavy packages}
-\label{sec:org65f0eea}
+\label{sec:org2b5265a}
 Some other pieces of software can safely be removed since the desktop is
 not to be used:
 
@@ -262,10 +262,8 @@ sudo apt-get autoclean
 sudo reboot now
 \end{minted}
 
-\pagebreak
-
 \subsubsection{Slow boot services to disable}
-\label{sec:org5d944ff}
+\label{sec:orgefd63b3}
 These packages (in particular the first one) are taking up a LOT of time at boot while providing no benefits\footnote{The CUPS and Docker services will be activated when used instead of during boot time.}.
 
 It is possible to disable them as follow:
@@ -284,7 +282,7 @@ sudo systemd-analyze blame
 \end{minted}
 
 \subsubsection{Jupyter notebook setup}
-\label{sec:org9b96978}
+\label{sec:org37c83d3}
 Here are some instruction on how to install and setup Jupyter on a KRIA board,
 accessing it remotely and using it for making data analysis.
 
@@ -314,16 +312,16 @@ From there, it is possible to use the displayed URL (something that looks like
 \texttt{http://localhost:8888/tree?token}) to access the remote Notebook system from a local web browser.
 It is possible to do so with \texttt{localhost} since we have the \texttt{ssh} port map connection going on.
 
-Eventually creating Notebooks and stuff, it is possible to obtain a situation like shown in the figure \ref{fig:org335b911} below.
+Eventually creating Notebooks and stuff, it is possible to obtain a situation like shown in the figure \ref{fig:org6f51987} below.
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=.6\textwidth]{./img/jupyter.png}
-\caption{\label{fig:org335b911}A test Jupyter Notebook for CSV data analysis.}
+\includegraphics[width=.6\textwidth]{img/jupyter.png}
+\caption{\label{fig:org6f51987}A test Jupyter Notebook for CSV data analysis.}
 \end{figure}
 
 \subsubsection{Enabling \texttt{remoteproc} with Device-Tree Overlay patching}
-\label{sec:orgf65e5a4}
+\label{sec:org63e3510}
 One of the advantage of this Kria board, as cited previously, is the presence of
 multiple types of core (APU, MCU, FPGA) on the same chip.
 
@@ -359,10 +357,10 @@ sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
 
 Then, a custom-made patch file can be downloaded and applied.
 This file is available at the URL visible in the command below
-but also in this report appendix \ref{sec:orgf0d3655}.
+but also in this report appendix \ref{sec:org88eb2dd}.
 
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/90aca1dfe54875384c1962b75570c33d4b4fec00/src/system.patch
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/7a8f7c4e66e09b9d66aba8d2e08fc446ff485ca8/src/system.patch
 
 patch system.dts < system.patch
 \end{minted}
@@ -402,18 +400,18 @@ ready to be used!
 \pagebreak
 
 \subsubsection{Installing Docker}
-\label{sec:org4fe5214}
+\label{sec:orga9e3253}
 It is possible to have a version of Docker installed simply by using the available repository,
 but since we are on Ubuntu, a PPA is available from Docker in order to have the most up-to-date version.
 
 Following \href{https://docs.docker.com/engine/install/ubuntu/\#install-using-the-repository}{the official documentation}, the following steps can be taken to install the latest version of
 Docker on a Ubuntu system. The last command is meant to test the install.
 If everything went smoothly, you should see something similar to what is presented
-in the figure \ref{fig:org3941bd7} below, after the commands:
+in the figure \ref{fig:orgd1b85ee} below, after the commands:
 
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
 sudo apt-get update
-sudo apt-get install ca-certificates
+sudo apt-get install ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
     sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -439,12 +437,12 @@ docker run hello-world
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=.7\textwidth]{./img/hello-docker.png}
-\caption{\label{fig:org3941bd7}The return of a successful run of the \texttt{hello world} test Docker container.}
+\includegraphics[width=.7\textwidth]{img/hello-docker.png}
+\caption{\label{fig:orgd1b85ee}The return of a successful run of the \texttt{hello world} test Docker container.}
 \end{figure}
 
 \subsubsection{Adding a swap partition}
-\label{sec:org2975858}
+\label{sec:org339b31f}
 This part is very optional, in particular as it might slow down a bit the
 boot time of the board (\textasciitilde{}2s), however it might become handy to have swap memory
 available to avoid system failure under heavy use.
@@ -477,13 +475,13 @@ reboot now
 \end{minted}
 
 \subsubsection{{\bfseries\sffamily TODO} Using a PetaLinux kernel in Ubuntu}
-\label{sec:orgb39b985}
+\label{sec:orgc8c018b}
 
 
 \pagebreak
 \appendix
 \section{DTO patch}
-\label{sec:orgf0d3655}
+\label{sec:org88eb2dd}
 This file is available in this repository: \href{https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch}{system.patch}
 \inputminted[linenos, frame=single]{diff}{./src/system.patch}
 \end{document}

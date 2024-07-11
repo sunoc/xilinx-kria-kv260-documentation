@@ -116,7 +116,6 @@ using the SoC shared memory.
 #+latex: \clearpage
 ** COMMENT LINK: [[id:be2ce0ab-07db-49e6-be50-72f2db76cde3][KRIA board boot firmware update]]
 
-
 * Installing Ubuntu LTS 22.04
 #+INCLUDE: "./install_ubuntu.org" :minlevel 2 :lines "34-461"
 #+latex: \clearpage
@@ -491,6 +490,10 @@ In order to have this node up and running, you need to set basically all the pre
 
   #+latex: \clearpage
 * Monitoring and performances evaluation                   :WORK_IN_PROGRESS:
+
+  #+latex: \clearpage
+* Shared memory data transfer system                       :WORK_IN_PROGRESS:
+
 
 #+latex: \clearpage
 * Conclusion & future                                      :WORK_IN_PROGRESS:

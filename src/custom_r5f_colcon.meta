@@ -35,7 +35,8 @@
                 "-DUCLIENT_PROFILE_DISCOVERY=OFF",
                 "-DUCLIENT_PROFILE_SERIAL=OFF",
                 "-UCLIENT_PROFILE_STREAM_FRAMING=ON",
-                "-DUCLIENT_PROFILE_CUSTOM_TRANSPORT=ON"
+                "-DUCLIENT_PROFILE_CUSTOM_TRANSPORT=ON",
+                "-DUCLIENT_UDP_TRANSPORT_MTU=2048"
             ]
         },
         "rmw_microxrcedds": {

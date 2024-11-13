@@ -117,7 +117,7 @@ using the SoC shared memory.
 ** COMMENT LINK: [[id:be2ce0ab-07db-49e6-be50-72f2db76cde3][KRIA board boot firmware update]]
 
 * Installing Ubuntu LTS 22.04
-#+INCLUDE: "./install_ubuntu.org" :minlevel 2 :lines "34-461"
+#+INCLUDE: "./install_ubuntu.org" :minlevel 2 :lines "34-704"
 #+latex: \clearpage
 ** COMMENT LINK: [[id:582fe4ef-a301-4b53-b908-a5c2b5b6d694][KRIA board Ubuntu LTS 22.04 Install]]
 

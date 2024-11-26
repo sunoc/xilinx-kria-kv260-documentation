@@ -390,12 +390,19 @@ ready to be used!
 ** [NEW] Enabling ~remoteproc~ using a device-tree overlay
 
 
+#+BEGIN_SRC bash
+scp ./src/remoteproc.dts kr260:~/
+#+END_SRC
+
+#+RESULTS:
+
+
 #+BEGIN_SRC bash  :dir /sshx:kr260|sudo::/home/ubuntu :results silent
-mkdir /sys/kernel/config/device-tree/overlays/remoteproc && \
+mkdir /configfs/device-tree/overlays/remoteproc && \
     dtc -O dtb -o remoteproc.dtbo remoteproc.dts && \
-    cat remoteproc.dtbo > /sys/kernel/config/device-tree/overlays/remoteproc/dtbo && \
-    modprobe --verbose zynqmp_r5_remoteproc && \
-    ls /sys/class/remoteproc/
+    cat remoteproc.dtbo > /configfs/device-tree/overlays/remoteproc/dtbo && \
+    sleep 1 && \
+    ls /sys/class/remoteproc
 #+END_SRC
 
 
@@ -419,6 +426,9 @@ mkdir /sys/kernel/config/device-tree/overlays/remoteproc && \
 		target-path = "/";
 		__overlay__ {
 			reserved-memory {
+				pmu@7ff00000 {
+					status = "disabled";
+				};
 				rpu0vdev0vring0: rpu0vdev0vring0@3ed80000 {
 					no-map;
 					reg = <0x0 0x3ed80000 0x0 0x4000>;
@@ -465,33 +475,36 @@ mkdir /sys/kernel/config/device-tree/overlays/remoteproc && \
 	fragment@2 {
 		target-path = "/";
 		__overlay__ {
+			clock6 {
+				status = "disabled";
+			};
 			tcm_0a: tcm_0a@ffe00000 {
 				no-map;
 				reg = <0x0 0xffe00000 0x0 0x10000>;
 				status = "okay";
 				compatible = "mmio-sram";
-				power-domain = <0x12 15>;
+				power-domain = <&zynqmp_firmware 15>;
 			};
 			tcm_0b: tcm_0b@ffe20000 {
 				no-map;
 				reg = <0x0 0xffe20000 0x0 0x10000>;
 				status = "okay";
 				compatible = "mmio-sram";
-				power-domain = <0x12 16>;
+				power-domain = <&zynqmp_firmware 16>;
 			};
 			tcm_1a: tcm_1a@ffe90000 {
 				no-map;
 				reg = <0x0 0xffe90000 0x0 0x10000>;
 				status = "okay";
 				compatible = "mmio-sram";
-				power-domain = <0x12 17>;
+				power-domain = <&zynqmp_firmware 17>;
 			};
 			tcm_1b: tcm_1b@ffeb0000 {
 				no-map;
 				reg = <0x0 0xffeb0000 0x0 0x10000>;
 				status = "okay";
 				compatible = "mmio-sram";
-				power-domain = <0x12 18>;
+				power-domain = <&zynqmp_firmware 18>;
 			};
 
 			rf5ss@ff9a0000 {
@@ -508,7 +521,7 @@ mkdir /sys/kernel/config/device-tree/overlays/remoteproc && \
 					ranges;
 					sram = <&tcm_0a &tcm_0b>;
 					memory-region = <&rproc_0_reserved>, <&rpu0vdev0buffer>, <&rpu0vdev0vring0>, <&rpu0vdev0vring1>;
-					power-domain = <0x12 7>;
+					power-domain = <&zynqmp_firmware 7>;
 					mboxes = <&ipi_mailbox_rpu0 0>, <&ipi_mailbox_rpu0 1>;
 					mbox-names = "tx", "rx";
 				};
@@ -519,7 +532,7 @@ mkdir /sys/kernel/config/device-tree/overlays/remoteproc && \
 					ranges;
 					sram = <&tcm_1a &tcm_1b>;
 					memory-region = <&rproc_1_reserved>, <&rpu1vdev0buffer>, <&rpu1vdev0vring0>, <&rpu1vdev0vring1>;
-					power-domain = <0x12 8>;
+					power-domain = <&zynqmp_firmware 8>;
 					mboxes = <&ipi_mailbox_rpu1 0>, <&ipi_mailbox_rpu1 1>;
 					mbox-names = "tx", "rx";
 				};
@@ -527,7 +540,7 @@ mkdir /sys/kernel/config/device-tree/overlays/remoteproc && \
 
 			zynqmp_ipi1 {
 				compatible = "xlnx,zynqmp-ipi-mailbox";
-				interrupt-parent = <0x05>;
+				interrupt-parent = <&gic>;
 				interrupts = <0 29 4>;
 				xlnx,ipi-id = <7>;
 				#address-cells = <1>;
@@ -549,7 +562,7 @@ mkdir /sys/kernel/config/device-tree/overlays/remoteproc && \
 			};
 			zynqmp_ipi2 {
 				compatible = "xlnx,zynqmp-ipi-mailbox";
-				interrupt-parent = <0x05>;
+				interrupt-parent = <&gic>;
 				interrupts = <0 30 4>;
 				xlnx,ipi-id = <8>;
 				#address-cells = <1>;
@@ -588,33 +601,6 @@ mkdir /sys/kernel/config/device-tree/overlays/remoteproc && \
 					memory-region = <&uros_buf0>;
 				};
 			};
-
-			__symbols__ {
-				rpu0vdev0vring0 = "/reserved-memory/rpu0vdev0vring0@3ed80000 ";
-				rpu0vdev0vring1 = "/reserved-memory/rpu0vdev0vring1@3ed84000 ";
-				rpu0vdev0buffer = "/reserved-memory/rpu0vdev0buffer@3ed88000 ";
-				rproc_0_reserved = "/reserved-memory/rproc_0_reserved@3ec00000 ";
-				rpu1vdev0vring0 = "/reserved-memory/rpu1vdev0vring0@3ef80000 ";
-				rpu1vdev0vring1 = "/reserved-memory/rpu1vdev0vring1@3ef84000 ";
-				rpu1vdev0buffer = "/reserved-memory/rpu1vdev0buffer@3ef88000 ";
-				rproc_1_reserved = "/reserved-memory/rproc_1_reserved@3ef00000 ";
-				uros_buf0 = "/reserved-memory/uros_buf@40000000 ";
-				tcm_0a = "/tcm_0a@ffe00000 ";
-				tcm_0b = "/tcm_0b@ffe20000 ";
-				tcm_1a = "/tcm_1a@ffe90000 ";
-				tcm_1b = "/tcm_1b@ffeb0000 ";
-				rf5ss = "/rf5ss@ff9a0000 ";
-				r5f_0 = "/rf5ss/r5f_0 ";
-				r5f_1 = "/rf5ss/r5f_1 ";
-				zynqmp_ipi1 = "/zynqmp_ipi1 ";
-				ipi_mailbox_rpu1 = "/zynqmp_ipi1/mailbox@ff990000 ";
-				zynqmp_ipi2 = "/zynqmp_ipi2 ";
-				ipi_mailbox_rpu2 = "/zynqmp_ipi2/mailbox@ff3f0b00 ";
-				amba_pl = "/amba_pl ";
-				udmabuf_0 = "/amba_pl/udmabuf@0x00 ";
-				udmabuf_1 = "/amba_pl/udmabuf@0x01 ";
-			};
-
 		};
 	};
 };

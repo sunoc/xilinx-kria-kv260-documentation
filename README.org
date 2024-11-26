@@ -2,15 +2,20 @@
 :ID:       ac338634-949e-4e3a-8d75-45bed92243c6
 :CATEGORY: KRIA
 :END:
-#+title: Setting up and using
-#+title: Xilinx KRIA KV260 and KR260
+#+title: Setting up and using Xilinx KRIA KV260 and KR260
 #+filetags: :export:
 #+subtitle: \begin{CJK}{UTF8}{min}南山大学\end{CJK}
 #+author: Vincent Conus
 #+email: vincent.conus@protonmail.com
-#+date: 2024-05-02
+#+date: 2024-11-26
 
-* Headers and LaTeX settings for export                            :noexport:
+* About                                 :noexport:
+The goal of this repository is to serve as a documentation in general for using
+Xilinx's KRIA board with Ubuntu and ROS2.
+
+More detail is available in the Section [[Introduction & motivation]].
+
+* Headers and LaTeX settings for export :noexport:
 A large amount of headers and parameters are needed in order
 to have this "README" document being exportable as a LaTeX
 document formatted the way I wanted it to be.
@@ -18,7 +23,7 @@ document formatted the way I wanted it to be.
 The detail can be seen in the raw ~.org~ version of this README
 and stays hidden in a :noexport: section in this report.
 
-#+DESCRIPTION: A report presenting how to use and set Xilinx's Kria board
+#+DESCRIPTION: A report presenting how to use and set Xilinx's KRIA board
 #+LANGUAGE: English
 
 #+OPTIONS: H:3 toc:t date:t title:t email:t
@@ -71,7 +76,7 @@ and stays hidden in a :noexport: section in this report.
 			     "\\pagebreak\n"))
 #+end_src
 
-* Building this report from the LaTeX file                         :noexport:
+* Building from the LaTeX file          :noexport:
 The base file for this report is actually this README.org file itself.
 However, upon local build, this file is regularly exported as
 a ~.tex~ file that can be built normally.
@@ -90,8 +95,8 @@ pdflatex README.tex
 
 * Introduction & motivation
 This guide will present how to setup and use Xilinx's KRIA boards, in particular
-for running ROS on a host Ubuntu system, as well as for deploying
-micro-ROS[[cite:&Belsare2023]] as a firmware on the MCU part of this board's chip.
+for running ROS2 on a host Ubuntu system, as well as for deploying
+micro-ROS[[cite:&Belsare2023]] as a firmware on the micro-controller part of this board's chip.
 
 The use of this device in particular is interesting because of the presence of a
 SoC comprising both a general purpose ARM core (Cortex A53), capable of running a Linux
@@ -106,7 +111,7 @@ are trying to archive.
 #+NAME: fig:map
 [[file:img/map.png]]
 
-This document will give a step-by-setep, chapter by chapter indication on how to go from a new board
+This document will give a step-by-step, chapter by chapter indication on how to go from a new board
 to a system ready to be used for testing internal communication for ROS, between both types of cores
 using the SoC shared memory.
 
@@ -125,7 +130,7 @@ using the SoC shared memory.
 ** TODO RPMsg Cortex R5F demonstration firmware
 ** RPMsg ~echo_test~ software
 In order to test the deployment of the firmware on the R5F side, and in particular
-to test the RPMsg function, we need some program on the Linux side of the Kria
+to test the RPMsg function, we need some program on the Linux side of the KRIA
 board to "talk" with the real-time side.
 
 Some source is provided by Xilinx to build a demonstration software that does
@@ -134,7 +139,7 @@ this purpose: specifically interact with the demonstration firmware.
 Here are the steps required to obtain the sources, and build the program.
 
 As a reminder, this is meant to be done on the Linux running on the
-Kria board, NOT on your host machine !
+KRIA board, NOT on your host machine !
 
 #+BEGIN_SRC sh
 git clone https://github.com/Xilinx/meta-openamp.git
@@ -145,7 +150,7 @@ make
 sudo ln -s $(pwd)/echo_test /usr/bin/
 #+END_SRC
 
-Once this is done, it it possible to run the test program from the Kria board's Ubuntu
+Once this is done, it it possible to run the test program from the KRIA board's Ubuntu
 by running the ~echo_test~ command.
 
 #+latex: \clearpage
@@ -187,7 +192,7 @@ In particular for this part, the ~clock_gettime~ function is key, and could
 simply be implemented with some FreeRTOS time functions.
 
 The end result for these implementation are visible in the appendix [[Firmware time functions]],
-and can be reused as-if for the Kria board setups.
+and can be reused as-if for the KRIA board setups.
 
 *** [DEPRECATED] Memory allocators
 Similarly to the time function, it is required to re-implement some form of memory allocating
@@ -268,7 +273,7 @@ micro-ROS library) built and loaded onto our Kria's Linux, we want to load and r
 on the Cortex micro-controller side.
 
 As a reminder, the firmware can be loaded from the host machine IDE workspace
-to the Kria board through ~SSH~ using the following command:
+to the KRIA board through ~SSH~ using the following command:
 #+BEGIN_SRC sh
 scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
     Debug/rpmsg_pingpong_microros_lib.elf  ubuntu@192.168.1.10:/home/ubuntu/
@@ -622,7 +627,7 @@ python3-pexpect xz-utils debianutils iputils-ping python3-git python3-jinja2 \
 libegl1-mesa libsdl1.2-dev pylint asciidoc
 #+END_SRC
 
-Installing the petalinux tools can be done with the ~.run~ script[fn:28], as follow:
+Installing the PetaLinux tools can be done with the ~.run~ script[fn:28], as follow:
 #+BEGIN_SRC sh
 sudo chmod +x ./petalinux-v2023.2-10121855-installer.run
 ./petalinux-v2023.2-10121855-installer.run
@@ -639,7 +644,7 @@ cd xilinx-kr260-starterkit-2023.2/
 
 
 The more general option allows to enable stuff related to hardware
-configuration[fn:33]. For this step, it is possible to select the ~openAMP~
+configuration[fn:33]. For this step, it is possible to select the ~OpenAMP~
 setting the the DTG Settings, as visible in the Figure [[fig:yocto_openamp_dtg]] below:
 #+BEGIN_SRC sh
 petalinux-config --get-hw-description  ./hardware/xilinx-kr260-starterkit-2023.2/kr260_starter_kit.xsa
@@ -651,7 +656,7 @@ Then, here are the options that we want to enable:
 #+NAME: fig:yocto_openamp_dtg
 [[file:./img/yocto_openamp_dtg.png]]
 
-Some kernel and module configuration are needed in order for the petalinux system to work properly.
+Some kernel and module configuration are needed in order for the PetaLinux system to work properly.
 These setup can be set using the following command:
 #+BEGIN_SRC sh
 petalinux-config -c rootfs
@@ -695,7 +700,7 @@ should happen successfully.
 
 ** First login
 On the first start, if you have a serial terminal open to the KR260 board, you'll be prompter to enter a login.
-The default user it ~petalinux~. You'll then be prompted to enter a password.
+The default user it ~PetaLinux~. You'll then be prompted to enter a password.
 
 ** Testing openamp "echo-test"
 A good and out-of-the-box way to try and confirm that the OpenAMP setup was done
@@ -801,7 +806,7 @@ This fast delay for data transmission was later confirmed by measurement done us
 
 ** Enabling SSH
 ** Setting up a static IP address for PetaLinux
-This is not a trivial task in petalinux.
+This is not a trivial task in PetaLinux.
 
 As it appears, the classic ~/etc/network/interfaces~ must be modified, however and
 for some unknown reason the DHCP keep being used even when disabled, and the
@@ -911,7 +916,7 @@ which has little documentation. Some [[https://github.com/micro-ROS/micro_ros_se
 
 [fn:12] It is also important to note that the ~echo_test~ part is specific for the
 RPMsg base demonstration firmware. It is not to be used for other firmware.
-The instruction to build and use this particular program on the Kria Linux
+The instruction to build and use this particular program on the KRIA Linux
 is visible in the section [[RPMsg ~echo_test~ software]].
 
 [fn:11] In this sequence, we are entering a root shell with ~sudo -s~, but this can

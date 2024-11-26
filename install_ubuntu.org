@@ -76,7 +76,7 @@ sudo dd if=iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img \
 Once the SD card is flashed and put back in the board, the micro-USB cable can be
 connected from the PC to the board. It is then possible to
 connect to the board in serial with an appropriate tool, for example ~picocom~,
-as in the following example (the serial port that "appeared" was the ~/dev/ttyUSB1~ in this case,
+as in the following example (the serial port that "appeared" was the ~/dev/ttyUSB1~ in this case[fn:8],
 and the 115200 bit-rate is the default value for the board):
 
 #+BEGIN_SRC sh
@@ -139,7 +139,7 @@ as follow:
 sudo netplan apply
 #+END_SRC
 
-** Proxy and DNS
+** Proxy and DNS [DEPRACATED ?]
 An issue that can occur when connecting the board to the internet is the
 conflicting situation with the university proxy.
 Indeed, as the network at Nanzan University requires to go through a proxy,
@@ -687,6 +687,9 @@ This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kri
 
 
 * Footnotes
+
+[fn:8] If two boards are plugged in for serial, the second one will be ~/dev/ttyUSB5~, then ~USB9~ and so on.
+
 [fn:7] The CUPS and Docker services will be activated when used instead of during boot time. 
 
 [fn:30] Alongside other packages useful for data analysis, such as ~pandas~ or ~numpy~. 

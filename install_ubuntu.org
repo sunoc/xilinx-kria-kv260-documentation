@@ -207,6 +207,46 @@ sudo apt update
 sudo apt upgrade
 #+END_SRC
 
+** Installing Docker
+It is possible to have a version of Docker installed simply by using the available repository,
+but since we are on Ubuntu, a PPA is available from Docker in order to have the most up-to-date version.
+
+Following [[https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository][the official documentation]], the following steps can be taken to install the latest version of
+Docker on a Ubuntu system. The last command is meant to test the install.
+If everything went smoothly, you should see something similar to what is presented
+in the figure [[fig:hello-docker]] below, after the commands:
+
+#+BEGIN_SRC sh
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+    sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo \
+    "deb [arch="$(dpkg --print-architecture)" \
+  signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && \
+         echo "$VERSION_CODENAME")" stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli \
+     containerd.io docker-buildx-plugin docker-compose-plugin
+sudo usermod -aG docker $USER
+newgrp docker
+
+docker run hello-world
+#+END_SRC
+
+#+ATTR_LATEX: :width .7\textwidth
+#+CAPTION: The return of a successful run of the ~hello world~ test Docker container.
+#+NAME: fig:hello-docker
+[[file:img/hello-docker.png]]
+
 ** Purging ~snap~
 As the desktop-specific software are not used at all in the case
 of our project, there are some packages that can be purges in order for the
@@ -274,44 +314,7 @@ Additional, potentially unused services can be found using the very handy comman
 sudo systemd-analyze blame
 #+END_SRC
 
-** Jupyter notebook setup
-Here are some instruction on how to install and setup Jupyter on a KRIA board,
-accessing it remotely and using it for making data analysis.
-
-The following commands will set the required packages and install Jupyter itself[fn:30]:
-#+BEGIN_SRC sh
-sudo apt-get update && sudo apt-get install python3 python3-pip python3-venv python3-virtualenv
-
-virtualenv myjupyter
-source ./myjupyter/bin/activate
-python3 -m pip install jupyter pandas numpy matplotlib scipy
-
-sudo reboot now
-#+END_SRC
-
-Then in a terminal on your host machine (not on the KRIA board), you can run the following command[fn:38] to bind local ports:
-#+BEGIN_SRC sh
-ssh -L 8888:localhost:8888 ubuntu@192.168.11.107
-#+END_SRC
-
-Then on the opened SSH shell to the KRIA board:
-#+BEGIN_SRC sh
-source ./myjupyter/bin/activate
-jupyter notebook
-#+END_SRC
-
-From there, it is possible to use the displayed URL (something that looks like
-~http://localhost:8888/tree?token~) to access the remote Notebook system from a local web browser.
-It is possible to do so with ~localhost~ since we have the ~ssh~ port map connection going on.
-
-Eventually creating Notebooks and stuff, it is possible to obtain a situation like shown in the figure [[fig:jupyter]] below.
-
-#+ATTR_LATEX: :width .6\textwidth
-#+CAPTION: A test Jupyter Notebook for CSV data analysis.
-#+NAME: fig:jupyter
-[[file:img/jupyter.png]]
-
-** [OLD] Enabling ~remoteproc~ with Device-Tree patching
+** Enabling ~remoteproc~ with Device-Tree patching
 One of the advantage of this Kria board, as cited previously, is the presence of
 multiple types of core (APU, MCU, FPGA) on the same chip.
 
@@ -607,46 +610,6 @@ mkdir /configfs/device-tree/overlays/remoteproc && \
 #+END_SRC
 
 
-** Installing Docker
-It is possible to have a version of Docker installed simply by using the available repository,
-but since we are on Ubuntu, a PPA is available from Docker in order to have the most up-to-date version.
-
-Following [[https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository][the official documentation]], the following steps can be taken to install the latest version of
-Docker on a Ubuntu system. The last command is meant to test the install.
-If everything went smoothly, you should see something similar to what is presented
-in the figure [[fig:hello-docker]] below, after the commands:
-
-#+BEGIN_SRC sh
-sudo apt-get update
-sudo apt-get install ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-    sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-
-echo \
-    "deb [arch="$(dpkg --print-architecture)" \
-  signed-by=/etc/apt/keyrings/docker.gpg] \
-  https://download.docker.com/linux/ubuntu \
-  "$(. /etc/os-release && \
-         echo "$VERSION_CODENAME")" stable" | \
-    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli \
-     containerd.io docker-buildx-plugin docker-compose-plugin
-sudo usermod -aG docker $USER
-newgrp docker
-
-docker run hello-world
-#+END_SRC
-
-#+ATTR_LATEX: :width .7\textwidth
-#+CAPTION: The return of a successful run of the ~hello world~ test Docker container.
-#+NAME: fig:hello-docker
-[[file:img/hello-docker.png]]
-
 ** Adding a swap partition
 This part is very optional, in particular as it might slow down a bit the
 boot time of the board (~2s), however it might become handy to have swap memory
@@ -676,6 +639,43 @@ sudo -s
 echo "UUID=8b13ed05-a91d-4x50-a44a-e654a0c67a2c none   swap    sw      0       0" >> /etc/fstab
 reboot now
 #+END_SRC
+
+** [DEPRACATED] Jupyter notebook setup
+Here are some instruction on how to install and setup Jupyter on a KRIA board,
+accessing it remotely and using it for making data analysis.
+
+The following commands will set the required packages and install Jupyter itself[fn:30]:
+#+BEGIN_SRC sh
+sudo apt-get update && sudo apt-get install python3 python3-pip python3-venv python3-virtualenv
+
+virtualenv myjupyter
+source ./myjupyter/bin/activate
+python3 -m pip install jupyter pandas numpy matplotlib scipy
+
+sudo reboot now
+#+END_SRC
+
+Then in a terminal on your host machine (not on the KRIA board), you can run the following command[fn:38] to bind local ports:
+#+BEGIN_SRC sh
+ssh -L 8888:localhost:8888 ubuntu@192.168.11.107
+#+END_SRC
+
+Then on the opened SSH shell to the KRIA board:
+#+BEGIN_SRC sh
+source ./myjupyter/bin/activate
+jupyter notebook
+#+END_SRC
+
+From there, it is possible to use the displayed URL (something that looks like
+~http://localhost:8888/tree?token~) to access the remote Notebook system from a local web browser.
+It is possible to do so with ~localhost~ since we have the ~ssh~ port map connection going on.
+
+Eventually creating Notebooks and stuff, it is possible to obtain a situation like shown in the figure [[fig:jupyter]] below.
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: A test Jupyter Notebook for CSV data analysis.
+#+NAME: fig:jupyter
+[[file:img/jupyter.png]]
 
 ** TODO Using a PetaLinux kernel in Ubuntu
 

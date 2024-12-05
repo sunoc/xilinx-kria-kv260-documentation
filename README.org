@@ -126,34 +126,6 @@ using the SoC shared memory.
 #+latex: \clearpage
 ** COMMENT LINK: [[id:582fe4ef-a301-4b53-b908-a5c2b5b6d694][KRIA board Ubuntu LTS 22.04 Install]]
 
-* RPMsg standalone evaluation
-** TODO RPMsg Cortex R5F demonstration firmware
-** RPMsg ~echo_test~ software
-In order to test the deployment of the firmware on the R5F side, and in particular
-to test the RPMsg function, we need some program on the Linux side of the KRIA
-board to "talk" with the real-time side.
-
-Some source is provided by Xilinx to build a demonstration software that does
-this purpose: specifically interact with the demonstration firmware.
-
-Here are the steps required to obtain the sources, and build the program.
-
-As a reminder, this is meant to be done on the Linux running on the
-KRIA board, NOT on your host machine !
-
-#+BEGIN_SRC sh
-git clone https://github.com/Xilinx/meta-openamp.git
-cd  meta-openamp
-git checkout xlnx-rel-v2022.2
-cd  ./recipes-openamp/rpmsg-examples/rpmsg-echo-test
-make
-sudo ln -s $(pwd)/echo_test /usr/bin/
-#+END_SRC
-
-Once this is done, it it possible to run the test program from the KRIA board's Ubuntu
-by running the ~echo_test~ command.
-
-#+latex: \clearpage
 * Building micro-ROS as a static library
 #+INCLUDE: "./libmicroros.org" :minlevel 2 :lines "6-63"
 #+latex: \clearpage
@@ -169,7 +141,12 @@ by running the ~echo_test~ command.
 #+latex: \clearpage
 ** COMMENT LINK: [[id:9a6622c8-2366-426d-a194-31cb79c3d571][Robot Operating System (ROS2) setup]]
 
-* micro-ROS Client
+* Micro-ROS Client
+#+INCLUDE: "../libmicroros_kv260/README.org" :minlevel 2 :lines "6-"
+#+latex: \clearpage
+** COMMENT LINK:[[id:24cb8127-6bc5-4b67-8700-741622e8895d][libmicroros]]
+
+* [IRRELEVENT ???] micro-ROS Client
 ** micro-ROS adaptation for the firmware
 Beyond the inclusion of the library itself, actually using the micro-ROS system
 within an external project require more than just importing the needed
@@ -190,17 +167,6 @@ function calls.
 
 In particular for this part, the ~clock_gettime~ function is key, and could
 simply be implemented with some FreeRTOS time functions.
-
-The end result for these implementation are visible in the appendix [[Firmware time functions]],
-and can be reused as-if for the KRIA board setups.
-
-*** [DEPRECATED] Memory allocators
-Similarly to the time function, it is required to re-implement some form of memory allocating
-functions in order for the library to be able to work with such functions in a formalized way.
-
-As for now, the current version of the allocator function can be seen in the
-appendix [[Firmware memory allocation functions]], but the current setup is not
-completely "clean", some further formatting, test and modification will be needed.
 
 *** Custom transport layer
 This part is the key translation layer that needs to happen in order for the
@@ -479,10 +445,10 @@ source /opt/ros/$ROS_DISTRO/setup.bash
 
 
 #+LATEX: \clearpage
-* micro-ROS Talker
+* micro-ROS Talker :WORK_IN_PROGRESS:
 
 #+latex: \clearpage
-* Running the ping-pong node                               :WORK_IN_PROGRESS:
+* Running the ping-pong node    :WORK_IN_PROGRESS:
 A custom ping-pong node for ROS2 was developed in order to test the data transfer of the newly created
 Agent / Client system.
 
@@ -494,15 +460,19 @@ In order to have this node up and running, you need to set basically all the pre
   in a ROS2 environment to avoid having dependencies issues, as presented in the section about ROS2.
 
   #+latex: \clearpage
-* Monitoring and performances evaluation                   :WORK_IN_PROGRESS:
+* Monitoring and performances evaluation :WORK_IN_PROGRESS:
 
   #+latex: \clearpage
-* Shared memory data transfer system                       :WORK_IN_PROGRESS:
+* Shared memory data transfer system :WORK_IN_PROGRESS:
 
 
 #+latex: \clearpage
-* Conclusion & future                                      :WORK_IN_PROGRESS:
+* Conclusion & future           :WORK_IN_PROGRESS:
 
+
+# ================================================================================
+# APPENDIX
+# ================================================================================
 #+LATEX: \clearpage
 #+LATEX: \appendix
 * DTO patch
@@ -519,56 +489,7 @@ This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kri
 This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom_r5f_colcon.meta][custom r5f colcon.meta]]
 #+LATEX: \inputminted[linenos, frame=single]{yaml}{./src/custom_r5f_colcon.meta}
 
-#+LATEX: \clearpage
-* Firmware time functions
-
-** main
-This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/clock.c][clock.c]]
-but a potentially more up-to-date version is visible
-directly at the ~libmicroros_kv260~ repository: [[https://gitlab.com/sunoc/libmicroros_kv260/-/blob/4867e762f66af7b4647232eb4c0a31106db66e13/src/clock.c][clock.c]]
-
-#+LATEX: \inputminted[linenos, frame=single]{c}{./src/clock.c}
-
-** header file
-#+BEGIN_SRC C
-/**< Microseconds per second. */
-#define MICROSECONDS_PER_SECOND    ( 1000000LL )  
-/**< Nanoseconds per second. */
-#define NANOSECONDS_PER_SECOND     ( 1000000000LL ) 
-/**< Nanoseconds per FreeRTOS tick. */  
-#define NANOSECONDS_PER_TICK       ( NANOSECONDS_PER_SECOND / configTICK_RATE_HZ ) 
-#+END_SRC
-
-
-#+LATEX: \clearpage
-* Firmware memory allocation functions
-
-** main
-This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/allocators.c][allocators.c]]
-but a potentially more up-to-date version is visible
-directly at the ~libmicroros_kv260~ repository: [[https://gitlab.com/sunoc/libmicroros_kv260/-/blob/4867e762f66af7b4647232eb4c0a31106db66e13/src/allocators.c][allocators.c]]
-
-#+LATEX: \inputminted[linenos, frame=single]{c}{./src/allocators.c}
-
-** header file
-#+BEGIN_SRC C
-#ifndef _ALLOCATORS_H_
-#define _ALLOCATORS_H_
-
-#include "microros.h"
-
-extern int absoluteUsedMemory;
-extern int usedMemory;
-
-
-void * __freertos_allocate(size_t size, void * state);
-void __freertos_deallocate(void * pointer, void * state);
-void * __freertos_reallocate(void * pointer, size_t size, void * state);
-void * __freertos_zero_allocate(size_t number_of_elements,
-				size_t size_of_element, void * state);
-
-#endif // _ALLOCATORS_H_
-#+END_SRC
+#+LATEX: \pagebreak
 * [deprecated] Installing Linux (PetaLinux option)
 This part is an alternative to the previous section [[Installing Ubuntu LTS 22.04]],
 where the installation of PetaLinux as a host system[fn:24] will be presented,
@@ -916,8 +837,6 @@ which has little documentation. Some [[https://github.com/micro-ROS/micro_ros_se
 
 [fn:12] It is also important to note that the ~echo_test~ part is specific for the
 RPMsg base demonstration firmware. It is not to be used for other firmware.
-The instruction to build and use this particular program on the KRIA Linux
-is visible in the section [[RPMsg ~echo_test~ software]].
 
 [fn:11] In this sequence, we are entering a root shell with ~sudo -s~, but this can
 also be archived by putting the commands in a script to be executed with ~sudo~. 

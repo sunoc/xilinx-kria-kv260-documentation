@@ -139,30 +139,6 @@ as follow:
 sudo netplan apply
 #+END_SRC
 
-** Proxy and DNS [DEPRACATED ?]
-An issue that can occur when connecting the board to the internet is the
-conflicting situation with the university proxy.
-Indeed, as the network at Nanzan University requires to go through a proxy,
-some DNS errors appeared.
-
-In that case, it might become needed to setup the proxy for the school.
-
-This can be done as follow, by exporting a https base proxy configuration
-containing you AXIA credentials (this is specific to Nanzan University IT system),
-then by consolidating the configuration for other types of connections in the ~bashrc~:
-
-#+BEGIN_SRC sh
-export https_proxy="http://<AXIA_username>:\
-       <AXIA_psw>@proxy.ic.nanzan-u.ac.jp:8080"
-
-echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc
-echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc
-echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc
-echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" >> ~/.bashrc
-#+END_SRC
-
-Eventually the board can be rebooted in order for the setup to get applied cleanly.
-
 ** ~root~ password
 #+LATEX: \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 *WARNING*: Depending on your use-case, the setup presented in this
@@ -352,7 +328,7 @@ This file is available at the URL visible in the command below
 but also in this report appendix [[DTO patch]].
 
 #+BEGIN_SRC sh
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/7a8f7c4e66e09b9d66aba8d2e08fc446ff485ca8/src/system.patch
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/90764ea6619fc95c0d801302ec7f82a7197b2f44/src/system.patch
 
 patch system.dts < system.patch
 #+END_SRC
@@ -389,6 +365,15 @@ ls /sys/class/remoteproc/
 If it is the case, it means that the patch was successful and  that the remote processor is
 ready to be used!
 #+LATEX: \pagebreak
+
+** [NEW] Minimum ~remoteproc~ and UIO shared-memory
+#+BEGIN_SRC bash  :dir /sshx:pazuzu|sudo::/home/ubuntu :results silent
+mkdir /configfs/device-tree/overlays/openamp_userspace && \
+    dtc -O dtb -o openamp_userspace.dtbo openamp_userspace.dtsi && \
+    cat openamp_userspace.dtbo > /configfs/device-tree/overlays/openamp_userspace/dtbo && \
+    sleep 1 && \
+    ls /sys/class/remoteproc
+#+END_SRC
 
 ** [NEW] Enabling ~remoteproc~ using a device-tree overlay
 
@@ -640,7 +625,37 @@ echo "UUID=8b13ed05-a91d-4x50-a44a-e654a0c67a2c none   swap    sw      0       0
 reboot now
 #+END_SRC
 
-** [DEPRACATED] Jupyter notebook setup
+** [DEPRECATED] Proxy and DNS
+#+LATEX: \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
+*WARNING*: This setup is not needed anymore when using Honda-sensei's lab
+wired network.
+Adding it will cause the DNS to FAIL!
+This section is kept as a reference.
+#+LATEX: \end{tcolorbox}
+An issue that can occur when connecting the board to the internet is the
+conflicting situation with the university proxy.
+Indeed, as the network at Nanzan University requires to go through a proxy,
+some DNS errors appeared.
+
+In that case, it might become needed to setup the proxy for the school.
+
+This can be done as follow, by exporting a https base proxy configuration
+containing you AXIA credentials (this is specific to Nanzan University IT system),
+then by consolidating the configuration for other types of connections in the ~bashrc~:
+
+#+BEGIN_SRC sh
+export https_proxy="http://<AXIA_username>:\
+       <AXIA_psw>@proxy.ic.nanzan-u.ac.jp:8080"
+
+echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc
+echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc
+echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc
+echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" >> ~/.bashrc
+#+END_SRC
+
+Eventually the board can be rebooted in order for the setup to get applied cleanly.
+
+** [DEPRECATED] Jupyter notebook setup
 Here are some instruction on how to install and setup Jupyter on a KRIA board,
 accessing it remotely and using it for making data analysis.
 
@@ -679,12 +694,32 @@ Eventually creating Notebooks and stuff, it is possible to obtain a situation li
 
 ** TODO Using a PetaLinux kernel in Ubuntu
 
-#+LATEX: \pagebreak
-#+LATEX: \appendix
-* DTO patch
-This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch][system.patch]]
-#+LATEX: \inputminted[linenos, frame=single]{diff}{./src/system.patch}
+* RPMsg standalone evaluation
+** TODO RPMsg Cortex R5F demonstration firmware
+** RPMsg ~echo_test~ software
+In order to test the deployment of the firmware on the R5F side, and in particular
+to test the RPMsg function, we need some program on the Linux side of the KRIA
+board to "talk" with the real-time side.
 
+Some source is provided by Xilinx to build a demonstration software that does
+this purpose: specifically interact with the demonstration firmware.
+
+Here are the steps required to obtain the sources, and build the program.
+
+As a reminder, this is meant to be done on the Linux running on the
+KRIA board, NOT on your host machine !
+
+#+BEGIN_SRC sh
+git clone https://github.com/Xilinx/meta-openamp.git
+cd  meta-openamp
+git checkout xlnx-rel-v2022.2
+cd  ./recipes-openamp/rpmsg-examples/rpmsg-echo-test
+make
+sudo ln -s $(pwd)/echo_test /usr/bin/
+#+END_SRC
+
+Once this is done, it it possible to run the test program from the KRIA board's Ubuntu
+by running the ~echo_test~ command.
 
 * Footnotes
 

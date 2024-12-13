@@ -2,15 +2,20 @@
 :ID:       ac338634-949e-4e3a-8d75-45bed92243c6
 :CATEGORY: KRIA
 :END:
-#+title: Setting up and using
-#+title: Xilinx KRIA KV260 and KR260
+#+title: Setting up and using Xilinx KRIA KV260 and KR260
 #+filetags: :export:
 #+subtitle: \begin{CJK}{UTF8}{min}南山大学\end{CJK}
 #+author: Vincent Conus
 #+email: vincent.conus@protonmail.com
-#+date: 2024-05-02
+#+date: 2024-11-26
 
-* Headers and LaTeX settings for export                            :noexport:
+* About                                 :noexport:
+The goal of this repository is to serve as a documentation in general for using
+Xilinx's KRIA board with Ubuntu and ROS2.
+
+More detail is available in the Section [[Introduction & motivation]].
+
+* Headers and LaTeX settings for export :noexport:
 A large amount of headers and parameters are needed in order
 to have this "README" document being exportable as a LaTeX
 document formatted the way I wanted it to be.
@@ -18,7 +23,7 @@ document formatted the way I wanted it to be.
 The detail can be seen in the raw ~.org~ version of this README
 and stays hidden in a :noexport: section in this report.
 
-#+DESCRIPTION: A report presenting how to use and set Xilinx's Kria board
+#+DESCRIPTION: A report presenting how to use and set Xilinx's KRIA board
 #+LANGUAGE: English
 
 #+OPTIONS: H:3 toc:t date:t title:t email:t
@@ -89,8 +94,8 @@ pdflatex README.tex
 
 * Introduction & motivation
 This guide will present how to setup and use Xilinx's KRIA boards, in particular
-for running ROS on a host Ubuntu system, as well as for deploying
-micro-ROS[[cite:&Belsare2023]] as a firmware on the MCU part of this board's chip.
+for running ROS2 on a host Ubuntu system, as well as for deploying
+micro-ROS[[cite:&Belsare2023]] as a firmware on the micro-controller part of this board's chip.
 
 The use of this device in particular is interesting because of the presence of a
 SoC comprising both a general purpose ARM core (Cortex A53), capable of running
@@ -105,9 +110,9 @@ overall system we are trying to archive.
 #+NAME: fig:map
 [[file:img/map.png]]
 
-This document will give a step-by-setep, chapter by chapter indication on how to
-go from a new board to a system ready to be used for testing internal
-communication for ROS, between both types of cores using the SoC shared memory.
+This document will give a step-by-step, chapter by chapter indication on how to go from a new board
+to a system ready to be used for testing internal communication for ROS, between both types of cores
+using the SoC shared memory.
 
 #+latex: \pagebreak
 * Boot firmware update
@@ -116,38 +121,10 @@ communication for ROS, between both types of cores using the SoC shared memory.
 ** COMMENT LINK: [[id:be2ce0ab-07db-49e6-be50-72f2db76cde3][KRIA board boot firmware update]]
 
 * Installing Ubuntu LTS 22.04
-#+INCLUDE: "./install_ubuntu.org" :minlevel 2 :lines "34-461"
+#+INCLUDE: "./install_ubuntu.org" :minlevel 2 :lines "34-704"
 #+latex: \clearpage
 ** COMMENT LINK: [[id:582fe4ef-a301-4b53-b908-a5c2b5b6d694][KRIA board Ubuntu LTS 22.04 Install]]
 
-* RPMsg standalone evaluation
-** TODO RPMsg Cortex R5F demonstration firmware
-** RPMsg ~echo_test~ software
-In order to test the deployment of the firmware on the R5F side, and in particular
-to test the RPMsg function, we need some program on the Linux side of the Kria
-board to "talk" with the real-time side.
-
-Some source is provided by Xilinx to build a demonstration software that does
-this purpose: specifically interact with the demonstration firmware.
-
-Here are the steps required to obtain the sources, and build the program.
-
-As a reminder, this is meant to be done on the Linux running on the
-Kria board, NOT on your host machine !
-
-#+BEGIN_SRC sh
-git clone https://github.com/Xilinx/meta-openamp.git
-cd  meta-openamp
-git checkout xlnx-rel-v2022.2
-cd  ./recipes-openamp/rpmsg-examples/rpmsg-echo-test
-make
-sudo ln -s $(pwd)/echo_test /usr/bin/
-#+END_SRC
-
-Once this is done, it it possible to run the test program from the Kria board's Ubuntu
-by running the ~echo_test~ command.
-
-#+latex: \clearpage
 * Building micro-ROS as a static library
 #+INCLUDE: "./libmicroros.org" :minlevel 2 :lines "6-63"
 #+latex: \clearpage
@@ -163,7 +140,402 @@ by running the ~echo_test~ command.
 #+latex: \clearpage
 ** COMMENT LINK: [[id:9a6622c8-2366-426d-a194-31cb79c3d571][Robot Operating System (ROS2) setup]]
 
-* micro-ROS Client
+* Micro-ROS Client
+#+INCLUDE: "../libmicroros_kv260/README.org" :minlevel 2 :lines "6-"
+#+latex: \clearpage
+** COMMENT LINK:[[id:24cb8127-6bc5-4b67-8700-741622e8895d][libmicroros]]
+
+* micro-ROS XRCE-DDS Agent :WORK_IN_PROGRESS:
+The micro-ROS Agent on the ROS2 side is the last piece of the puzzle needed to
+allow our DDS environment to use RPMsg as a mean of communication, as visible
+on the schematic of the figure [[fig:map_agent]] below.
+In particular, it will be useful to modify this agent in order to archive
+the full RPMsg communication for ROS2[fn:19].
+An [[https://micro.ros.org/docs/tutorials/advanced/create_custom_transports/][official documentation]] exists, but it gives little to no detail
+on how to deploy such modified, custom transport setup.
+This part of the guide will focus on it.
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: The agent (red border) allows for a micro-ROS
+#+CAPTION: instance to communicate with a ROS2 system.
+#+CAPTION: It is deployed on the Linux side, as a ROS2 node.
+#+NAME: fig:map_agent
+[[file:./img/map_agent.png]]
+
+** Building a XRCE-DDS agent in a Docker
+The same command presented above for running a custom agent "bare-metal" can be
+run inside a Docker.
+
+#+BEGIN_SRC sh
+docker run -d --name XRCE_DDS_Agent -it --net=host -v \
+       /dev:/dev --privileged ros:iron
+docker exec -it XRCE_DDS_Agent bash
+#+END_SRC
+
+
+#+BEGIN_SRC sh
+git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+cd Micro-XRCE-DDS-Agent
+docker build -t xrce-dds-agent .
+docker run -it --privileged -v /dev:/dev xrce-dds-agent serial \
+       --dev /dev/ttyACM0
+#+END_SRC
+
+
+git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+cd Micro-XRCE-DDS-Agent
+docker build -t xrce-dds-agent .
+docker run -it --privileged -v /dev:/dev xrce-dds-agent serial \
+       --dev /dev/ttyACM0
+#+END_SRC
+
+* Talker Node                   :WORK_IN_PROGRESS:
+
+#+latex: \clearpage
+* Running the ping-pong node    :WORK_IN_PROGRESS:
+A custom ping-pong node for ROS2 was developed in order to test the data transfer of the newly created
+Agent / Client system.
+
+In order to have this node up and running, you need to set basically all the previously presented points:
+- The micro-ROS firmware is running on the R5F core, as presented in the section [[Loading the firmware]].
+- On the same Linux you plan to run the node, you will need to run and keep the Agent, as presented
+  in the section [[micro-ROS XRCE-DDS Agent]].
+- This ping-pong application is released as a ROS2 Python node. It is best to pull and run it
+  in a ROS2 environment to avoid having dependencies issues, as presented in the section about ROS2.
+
+  #+latex: \clearpage
+* Monitoring and performances evaluation :WORK_IN_PROGRESS:
+
+  #+latex: \clearpage
+* Shared memory data transfer system :WORK_IN_PROGRESS:
+
+
+#+latex: \clearpage
+* Conclusion & future           :WORK_IN_PROGRESS:
+
+
+# ================================================================================
+# APPENDIX
+# ================================================================================
+#+LATEX: \clearpage
+#+LATEX: \appendix
+* DTO patch
+This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch][system.patch]]
+#+LATEX: \inputminted[linenos, frame=single]{diff}{./src/system.patch}
+
+#+LATEX: \clearpage
+* Custom tool-chain CMake settings
+This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom_r5f_toolchain.cmake][custom r5f toolchain.cmake]]
+#+LATEX: \inputminted[linenos, frame=single]{cmake}{./src/custom_r5f_toolchain.cmake}
+
+#+LATEX: \clearpage
+* Custom Colcon meta settings
+This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/custom_r5f_colcon.meta][custom r5f colcon.meta]]
+#+LATEX: \inputminted[linenos, frame=single]{yaml}{./src/custom_r5f_colcon.meta}
+
+#+LATEX: \pagebreak
+* [deprecated] Installing Linux (PetaLinux option)
+This part is an alternative to the previous section [[Installing Ubuntu LTS 22.04]],
+where the installation of PetaLinux as a host system[fn:24] will be presented,
+as being an alternative to the Ubuntu LTS. Here are some reasoning why you'd
+prefer to use PetaLinux instead of Ubuntu:
++ Direct support from Xilinx. While Ubuntu is also an official port, it is
+  provided through Canonical.
++ If you plan to use ROS2 in containers.
+
+It is also to be noted that the building process of a PetaLinux image is not as
+trivial as simply flashing a downloaded ISO file. It takes some time to
+configure it and even more time to be built, especially if you are working on a
+lower-end machine.
+
+** General installation
+The indication on how to install PetaLinux on a KRIA board is detailed in the
+official documentation[fn:25], but for the KV260 board with an older release of
+the Linux. This guide will try to keep an up-to-date version of the guide, in
+particular for the KR260 KRIA board and, at the time of writing, the PetaLinux
+in version 2023.2 for the installer.  The 2022.2 version is recommended for this
+board's latest updated boot firmware, as presented in the Section Boot firmware
+above; however I happened to have issues with the building process from a system
+based on Ubuntu 22.04. Thus the choice of the 2023.2 that should be compatible.
+
+Two tools should be downloaded upfront in order to be ready and create the
+PetaLinux image for our target board. Both can be obtained at the Xilinx
+official download page[fn:26]. Login with an AMD account is required in order to
+download the files we need, namely, we'll have to get:
++ The installer tool: ~petalinux-v2023.2-10121855-installer.run~ or similar name.
++ The SOM board support package: ~xilinx-kr260-starterkit-v2023.2-10140544.bsp~ or similar name[fn:29].
+The specific name of the utils you'll get to download will evolve over time.
+
+For the following command, I will assume that both files were downloaded into
+the same directory and that you have a shell open in said directory.
+
+Firstly, a crap ton of dependencies are needed. They are detailed in the
+release notes of the version of the tool you are downloading and it depends on
+your distribution, but here is a one-liner that works for the PetaLinux 2023.2
+to be built on Ubuntu(-based) 22.04 LTS:
+#+BEGIN_SRC sh
+sudo apt-get install iproute2 gawk python3 build-essential gcc git make \
+     net-tools libncurses5-dev tftpd zlib1g-dev libssl-dev flex bison libselinux1 \
+     gnupg wget git-core diffstat chrpath socat xterm autoconf libtool tar unzip \
+     texinfo zlib1g-dev gcc-multilib automake zlib1g:i386 screen pax gzip cpio \
+     python3-pip python3-pexpect xz-utils debianutils iputils-ping python3-git \
+     python3-jinja2 libegl1-mesa libsdl1.2-dev pylint asciidoc
+#+END_SRC
+
+Testing, if building on Debian 12 the following variant of the same command has been confirmed to work:
+#+BEGIN_SRC sh
+sudo apt-get install iproute2 gawk python3 build-essential gcc git make \
+net-tools libncurses5-dev tftpd-hpa zlib1g-dev libssl-dev flex bison libselinux1 \
+gnupg wget git-core diffstat chrpath socat xterm autoconf libtool tar unzip \
+texinfo zlib1g-dev gcc-multilib automake zlib1g screen pax gzip cpio python3-pip \
+python3-pexpect xz-utils debianutils iputils-ping python3-git python3-jinja2 \
+libegl1-mesa libsdl1.2-dev pylint asciidoc
+#+END_SRC
+
+Installing the PetaLinux tools can be done with the ~.run~ script[fn:28], as follow:
+#+BEGIN_SRC sh
+sudo chmod +x ./petalinux-v2023.2-10121855-installer.run
+./petalinux-v2023.2-10121855-installer.run
+bash
+source settings.sh
+#+END_SRC
+
+A project can then be created, using the ~.bsp~ file. From there it is possible to
+build the image file meant to be booted by the board:
+#+BEGIN_SRC sh
+petalinux-create -t project -s xilinx-kr260-starterkit-v2023.2-10140544.bsp
+cd xilinx-kr260-starterkit-2023.2/
+#+END_SRC
+
+
+The more general option allows to enable stuff related to hardware
+configuration[fn:33]. For this step, it is possible to select the ~OpenAMP~
+setting the the DTG Settings, as visible in the Figure [[fig:yocto_openamp_dtg]] below:
+#+BEGIN_SRC sh
+petalinux-config --get-hw-description  ./hardware/xilinx-kr260-starterkit-2023.2/kr260_starter_kit.xsa
+#+END_SRC
+
+Then, here are the options that we want to enable:
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: In the hardware config, it is possible to select the openamp device tree source.
+#+NAME: fig:yocto_openamp_dtg
+[[file:./img/yocto_openamp_dtg.png]]
+
+Some kernel and module configuration are needed in order for the PetaLinux system to work properly.
+These setup can be set using the following command:
+#+BEGIN_SRC sh
+petalinux-config -c rootfs
+#+END_SRC
+
+Then, here are the options that we want to enable:
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: In the rootfs config, it is possible to select the openamp package.
+#+NAME: fig:yocto_openamp
+[[file:./img/yocto_openamp.png]]
+
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: OpenSSH can be configure in the same rootfs config.
+#+NAME: fig:yocto_ssh
+[[file:./img/yocto_ssh.png]]
+
+It is then possible to build[fn:32] and package the image. Most critically compared to the example,
+the ~openamp.dtb~ overlay must be used in order for OpenAMP and subsequently RPMsg to become usable.
+#+BEGIN_SRC sh
+petalinux-build
+petalinux-package --wic --bootfiles "ramdisk.cpio.gz.u-boot boot.scr Image system.dtb"
+#+END_SRC
+
+#+LATEX: \begin{tcolorbox}[colback=red!5!white,colframe=red!75!black]
+*DANGER*: The next part involve the ~dd~ command writing on disks!!!
+As always with the dd command, thou have to be *VERY* careful on what arguments
+thou give. Selecting the wrong disk will result on the destruction of
+thy data !!
+_If you are unsure of what to do, seek assistance !_
+#+LATEX: \end{tcolorbox}
+
+Finally, and now an image has been generated, it can be burnt to a micro-SD card the usual way:
+#+BEGIN_SRC sh
+sudo dd if=./images/linux/petalinux-sdimage.wic \
+     of=/dev/sda status=progress bs=8M && sync
+#+END_SRC
+
+From that point, the media can be ejected, put in the board and the boot process
+should happen successfully.
+
+** First login
+On the first start, if you have a serial terminal open to the KR260 board, you'll be prompter to enter a login.
+The default user it ~PetaLinux~. You'll then be prompted to enter a password.
+
+** Testing openamp "echo-test"
+A good and out-of-the-box way to try and confirm that the OpenAMP setup was done
+properly is to run the so-called "echo-test". This program will basically send
+series of packages to the R5F core and expect them to be returned.
+
+As presented in the official documentation[fn:34], this can be simply done with
+the following commands. If the return of the ~echo_test~ commands states that zero
+error occurs, the system should be good to go:
+#+BEGIN_SRC sh
+sudo -s
+echo image_echo_test  > /sys/class/remoteproc/remoteproc0/firmware
+echo start > /sys/class/remoteproc/remoteproc0/state
+echo_test
+echo stop > /sys/class/remoteproc/remoteproc0/state
+#+END_SRC
+
+** "echo-test" performance comparison
+
+*** Raw plot of the package measurement                          :noexport:
+#+BEGIN_SRC python :results file :eval no-export
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.stats as stats
+
+df_kr = pd.read_csv('./csv/kr260_echo_test.csv', names=['time KR260 (PetaLinux)'])
+df_kv = pd.read_csv('./csv/kv260_echo_test.csv', names=['time KV260 (Ubuntu)'])
+
+df_payload = pd.DataFrame([s] for l in range(0, 10, 1) for s in range(17, 489, 1))
+
+df_tot_2 = pd.concat([df_kr, df_kv, df_payload], sort=False, axis=1)
+
+df_tot_2 = df_tot_2.rename(columns={0:'Payload size'})
+
+df_tot_2['time KR260 (PetaLinux)'] = df_tot_2['time KR260 (PetaLinux)'].div(df_tot_2['Payload size'])
+df_tot_2['time KV260 (Ubuntu)'] = df_tot_2['time KV260 (Ubuntu)'].div(df_tot_2['Payload size'])
+
+df_tot_2 = df_tot_2.sort_values(by=['Payload size'], ascending=True)
+df_tot_2 = df_tot_2.drop(columns=['Payload size'])
+
+df_tot_2 = df_tot_2.reset_index(drop=True)
+
+df_tot_2 = 1/df_tot_2
+df_tot_2 = df_tot_2.mul(1000)
+
+plt.rc('font', size=10)
+
+scatterplot = df_tot_2.plot(style='.', grid='true')
+scatterplot.set_xlabel('Package sent [n]')
+scatterplot.set_ylabel('Data throughput [MB/s]')
+# scatterplot.set_yscale("log");
+# densityplot = df_tot_2.plot.density(grid='true', xlim=[0.2, 0.9])
+# densityplot.set_xlabel('Round trip time for one RPMsg package [us]')
+# densityplot.set_ylabel('Probability density [%]')
+plt.savefig('./img/kr260_echo_test_density.png', dpi=400, bbox_inches='tight')
+return './img/kr260_echo_test_density.png'
+#+END_SRC
+
+#+RESULTS:
+[[file:./img/kr260_echo_test_density.png]]
+
+
+*** Report :ignore:
+Now we have a working demonstration for RPMsg, a goal was to compare this system between boards.
+
+Here is the complete sequence in order to archive a timely measured ~echo_test~ run, namely:
+- Installation of the build dependencies
+- Clone of the Xilinx repository
+- Patching of the main source to add the time measurement
+- Building of the test software
+- Communication with the R5F, with reload of the firmware
+#+BEGIN_SRC sh
+sudo dnf install git make gcc binutils packagegroup-core-buildessential
+sudo ln -s /usr/bin/aarch64-xilinx-linux-gcc /bin/cc
+git clone https://github.com/OpenAMP/openamp-system-reference.git
+cd openamp-system-reference/examples/linux/rpmsg-echo-test/
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/echo_test.patch
+patch -u -b echo_test.c -i echo_test.patch
+make
+sudo -s
+echo image_echo_test  > /sys/class/remoteproc/remoteproc0/firmware
+echo start > /sys/class/remoteproc/remoteproc0/state
+./echo_test
+echo stop > /sys/class/remoteproc/remoteproc0/state
+#+END_SRC
+
+
+The figure [[fig:kr260_echo_test_density]] below shows a comparison for the data
+throughput that is reachable for a packages round trip of individual RPMsg
+packages for both PetaLinux running on the KR260 board and Ubuntu running on the
+KV260.
+
+A difference exist but it is not as significant as to explain the rather slow
+transfer rate when used in combination with ROS2 DDS.
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: A graph of the data transfer rate for individual packages to be transmitted and received back from the Linux.
+#+NAME: fig:kr260_echo_test_density
+[[file:./img/kr260_echo_test_density.png]]
+
+This fast delay for data transmission was later confirmed by measurement done using an external logic analyser[fn:35].
+
+** Enabling SSH
+** Setting up a static IP address for PetaLinux
+This is not a trivial task in PetaLinux.
+
+As it appears, the classic ~/etc/network/interfaces~ must be modified, however and
+for some unknown reason the DHCP keep being used even when disabled, and the
+actual static interface is not used until restarted.
+
+Multiple steps are required in order to mitigate all of this.
+
+First, we can make our standard ~interfaces~ configuration, in the  ~/etc/network/interfaces~:
+#+BEGIN_SRC sh
+# Wired or wireless interfaces
+auto eth0
+iface eth0 inet static
+address 192.168.11.107
+netmask 255.255.255.0
+network 192.168.11.0
+gateway 192.168.11.1
+#+END_SRC
+
+Then we need to have ~systemd~ to run a script after boot time to restart the ~eth0~ interface.
+
+A very basic script, as follow need to be placed somewhere on the system, for example here, in the ~/home/root/net.sh~:
+#+BEGIN_SRC sh
+#!/bin/sh -e
+ifdown eth0
+ifup eth0
+exit 0
+#+END_SRC
+
+Then, we want to create a ~systemd~ service that will run this script as ~idle~,
+i.e. after all the rest. Said file, in our case named ~updown.service~ must be
+placed in the ~/etc/systemd/system/~ directory:
+#+BEGIN_SRC yaml
+[Unit]
+Description=Restart once more the eth0 network to enable the static IP
+
+[Service]
+Type=idle
+ExecStart=/bin/sh /home/root/net.sh
+
+[Install]
+WantedBy=multi-user.target
+#+END_SRC
+
+Finally, as a ~root~ we need to set the correct right for these files and finally enabling the service before reboot:
+#+BEGIN_SRC sh
+sudo -s
+chmod +x /home/root/net.sh
+chmod 644 /etc/systemd/system/updown.service
+systemctl enable updown.service
+reboot now
+#+END_SRC
+
+With all of this, on the next reboot of the board, the static IP should be available alongside the DHCP IP.
+
+** Note: good points for PetaLinux over Ubuntu :noexport:
++ The boot process in insanely faster: a few seconds for PetaLinux versus multiple minutes with Ubuntu.
++ +The fan is silent all the way through, and seemingly managed in a better way.+
+  This seems to stop being true once we update the board packages with
+  ~dnf~. Unknown reason for now. There is an issue with the ZynqMP Linux PIN
+  control system, as visible in the ~dmesg~ log.
++ OpenAMP and the echo test app works fairly "out of the box" if configured
+  properly during the build process.
+
+* [deprecated] micro-ROS Client
 ** micro-ROS adaptation for the firmware
 Beyond the inclusion of the library itself, actually using the micro-ROS system
 within an external project require more than just importing the needed
@@ -184,17 +556,6 @@ function calls.
 
 In particular for this part, the ~clock_gettime~ function is key, and could
 simply be implemented with some FreeRTOS time functions.
-
-The end result for these implementation are visible in the appendix [[Firmware time functions]],
-and can be reused as-if for the Kria board setups.
-
-*** [DEPRECATED] Memory allocators
-Similarly to the time function, it is required to re-implement some form of memory allocating
-functions in order for the library to be able to work with such functions in a formalized way.
-
-As for now, the current version of the allocator function can be seen in the
-appendix [[Firmware memory allocation functions]], but the current setup is not
-completely "clean", some further formatting, test and modification will be needed.
 
 *** Custom transport layer
 This part is the key translation layer that needs to happen in order for the
@@ -267,7 +628,7 @@ micro-ROS library) built and loaded onto our Kria's Linux, we want to load and r
 on the Cortex micro-controller side.
 
 As a reminder, the firmware can be loaded from the host machine IDE workspace
-to the Kria board through ~SSH~ using the following command:
+to the KRIA board through ~SSH~ using the following command:
 #+BEGIN_SRC sh
 scp /home/sunoc/workspace/rpmsg_pingpong_microros_lib/\
     Debug/rpmsg_pingpong_microros_lib.elf  ubuntu@192.168.1.10:/home/ubuntu/
@@ -915,8 +1276,6 @@ which has little documentation. Some [[https://github.com/micro-ROS/micro_ros_se
 
 [fn:12] It is also important to note that the ~echo_test~ part is specific for the
 RPMsg base demonstration firmware. It is not to be used for other firmware.
-The instruction to build and use this particular program on the Kria Linux
-is visible in the section [[RPMsg ~echo_test~ software]].
 
 [fn:11] In this sequence, we are entering a root shell with ~sudo -s~, but this can
 also be archived by putting the commands in a script to be executed with ~sudo~. 

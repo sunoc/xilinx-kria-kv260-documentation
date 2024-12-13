@@ -76,7 +76,7 @@ sudo dd if=iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img \
 Once the SD card is flashed and put back in the board, the micro-USB cable can be
 connected from the PC to the board. It is then possible to
 connect to the board in serial with an appropriate tool, for example ~picocom~,
-as in the following example (the serial port that "appeared" was the ~/dev/ttyUSB1~ in this case,
+as in the following example (the serial port that "appeared" was the ~/dev/ttyUSB1~ in this case[fn:8],
 and the 115200 bit-rate is the default value for the board):
 
 #+BEGIN_SRC sh
@@ -139,30 +139,6 @@ as follow:
 sudo netplan apply
 #+END_SRC
 
-** Proxy and DNS
-An issue that can occur when connecting the board to the internet is the
-conflicting situation with the university proxy.
-Indeed, as the network at Nanzan University requires to go through a proxy,
-some DNS errors appeared.
-
-In that case, it might become needed to setup the proxy for the school.
-
-This can be done as follow, by exporting a https base proxy configuration
-containing you AXIA credentials (this is specific to Nanzan University IT system),
-then by consolidating the configuration for other types of connections in the ~bashrc~:
-
-#+BEGIN_SRC sh
-export https_proxy="http://<AXIA_username>:\
-       <AXIA_psw>@proxy.ic.nanzan-u.ac.jp:8080"
-
-echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc
-echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc
-echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc
-echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" >> ~/.bashrc
-#+END_SRC
-
-Eventually the board can be rebooted in order for the setup to get applied cleanly.
-
 ** ~root~ password
 #+LATEX: \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 *WARNING*: Depending on your use-case, the setup presented in this
@@ -206,6 +182,46 @@ sudo add-apt-repository ppa:xilinx-apps/ppa
 sudo apt update
 sudo apt upgrade
 #+END_SRC
+
+** Installing Docker
+It is possible to have a version of Docker installed simply by using the available repository,
+but since we are on Ubuntu, a PPA is available from Docker in order to have the most up-to-date version.
+
+Following [[https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository][the official documentation]], the following steps can be taken to install the latest version of
+Docker on a Ubuntu system. The last command is meant to test the install.
+If everything went smoothly, you should see something similar to what is presented
+in the figure [[fig:hello-docker]] below, after the commands:
+
+#+BEGIN_SRC sh
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+    sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo \
+    "deb [arch="$(dpkg --print-architecture)" \
+  signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && \
+         echo "$VERSION_CODENAME")" stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli \
+     containerd.io docker-buildx-plugin docker-compose-plugin
+sudo usermod -aG docker $USER
+newgrp docker
+
+docker run hello-world
+#+END_SRC
+
+#+ATTR_LATEX: :width .7\textwidth
+#+CAPTION: The return of a successful run of the ~hello world~ test Docker container.
+#+NAME: fig:hello-docker
+[[file:img/hello-docker.png]]
 
 ** Purging ~snap~
 As the desktop-specific software are not used at all in the case
@@ -274,44 +290,7 @@ Additional, potentially unused services can be found using the very handy comman
 sudo systemd-analyze blame
 #+END_SRC
 
-** Jupyter notebook setup
-Here are some instruction on how to install and setup Jupyter on a KRIA board,
-accessing it remotely and using it for making data analysis.
-
-The following commands will set the required packages and install Jupyter itself[fn:30]:
-#+BEGIN_SRC sh
-sudo apt-get update && sudo apt-get install python3 python3-pip python3-venv python3-virtualenv
-
-virtualenv myjupyter
-source ./myjupyter/bin/activate
-python3 -m pip install jupyter pandas numpy matplotlib scipy
-
-sudo reboot now
-#+END_SRC
-
-Then in a terminal on your host machine (not on the KRIA board), you can run the following command[fn:38] to bind local ports:
-#+BEGIN_SRC sh
-ssh -L 8888:localhost:8888 ubuntu@192.168.11.107
-#+END_SRC
-
-Then on the opened SSH shell to the KRIA board:
-#+BEGIN_SRC sh
-source ./myjupyter/bin/activate
-jupyter notebook
-#+END_SRC
-
-From there, it is possible to use the displayed URL (something that looks like
-~http://localhost:8888/tree?token~) to access the remote Notebook system from a local web browser.
-It is possible to do so with ~localhost~ since we have the ~ssh~ port map connection going on.
-
-Eventually creating Notebooks and stuff, it is possible to obtain a situation like shown in the figure [[fig:jupyter]] below.
-
-#+ATTR_LATEX: :width .6\textwidth
-#+CAPTION: A test Jupyter Notebook for CSV data analysis.
-#+NAME: fig:jupyter
-[[file:img/jupyter.png]]
-
-** Enabling ~remoteproc~ with Device-Tree Overlay patching
+** Enabling ~remoteproc~ with Device-Tree patching
 One of the advantage of this Kria board, as cited previously, is the presence of
 multiple types of core (APU, MCU, FPGA) on the same chip.
 
@@ -349,7 +328,7 @@ This file is available at the URL visible in the command below
 but also in this report appendix [[DTO patch]].
 
 #+BEGIN_SRC sh
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/7a8f7c4e66e09b9d66aba8d2e08fc446ff485ca8/src/system.patch
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/90764ea6619fc95c0d801302ec7f82a7197b2f44/src/system.patch
 
 patch system.dts < system.patch
 #+END_SRC
@@ -387,45 +366,234 @@ If it is the case, it means that the patch was successful and  that the remote p
 ready to be used!
 #+LATEX: \pagebreak
 
-** Installing Docker
-It is possible to have a version of Docker installed simply by using the available repository,
-but since we are on Ubuntu, a PPA is available from Docker in order to have the most up-to-date version.
-
-Following [[https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository][the official documentation]], the following steps can be taken to install the latest version of
-Docker on a Ubuntu system. The last command is meant to test the install.
-If everything went smoothly, you should see something similar to what is presented
-in the figure [[fig:hello-docker]] below, after the commands:
-
-#+BEGIN_SRC sh
-sudo apt-get update
-sudo apt-get install ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-    sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-
-echo \
-    "deb [arch="$(dpkg --print-architecture)" \
-  signed-by=/etc/apt/keyrings/docker.gpg] \
-  https://download.docker.com/linux/ubuntu \
-  "$(. /etc/os-release && \
-         echo "$VERSION_CODENAME")" stable" | \
-    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli \
-     containerd.io docker-buildx-plugin docker-compose-plugin
-sudo usermod -aG docker $USER
-newgrp docker
-
-docker run hello-world
+** [NEW] Minimum ~remoteproc~ and UIO shared-memory
+#+BEGIN_SRC bash  :dir /sshx:pazuzu|sudo::/home/ubuntu :results silent
+mkdir /configfs/device-tree/overlays/openamp_userspace && \
+    dtc -O dtb -o openamp_userspace.dtbo openamp_userspace.dtsi && \
+    cat openamp_userspace.dtbo > /configfs/device-tree/overlays/openamp_userspace/dtbo && \
+    sleep 1 && \
+    ls /sys/class/remoteproc
 #+END_SRC
 
-#+ATTR_LATEX: :width .7\textwidth
-#+CAPTION: The return of a successful run of the ~hello world~ test Docker container.
-#+NAME: fig:hello-docker
-[[file:img/hello-docker.png]]
+** [NEW] Enabling ~remoteproc~ using a device-tree overlay
+
+
+#+BEGIN_SRC bash
+scp ./src/remoteproc.dts kr260:~/
+#+END_SRC
+
+#+RESULTS:
+
+
+#+BEGIN_SRC bash  :dir /sshx:kr260|sudo::/home/ubuntu :results silent
+mkdir /configfs/device-tree/overlays/remoteproc && \
+    dtc -O dtb -o remoteproc.dtbo remoteproc.dts && \
+    cat remoteproc.dtbo > /configfs/device-tree/overlays/remoteproc/dtbo && \
+    sleep 1 && \
+    ls /sys/class/remoteproc
+#+END_SRC
+
+
+#+BEGIN_SRC dts :tangle ./src/remoteproc.dts
+// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * Copyright (C) 2024 Vincent Conus
+ */
+
+/dts-v1/;
+ /plugin/;
+/ {
+	fragment@0 {
+		target = <&uart1>;
+		__overlay__ {
+			status = "disabled";
+		};
+	};
+
+	fragment@1 {
+		target-path = "/";
+		__overlay__ {
+			reserved-memory {
+				pmu@7ff00000 {
+					status = "disabled";
+				};
+				rpu0vdev0vring0: rpu0vdev0vring0@3ed80000 {
+					no-map;
+					reg = <0x0 0x3ed80000 0x0 0x4000>;
+				};
+				rpu0vdev0vring1: rpu0vdev0vring1@3ed84000 {
+					no-map;
+					reg = <0x0 0x3ed84000 0x0 0x4000>;
+				};
+				rpu0vdev0buffer: rpu0vdev0buffer@3ed88000 {
+					no-map;
+					reg = <0x0 0x3ed88000 0x0 0x100000>;
+				};
+				rproc_0_reserved: rproc_0_reserved@3ec00000 {
+					no-map;
+					reg = <0x0 0x3ec00000 0x0 0x180000>;
+				};
+
+				rpu1vdev0vring0: rpu1vdev0vring0@3ef80000 {
+					no-map;
+					reg = <0x0 0x3ef80000 0x0 0x4000>;
+				};
+				rpu1vdev0vring1: rpu1vdev0vring1@3ef84000 {
+					no-map;
+					reg = <0x0 0x3ef84000 0x0 0x4000>;
+				};
+				rpu1vdev0buffer: rpu1vdev0buffer@3ef88000 {
+					no-map;
+					reg = <0x0 0x3ef88000 0x0 0x100000>;
+				};
+				rproc_1_reserved: rproc_1_reserved@3ef00000 {
+					no-map;
+					reg = <0x0 0x3ef00000 0x0 0x80000>;
+				};
+				uros_buf0: uros_buf@40000000 {
+					compatible = "shared-dma-pool";
+					reusable;
+					reg = <0x8 0x40000000 0x0 0x00400000>;
+					label = "uros_buf0";
+				};
+			};
+		};
+	};
+
+	fragment@2 {
+		target-path = "/";
+		__overlay__ {
+			clock6 {
+				status = "disabled";
+			};
+			tcm_0a: tcm_0a@ffe00000 {
+				no-map;
+				reg = <0x0 0xffe00000 0x0 0x10000>;
+				status = "okay";
+				compatible = "mmio-sram";
+				power-domain = <&zynqmp_firmware 15>;
+			};
+			tcm_0b: tcm_0b@ffe20000 {
+				no-map;
+				reg = <0x0 0xffe20000 0x0 0x10000>;
+				status = "okay";
+				compatible = "mmio-sram";
+				power-domain = <&zynqmp_firmware 16>;
+			};
+			tcm_1a: tcm_1a@ffe90000 {
+				no-map;
+				reg = <0x0 0xffe90000 0x0 0x10000>;
+				status = "okay";
+				compatible = "mmio-sram";
+				power-domain = <&zynqmp_firmware 17>;
+			};
+			tcm_1b: tcm_1b@ffeb0000 {
+				no-map;
+				reg = <0x0 0xffeb0000 0x0 0x10000>;
+				status = "okay";
+				compatible = "mmio-sram";
+				power-domain = <&zynqmp_firmware 18>;
+			};
+
+			rf5ss@ff9a0000 {
+				compatible = "xlnx,zynqmp-r5-remoteproc";
+				xlnx,cluster-mode = <1>;
+				ranges;
+				reg = <0x0 0xFF9A0000 0x0 0x15000>;
+				#address-cells = <0x2>;
+				#size-cells = <0x2>;
+				r5f_0 {
+					compatible = "xilinx,r5f";
+					#address-cells = <2>;
+					#size-cells = <2>;
+					ranges;
+					sram = <&tcm_0a &tcm_0b>;
+					memory-region = <&rproc_0_reserved>, <&rpu0vdev0buffer>, <&rpu0vdev0vring0>, <&rpu0vdev0vring1>;
+					power-domain = <&zynqmp_firmware 7>;
+					mboxes = <&ipi_mailbox_rpu0 0>, <&ipi_mailbox_rpu0 1>;
+					mbox-names = "tx", "rx";
+				};
+				r5f_1 {
+					compatible = "xilinx,r5f";
+					#address-cells = <2>;
+					#size-cells = <2>;
+					ranges;
+					sram = <&tcm_1a &tcm_1b>;
+					memory-region = <&rproc_1_reserved>, <&rpu1vdev0buffer>, <&rpu1vdev0vring0>, <&rpu1vdev0vring1>;
+					power-domain = <&zynqmp_firmware 8>;
+					mboxes = <&ipi_mailbox_rpu1 0>, <&ipi_mailbox_rpu1 1>;
+					mbox-names = "tx", "rx";
+				};
+			};
+
+			zynqmp_ipi1 {
+				compatible = "xlnx,zynqmp-ipi-mailbox";
+				interrupt-parent = <&gic>;
+				interrupts = <0 29 4>;
+				xlnx,ipi-id = <7>;
+				#address-cells = <1>;
+				#size-cells = <1>;
+				ranges;
+				/* APU<->RPU0 IPI mailbox controller */
+				ipi_mailbox_rpu0: mailbox@ff990000 {
+					reg = <0xff990600 0x20>,
+					      <0xff990620 0x20>,
+					      <0xff9900c0 0x20>,
+					      <0xff9900e0 0x20>;
+					reg-names = "local_request_region",
+						    "local_response_region",
+						    "remote_request_region",
+						    "remote_response_region";
+					#mbox-cells = <1>;
+					xlnx,ipi-id = <1>;
+				};
+			};
+			zynqmp_ipi2 {
+				compatible = "xlnx,zynqmp-ipi-mailbox";
+				interrupt-parent = <&gic>;
+				interrupts = <0 30 4>;
+				xlnx,ipi-id = <8>;
+				#address-cells = <1>;
+				#size-cells = <1>;
+				ranges;
+				/* APU<->RPU0 IPI mailbox controller */
+				ipi_mailbox_rpu1: mailbox@ff3f0b00 {
+					reg = <0xff3f0b00 0x20>,
+					      <0xff3f0b20 0x20>,
+					      <0xff3f0940 0x20>,
+					      <0xff3f0960 0x20>;
+					reg-names = "local_request_region",
+						    "local_response_region",
+						    "remote_request_region",
+						    "remote_response_region";
+					#mbox-cells = <1>;
+					xlnx,ipi-id = <2>;
+				};
+			};
+
+			amba_pl: amba_pl@0 {
+				#address-cells = <2>;
+				#size-cells = <2>;
+				compatible = "simple-bus";
+				ranges ;
+				udmabuf@0x00 {
+					compatible  = "ikwzm,u-dma-buf";
+					device-name = "udmabuf0";
+					size = <0x0 0x00200000>;
+					memory-region = <&uros_buf0>;
+				};
+				udmabuf@0x01 {
+					compatible  = "ikwzm,u-dma-buf";
+					device-name = "udmabuf1";
+					size = <0x0 0x00200000>;
+					memory-region = <&uros_buf0>;
+				};
+			};
+		};
+	};
+};
+#+END_SRC
+
 
 ** Adding a swap partition
 This part is very optional, in particular as it might slow down a bit the
@@ -457,16 +625,106 @@ echo "UUID=8b13ed05-a91d-4x50-a44a-e654a0c67a2c none   swap    sw      0       0
 reboot now
 #+END_SRC
 
+** [DEPRECATED] Proxy and DNS
+#+LATEX: \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
+*WARNING*: This setup is not needed anymore when using Honda-sensei's lab
+wired network.
+Adding it will cause the DNS to FAIL!
+This section is kept as a reference.
+#+LATEX: \end{tcolorbox}
+An issue that can occur when connecting the board to the internet is the
+conflicting situation with the university proxy.
+Indeed, as the network at Nanzan University requires to go through a proxy,
+some DNS errors appeared.
+
+In that case, it might become needed to setup the proxy for the school.
+
+This can be done as follow, by exporting a https base proxy configuration
+containing you AXIA credentials (this is specific to Nanzan University IT system),
+then by consolidating the configuration for other types of connections in the ~bashrc~:
+
+#+BEGIN_SRC sh
+export https_proxy="http://<AXIA_username>:\
+       <AXIA_psw>@proxy.ic.nanzan-u.ac.jp:8080"
+
+echo "export http_proxy=\""$https_proxy"\"" >> ~/.bashrc
+echo "export https_proxy=\""$https_proxy"\"" >> ~/.bashrc
+echo "export ftp_proxy=\""$https_proxy"\"" >> ~/.bashrc
+echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" >> ~/.bashrc
+#+END_SRC
+
+Eventually the board can be rebooted in order for the setup to get applied cleanly.
+
+** [DEPRECATED] Jupyter notebook setup
+Here are some instruction on how to install and setup Jupyter on a KRIA board,
+accessing it remotely and using it for making data analysis.
+
+The following commands will set the required packages and install Jupyter itself[fn:30]:
+#+BEGIN_SRC sh
+sudo apt-get update && sudo apt-get install python3 python3-pip python3-venv python3-virtualenv
+
+virtualenv myjupyter
+source ./myjupyter/bin/activate
+python3 -m pip install jupyter pandas numpy matplotlib scipy
+
+sudo reboot now
+#+END_SRC
+
+Then in a terminal on your host machine (not on the KRIA board), you can run the following command[fn:38] to bind local ports:
+#+BEGIN_SRC sh
+ssh -L 8888:localhost:8888 ubuntu@192.168.11.107
+#+END_SRC
+
+Then on the opened SSH shell to the KRIA board:
+#+BEGIN_SRC sh
+source ./myjupyter/bin/activate
+jupyter notebook
+#+END_SRC
+
+From there, it is possible to use the displayed URL (something that looks like
+~http://localhost:8888/tree?token~) to access the remote Notebook system from a local web browser.
+It is possible to do so with ~localhost~ since we have the ~ssh~ port map connection going on.
+
+Eventually creating Notebooks and stuff, it is possible to obtain a situation like shown in the figure [[fig:jupyter]] below.
+
+#+ATTR_LATEX: :width .6\textwidth
+#+CAPTION: A test Jupyter Notebook for CSV data analysis.
+#+NAME: fig:jupyter
+[[file:img/jupyter.png]]
+
 ** TODO Using a PetaLinux kernel in Ubuntu
 
-#+LATEX: \pagebreak
-#+LATEX: \appendix
-* DTO patch
-This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch][system.patch]]
-#+LATEX: \inputminted[linenos, frame=single]{diff}{./src/system.patch}
+* RPMsg standalone evaluation
+** TODO RPMsg Cortex R5F demonstration firmware
+** RPMsg ~echo_test~ software
+In order to test the deployment of the firmware on the R5F side, and in particular
+to test the RPMsg function, we need some program on the Linux side of the KRIA
+board to "talk" with the real-time side.
 
+Some source is provided by Xilinx to build a demonstration software that does
+this purpose: specifically interact with the demonstration firmware.
+
+Here are the steps required to obtain the sources, and build the program.
+
+As a reminder, this is meant to be done on the Linux running on the
+KRIA board, NOT on your host machine !
+
+#+BEGIN_SRC sh
+git clone https://github.com/Xilinx/meta-openamp.git
+cd  meta-openamp
+git checkout xlnx-rel-v2022.2
+cd  ./recipes-openamp/rpmsg-examples/rpmsg-echo-test
+make
+sudo ln -s $(pwd)/echo_test /usr/bin/
+#+END_SRC
+
+Once this is done, it it possible to run the test program from the KRIA board's Ubuntu
+by running the ~echo_test~ command.
 
 * Footnotes
+
+[fn:8] If two boards are plugged in for serial, the second one will be ~/dev/ttyUSB5~, then ~USB9~ and so on.
+
 [fn:7] The CUPS and Docker services will be activated when used instead of during boot time. 
 
 [fn:30] Alongside other packages useful for data analysis, such as ~pandas~ or ~numpy~. 

@@ -72,11 +72,10 @@ and stays hidden in a :noexport: section in this report.
 #+end_src
 
 * Building this report from the LaTeX file                         :noexport:
-The base file for this report is actually this README.org file itself.
-However, upon local build, this file is regularly exported as
-a ~.tex~ file that can be built normally.
-On a moderately recent Ubuntu-base distribution, the following packages seemed to be required to build the
-report:
+The base file for this report is actually this README.org file itself.  However,
+upon local build, this file is regularly exported as a ~.tex~ file that can be
+built normally.  On a moderately recent Ubuntu-base distribution, the following
+packages seemed to be required to build the report:
 
 #+BEGIN_SRC bash
 sudo apt-get install texlive-base texlive-latex-recommended texlive-lang-japanese
@@ -94,10 +93,10 @@ for running ROS on a host Ubuntu system, as well as for deploying
 micro-ROS[[cite:&Belsare2023]] as a firmware on the MCU part of this board's chip.
 
 The use of this device in particular is interesting because of the presence of a
-SoC comprising both a general purpose ARM core (Cortex A53), capable of running a Linux
-distribution, as well as another ARM core, real-time enabled, capable to run a
-RTOS (Cortex R5F). The figure [[fig:map]] below shows a schematic view of the overall system we
-are trying to archive.
+SoC comprising both a general purpose ARM core (Cortex A53), capable of running
+a Linux distribution, as well as another ARM core, real-time enabled, capable to
+run a RTOS (Cortex R5F). The figure [[fig:map]] below shows a schematic view of the
+overall system we are trying to archive.
 
 #+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: The Linux and ROS2 environment (orange) will
@@ -106,9 +105,9 @@ are trying to archive.
 #+NAME: fig:map
 [[file:img/map.png]]
 
-This document will give a step-by-setep, chapter by chapter indication on how to go from a new board
-to a system ready to be used for testing internal communication for ROS, between both types of cores
-using the SoC shared memory.
+This document will give a step-by-setep, chapter by chapter indication on how to
+go from a new board to a system ready to be used for testing internal
+communication for ROS, between both types of cores using the SoC shared memory.
 
 #+latex: \pagebreak
 * Boot firmware update
@@ -498,6 +497,11 @@ In order to have this node up and running, you need to set basically all the pre
 #+latex: \clearpage
 * Conclusion & future                                      :WORK_IN_PROGRESS:
 
+#+latex: \clearpage
+* Publications
+
+
+# ##############################################################################
 #+LATEX: \clearpage
 #+LATEX: \appendix
 * DTO patch

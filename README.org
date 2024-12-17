@@ -660,7 +660,7 @@ return of the board (typically a ~/dev/ttyUSB1~), but two things are to be noted
   the RPMsg system worked successfully.
 
 #+LATEX: \clearpage
-*** Loading the firmware using JTAG and Vitis IDE
+** Loading the firmware using JTAG and Vitis IDE
 This is more of an alternative way, but it is possible to load the Client
 firmware onto the Cortex R5F onto the board from a host PC IDE, without booting or
 using the Linux on the KRIA board itself.
@@ -674,7 +674,7 @@ There are two key advantaged to using this method:
 - IDE debugging available. Running the JTAG on the board allows for the firmware
   to be debugger in a easier way.
 
-** Testing ~xsct~ and running the drivers
+*** Testing ~xsct~ and running the drivers
 Firstly, this part of the guide assumes that a version of the Vitis Classic IDE
 was installed on the host system. Some of the needed tools to test the working of the JTAG
 system are located in the installation directory of the IDE.

@@ -1,0 +1,97 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * A device tree overlay meant to use RPMsg in userspace
+ * with the R5F core.
+ *
+ * Copyright (C) 2024 Vincent Conus
+ */
+
+/dts-v1/;
+ /plugin/;
+/ {
+	fragment@0 {
+		target = <&uart1>;
+		__overlay__ {
+			status = "disabled";
+		};
+	};
+
+	fragment@1 {
+		target-path = "/";
+		__overlay__ {
+			reserved-memory {
+				pmu@7ff00000 {
+					status = "disabled";
+				};
+				rproc_0_reserved: rproc_0_reserved@3ec00000 {
+					no-map;
+					reg = <0x0 0x3ec00000 0x0 0x1000000>;
+				};
+			};
+		};
+	};
+
+	fragment@2 {
+		target-path = "/";
+		__overlay__ {
+			clock6 {
+				status = "disabled";
+			};
+			tcm_0a: tcm_0a@ffe00000 {
+				no-map;
+				reg = <0x0 0xffe00000 0x0 0x10000>;
+				status = "okay";
+				compatible = "mmio-sram";
+				power-domain = <&zynqmp_firmware 15>;
+			};
+			tcm_0b: tcm_0b@ffe20000 {
+				no-map;
+				reg = <0x0 0xffe20000 0x0 0x10000>;
+				status = "okay";
+				compatible = "mmio-sram";
+				power-domain = <&zynqmp_firmware 16>;
+			};
+
+
+			rf5ss@ff9a0000 {
+				compatible = "xlnx,zynqmp-r5-remoteproc";
+				xlnx,cluster-mode = <1>;
+				ranges;
+				reg = <0x0 0xFF9A0000 0x0 0x15000>;
+				#address-cells = <0x2>;
+				#size-cells = <0x2>;
+				r5f_0 {
+					compatible = "xilinx,r5f";
+					#address-cells = <2>;
+					#size-cells = <2>;
+					ranges;
+					sram = <&tcm_0a &tcm_0b>;
+					memory-region = <&rproc_0_reserved>;
+					power-domain = <&zynqmp_firmware 7>;
+				};
+			};
+
+			amba_pl: amba_pl@0 {
+				#address-cells = <2>;
+				#size-cells = <2>;
+				compatible = "simple-bus";
+				ranges ;
+
+				vring: vring@0 {
+					compatible = "vring_uio";
+					reg = <0x0 0x3ed40000 0x0 0x40000>;
+				};
+				shm0: shm@0 {
+					compatible = "shm_uio";
+					reg = <0x0 0x3ed20000 0x0 0x0100000>;
+				};
+				ipi0: ipi@0 {
+					compatible = "ipi_uio";
+					reg = <0x0 0xff340000 0x0 0x1000>;
+					interrupt-parent = <&gic>;
+					interrupts = <0 29 4>;
+				};
+			};
+		};
+	};
+};

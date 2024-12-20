@@ -1,5 +1,5 @@
 --- system.dts.orig	2024-12-17 02:53:50.728339591 +0000
-+++ system_uio.dts	2024-12-12 05:34:30.816562575 +0000
++++ system.dts	2024-12-20 03:22:38.724008387 +0000
 @@ -203,7 +203,7 @@
  
  	firmware {
@@ -46,7 +46,7 @@
  	gpio-keys {
  		compatible = "gpio-keys";
  		autorepeat;
-@@ -1973,6 +1961,72 @@
+@@ -1973,6 +1961,68 @@
  		pwms = <0x1f 0x02 0x9c40 0x00>;
  	};
  
@@ -100,15 +100,11 @@
 +                compatible = "simple-bus";
 +                ranges ;
 +
-+		vring: vring@0 {
-+			compatible = "vring_uio";
-+			reg = <0x0 0x3ed40000 0x0 0x40000>;
-+		};
-+		shm0: shm@0 {
++		shm0: shm@3ed20000 {
 +			compatible = "shm_uio";
-+			reg = <0x0 0x3ed20000 0x0 0x0100000>;
++			reg = <0x0 0x3ed20000 0x0 0x0140000>;
 +		};
-+		ipi0: ipi@0 {
++		ipi0: ipi@ff340000 {
 +			compatible = "ipi_uio";
 +			reg = <0x0 0xff340000 0x0 0x1000>;
 +			interrupt-parent = <&gic>;

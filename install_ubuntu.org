@@ -139,7 +139,7 @@ as follow:
 sudo netplan apply
 #+END_SRC
 
-** ~root~ password
+** [facultative] ~root~ password
 #+LATEX: \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 *WARNING*: Depending on your use-case, the setup presented in this
 subsection can be a critical security breach as it remove the need for a root
@@ -168,8 +168,8 @@ should be set for making administration tasks.
 With all of these settings, you should be able to update the software of your
 board without any issues:
 #+BEGIN_SRC sh
-sudo apt-get update
-sudo apt-get dist-upgrade
+sudo apt update
+sudo apt dist-upgrade
 sudo reboot now
 #+END_SRC
 
@@ -183,7 +183,7 @@ sudo apt update
 sudo apt upgrade
 #+END_SRC
 
-** Installing Docker
+** [facultative] Installing Docker
 It is possible to have a version of Docker installed simply by using the available repository,
 but since we are on Ubuntu, a PPA is available from Docker in order to have the most up-to-date version.
 
@@ -223,7 +223,7 @@ docker run hello-world
 #+NAME: fig:hello-docker
 [[file:img/hello-docker.png]]
 
-** Purging ~snap~
+** [facultative] Purging ~snap~
 As the desktop-specific software are not used at all in the case
 of our project, there are some packages that can be purges in order for the
 system to become more lightweight.
@@ -259,7 +259,7 @@ sudo apt autoremove --purge snapd
 systemctl list-units | grep snapd 
 #+END_SRC
 
-** Other unused heavy packages
+** [facultative] Other unused heavy packages
 Some other pieces of software can safely be removed since the desktop is
 not to be used:
 
@@ -272,7 +272,7 @@ sudo apt-get autoclean
 sudo reboot now
 #+END_SRC
 
-** Slow boot services to disable
+** [facultative] Slow boot services to disable
 These packages (in particular the first one) are taking up a LOT of time at boot while providing no benefits[fn:7].
 
 It is possible to disable them as follow:
@@ -288,6 +288,36 @@ sudo systemctl disable cloud-init-local.service
 Additional, potentially unused services can be found using the very handy command:
 #+BEGIN_SRC sh
 sudo systemd-analyze blame
+#+END_SRC
+
+** [facultative] Adding a swap partition
+This part is very optional, in particular as it might slow down a bit the
+boot time of the board (~2s), however it might become handy to have swap memory
+available to avoid system failure under heavy use.
+
+This whole procedure must be done externally, with the board system SD card
+mounted on a host PC as an external volume.  As it is highly platform dependant,
+I will not give a detailed explanation on how to do it, yet here are the key
+points that should be done:
++ Shutdown the Kria board, take out the SD card and put it in a host machine.
++ Make sure the disk is visible.
++ Make sure all volumes are *unmounted*.
++ Resize the main ~root~ partition (*not* the ~boot~) so a space the size of the
+  wanted swap is free *after* the partition. You'd want something around 1GB.
++ In the empty space, create a new partition, which type is "linux swap".
++ Find and take note of the UUID of the new partition. This is useful hereafter.
++ ~sync~
++ Un-mount everything, eject SD card.
++ Put the SD card back in the Kria.
++ Boot back to Ubuntu.
+
+Going back on the Kria board Ubuntu after boot, the ~/etc/fstab~ file can be
+updated as follow, modulo your actual UUID for the newly created partition, to
+enable swap at boot time.
+#+BEGIN_SRC sh
+sudo -s
+echo "UUID=8b13ed05-a91d-4x50-a44a-e654a0c67a2c none   swap    sw      0       0" >> /etc/fstab
+reboot now
 #+END_SRC
 
 ** [OLD] Enabling ~remoteproc~ with Device-Tree patching
@@ -366,7 +396,6 @@ ready to be used!
 #+LATEX: \pagebreak
 
 ** [NEW] Enabling ~remoteproc~ for RPMsg in userspace using a device-tree patching
-
 *** Patching the device tree for RPMsg in userspace
 #+BEGIN_SRC bash
 sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
@@ -385,36 +414,6 @@ If everything went correctly, on reboot and re-loging in the device, you should
 see an output to the following command:
 #+BEGIN_SRC bash
 ls /sys/class/remoteproc/
-#+END_SRC
-
-** Adding a swap partition
-This part is very optional, in particular as it might slow down a bit the
-boot time of the board (~2s), however it might become handy to have swap memory
-available to avoid system failure under heavy use.
-
-This whole procedure must be done externally, with the board system SD card
-mounted on a host PC as an external volume.  As it is highly platform dependant,
-I will not give a detailed explanation on how to do it, yet here are the key
-points that should be done:
-+ Shutdown the Kria board, take out the SD card and put it in a host machine.
-+ Make sure the disk is visible.
-+ Make sure all volumes are *unmounted*.
-+ Resize the main ~root~ partition (*not* the ~boot~) so a space the size of the
-  wanted swap is free *after* the partition. You'd want something around 1GB.
-+ In the empty space, create a new partition, which type is "linux swap".
-+ Find and take note of the UUID of the new partition. This is useful hereafter.
-+ ~sync~
-+ Un-mount everything, eject SD card.
-+ Put the SD card back in the Kria.
-+ Boot back to Ubuntu.
-
-Going back on the Kria board Ubuntu after boot, the ~/etc/fstab~ file can be
-updated as follow, modulo your actual UUID for the newly created partition, to
-enable swap at boot time.
-#+BEGIN_SRC sh
-sudo -s
-echo "UUID=8b13ed05-a91d-4x50-a44a-e654a0c67a2c none   swap    sw      0       0" >> /etc/fstab
-reboot now
 #+END_SRC
 
 ** [DEPRECATED] Proxy and DNS
@@ -484,7 +483,8 @@ Eventually creating Notebooks and stuff, it is possible to obtain a situation li
 #+NAME: fig:jupyter
 [[file:img/jupyter.png]]
 
-** TODO Using a PetaLinux kernel in Ubuntu
+** Using a PetaLinux kernel in Ubuntu
+TBD
 
 * RPMsg standalone evaluation
 ** TODO RPMsg Cortex R5F demonstration firmware

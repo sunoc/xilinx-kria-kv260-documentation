@@ -7,7 +7,7 @@
 #+subtitle: \begin{CJK}{UTF8}{min}南山大学\end{CJK}
 #+author: Vincent Conus
 #+email: vincent.conus@protonmail.com
-#+date: 2024-11-26
+#+date: 2025-02-28
 
 [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/commits/main][https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/badges/main/pipeline.svg?style=svg]]
 

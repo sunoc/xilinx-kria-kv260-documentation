@@ -9,6 +9,8 @@
 #+email: vincent.conus@protonmail.com
 #+date: 2024-11-26
 
+[[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/commits/main][https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/badges/main/pipeline.svg?style=svg]]
+
 * About                                 :noexport:
 The goal of this repository is to serve as a documentation in general for using
 Xilinx's KRIA board with Ubuntu and ROS2.

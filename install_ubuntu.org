@@ -67,8 +67,8 @@ With the image available on thy machine and a SD card visible as ~/dev/sda~ devi
 one can simply run the ~dd~ command as follow to write the image to a previously formatted drive (here ~/dev/sda~):
 
 #+BEGIN_SRC sh
-unxz iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img.xz
-sudo dd if=iot-limerick-kria-classic-desktop-2204-x07-20230302-63.img \
+unxz iot-limerick-kria-classic-desktop-2204-20240304-165.img.xz
+sudo dd if=iot-limerick-kria-classic-desktop-2204-20240304-165.img \
      of=/dev/sda status=progress bs=8M && sync
 #+END_SRC
 
@@ -290,7 +290,7 @@ Additional, potentially unused services can be found using the very handy comman
 sudo systemd-analyze blame
 #+END_SRC
 
-** Enabling ~remoteproc~ with Device-Tree patching
+** [OLD] Enabling ~remoteproc~ with Device-Tree patching
 One of the advantage of this Kria board, as cited previously, is the presence of
 multiple types of core (APU, MCU, FPGA) on the same chip.
 
@@ -324,11 +324,10 @@ sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
 #+END_SRC
 
 Then, a custom-made patch file can be downloaded and applied.
-This file is available at the URL visible in the command below
-but also in this report appendix [[DTO patch]].
+This file is available at the URL visible in the command below.
 
 #+BEGIN_SRC sh
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/90764ea6619fc95c0d801302ec7f82a7197b2f44/src/system.patch
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/806dcaa16ed9f2571539fb98e9f027226a485a6a/src/system.patch
 
 patch system.dts < system.patch
 #+END_SRC
@@ -372,7 +371,7 @@ ready to be used!
 #+BEGIN_SRC bash
 sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
 
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/system_uio.patch
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/806dcaa16ed9f2571539fb98e9f027226a485a6a/src/system_uio.patch
 
 patch system.dts < system_uio.patch
 
@@ -381,7 +380,12 @@ sudo mv user-override.dtb /boot/firmware/
 sudo reboot now
 #+END_SRC
 
-#+RESULTS:
+*** Checking the patching
+If everything went correctly, on reboot and re-loging in the device, you should
+see an output to the following command:
+#+BEGIN_SRC bash
+ls /sys/class/remoteproc/
+#+END_SRC
 
 ** Adding a swap partition
 This part is very optional, in particular as it might slow down a bit the

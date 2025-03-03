@@ -223,7 +223,7 @@ docker run hello-world
 #+NAME: fig:hello-docker
 [[file:img/hello-docker.png]]
 
-** [facultative] Purging ~snap~
+** [recommended] Purging ~snap~
 As the desktop-specific software are not used at all in the case
 of our project, there are some packages that can be purges in order for the
 system to become more lightweight.
@@ -231,14 +231,15 @@ system to become more lightweight.
 In particular, the main issue with Ubuntu systems is the forced integration of
 Snap packages. Here are the command to use in order to remove all of that.
 These steps take a lot of time and need to be executed in that specific order[fn:2],
-but the system fan runs sensibly slower without all of this stuff:
+but the system fan runs sensibly slower without all of this stuff.
 
+Note that this all process is rather slow and can take up to 30min to complete.
 #+BEGIN_SRC sh
 sudo systemctl disable snapd.service
 sudo systemctl disable snapd.socket
 sudo systemctl disable snapd.seeded.service
 
-sudo snap list #show installed package, remove then all:
+sudo snap list #show installed package, remove them all:
 sudo snap remove --purge firefox
 sudo snap remove --purge gnome-3-38-2004
 sudo snap remove --purge gnome-42-2204
@@ -261,8 +262,7 @@ systemctl list-units | grep snapd
 
 ** [facultative] Other unused heavy packages
 Some other pieces of software can safely be removed since the desktop is
-not to be used:
-
+not to be used.
 #+BEGIN_SRC sh
 sudo apt-get autoremove --purge yaru-theme-icon \
      fonts-noto-cjk yaru-theme-gtk vim-runtime \
@@ -410,7 +410,7 @@ sudo reboot now
 #+END_SRC
 
 *** Checking the patching
-If everything went correctly, on reboot and re-loging in the device, you should
+If everything went correctly, on reboot and re-logging in the device, you should
 see an output to the following command:
 #+BEGIN_SRC bash
 ls /sys/class/remoteproc/
@@ -483,11 +483,11 @@ Eventually creating Notebooks and stuff, it is possible to obtain a situation li
 #+NAME: fig:jupyter
 [[file:img/jupyter.png]]
 
-** Using a PetaLinux kernel in Ubuntu
+** [TODO] Using a PetaLinux kernel in Ubuntu
 TBD
 
 * RPMsg standalone evaluation
-** TODO RPMsg Cortex R5F demonstration firmware
+** [TODO] RPMsg Cortex R5F demonstration firmware
 ** RPMsg ~echo_test~ software
 In order to test the deployment of the firmware on the R5F side, and in particular
 to test the RPMsg function, we need some program on the Linux side of the KRIA

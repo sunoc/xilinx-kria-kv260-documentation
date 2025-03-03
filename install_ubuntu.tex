@@ -1,4 +1,4 @@
-% Created 2025-02-28 Fri 14:03
+% Created 2025-03-03 Mon 14:18
 \documentclass[10pt]{article}
 \usepackage{graphicx}
 \usepackage{longtable}
@@ -39,7 +39,7 @@
 \tableofcontents
 
 \section{Preparing and booting a Ubuntu 22.04 media}
-\label{sec:orge29e87a}
+\label{sec:orgeecd43e}
 An \href{https://ubuntu.com/download/amd-xilinx}{official Ubuntu image} exists and is
 provided by Xilinx, allowing the OS installation to be quick and
 straightforward.
@@ -98,12 +98,12 @@ host# ssh ubuntu@192.168.4.11
 \end{minted}
 
 \section{Network and admin setups}
-\label{sec:org295017a}
+\label{sec:org8d2189a}
 This section presents a variety of extra convenience configurations
 that can be used when setting-up the Kria board.
 
 \subsection{Static IP address}
-\label{sec:org9e8f535}
+\label{sec:orga65c05e}
 A static IP can be set by writing the following
 configuration into your \texttt{netplan} configuration file\footnote{The \texttt{chmod} command is used to update the permissions and silence some warnings}.
 
@@ -138,8 +138,8 @@ as follow:
 sudo netplan apply
 \end{minted}
 
-\subsection{\texttt{root} password}
-\label{sec:org4c553af}
+\subsection{[facultative] \texttt{root} password}
+\label{sec:org309d12f}
 \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 \textbf{WARNING}: Depending on your use-case, the setup presented in this
 subsection can be a critical security breach as it remove the need for a root
@@ -168,13 +168,13 @@ should be set for making administration tasks.
 With all of these settings, you should be able to update the software of your
 board without any issues:
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
-sudo apt-get update
-sudo apt-get dist-upgrade
+sudo apt update
+sudo apt dist-upgrade
 sudo reboot now
 \end{minted}
 
 \subsection{Adding Xilinx specific repositories}
-\label{sec:org2843144}
+\label{sec:orgc7dcc31}
 The following commands will add \texttt{PPA} repositories that are specific for Xilinx boards using Ubuntu.
 It is then possible to update the package list and eventually upgrade to some new packages.
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
@@ -184,15 +184,15 @@ sudo apt update
 sudo apt upgrade
 \end{minted}
 
-\subsection{Installing Docker}
-\label{sec:org158960e}
+\subsection{[facultative] Installing Docker}
+\label{sec:org21b2934}
 It is possible to have a version of Docker installed simply by using the available repository,
 but since we are on Ubuntu, a PPA is available from Docker in order to have the most up-to-date version.
 
 Following \href{https://docs.docker.com/engine/install/ubuntu/\#install-using-the-repository}{the official documentation}, the following steps can be taken to install the latest version of
 Docker on a Ubuntu system. The last command is meant to test the install.
 If everything went smoothly, you should see something similar to what is presented
-in the figure \ref{fig:orgc8407af} below, after the commands:
+in the figure \ref{fig:org5e030a6} below, after the commands:
 
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
 sudo apt-get update
@@ -223,11 +223,11 @@ docker run hello-world
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.7\textwidth]{img/hello-docker.png}
-\caption{\label{fig:orgc8407af}The return of a successful run of the \texttt{hello world} test Docker container.}
+\caption{\label{fig:org5e030a6}The return of a successful run of the \texttt{hello world} test Docker container.}
 \end{figure}
 
-\subsection{Purging \texttt{snap}}
-\label{sec:org3998d79}
+\subsection{[recommended] Purging \texttt{snap}}
+\label{sec:orga508de7}
 As the desktop-specific software are not used at all in the case
 of our project, there are some packages that can be purges in order for the
 system to become more lightweight.
@@ -237,14 +237,15 @@ Snap packages. Here are the command to use in order to remove all of that.
 These steps take a lot of time and need to be executed in that specific order\footnote{The \texttt{snap} packages depends on each others. Dependencies
 cannot be remove before the package(s) that depends on them,
 thus the specific delete order.},
-but the system fan runs sensibly slower without all of this stuff:
+but the system fan runs sensibly slower without all of this stuff.
 
+Note that this all process is rather slow and can take up to 30min to complete.
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
 sudo systemctl disable snapd.service
 sudo systemctl disable snapd.socket
 sudo systemctl disable snapd.seeded.service
 
-sudo snap list #show installed package, remove then all:
+sudo snap list #show installed package, remove them all:
 sudo snap remove --purge firefox
 sudo snap remove --purge gnome-3-38-2004
 sudo snap remove --purge gnome-42-2204
@@ -265,11 +266,10 @@ sudo apt autoremove --purge snapd
 systemctl list-units | grep snapd 
 \end{minted}
 
-\subsection{Other unused heavy packages}
-\label{sec:org0602b44}
+\subsection{[facultative] Other unused heavy packages}
+\label{sec:orgdf8cbaf}
 Some other pieces of software can safely be removed since the desktop is
-not to be used:
-
+not to be used.
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
 sudo apt-get autoremove --purge yaru-theme-icon \
      fonts-noto-cjk yaru-theme-gtk vim-runtime \
@@ -279,8 +279,8 @@ sudo apt-get autoclean
 sudo reboot now
 \end{minted}
 
-\subsection{Slow boot services to disable}
-\label{sec:orga666403}
+\subsection{[facultative] Slow boot services to disable}
+\label{sec:org70972db}
 These packages (in particular the first one) are taking up a LOT of time at boot while providing no benefits\footnote{The CUPS and Docker services will be activated when used instead of during boot time.}.
 
 It is possible to disable them as follow:
@@ -298,8 +298,41 @@ Additional, potentially unused services can be found using the very handy comman
 sudo systemd-analyze blame
 \end{minted}
 
+\subsection{[facultative] Adding a swap partition}
+\label{sec:org0c0b522}
+This part is very optional, in particular as it might slow down a bit the
+boot time of the board (\textasciitilde{}2s), however it might become handy to have swap memory
+available to avoid system failure under heavy use.
+
+This whole procedure must be done externally, with the board system SD card
+mounted on a host PC as an external volume.  As it is highly platform dependant,
+I will not give a detailed explanation on how to do it, yet here are the key
+points that should be done:
+\begin{itemize}
+\item Shutdown the Kria board, take out the SD card and put it in a host machine.
+\item Make sure the disk is visible.
+\item Make sure all volumes are \textbf{unmounted}.
+\item Resize the main \texttt{root} partition (\textbf{not} the \texttt{boot}) so a space the size of the
+wanted swap is free \textbf{after} the partition. You'd want something around 1GB.
+\item In the empty space, create a new partition, which type is "linux swap".
+\item Find and take note of the UUID of the new partition. This is useful hereafter.
+\item \texttt{sync}
+\item Un-mount everything, eject SD card.
+\item Put the SD card back in the Kria.
+\item Boot back to Ubuntu.
+\end{itemize}
+
+Going back on the Kria board Ubuntu after boot, the \texttt{/etc/fstab} file can be
+updated as follow, modulo your actual UUID for the newly created partition, to
+enable swap at boot time.
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
+sudo -s
+echo "UUID=8b13ed05-a91d-4x50-a44a-e654a0c67a2c none   swap    sw      0       0" >> /etc/fstab
+reboot now
+\end{minted}
+
 \subsection{[OLD] Enabling \texttt{remoteproc} with Device-Tree patching}
-\label{sec:org1ca3ae3}
+\label{sec:org7ecd814}
 One of the advantage of this Kria board, as cited previously, is the presence of
 multiple types of core (APU, MCU, FPGA) on the same chip.
 
@@ -377,10 +410,9 @@ ready to be used!
 \pagebreak
 
 \subsection{[NEW] Enabling \texttt{remoteproc} for RPMsg in userspace using a device-tree patching}
-\label{sec:org15832f6}
-
+\label{sec:org6f0d662}
 \subsubsection{Patching the device tree for RPMsg in userspace}
-\label{sec:org9eaf480}
+\label{sec:org282a27c}
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{bash}
 sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
 
@@ -394,48 +426,15 @@ sudo reboot now
 \end{minted}
 
 \subsubsection{Checking the patching}
-\label{sec:org2347c7a}
-If everything went correctly, on reboot and re-loging in the device, you should
+\label{sec:org58db94a}
+If everything went correctly, on reboot and re-logging in the device, you should
 see an output to the following command:
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{bash}
 ls /sys/class/remoteproc/
 \end{minted}
 
-\subsection{Adding a swap partition}
-\label{sec:org5285167}
-This part is very optional, in particular as it might slow down a bit the
-boot time of the board (\textasciitilde{}2s), however it might become handy to have swap memory
-available to avoid system failure under heavy use.
-
-This whole procedure must be done externally, with the board system SD card
-mounted on a host PC as an external volume.  As it is highly platform dependant,
-I will not give a detailed explanation on how to do it, yet here are the key
-points that should be done:
-\begin{itemize}
-\item Shutdown the Kria board, take out the SD card and put it in a host machine.
-\item Make sure the disk is visible.
-\item Make sure all volumes are \textbf{unmounted}.
-\item Resize the main \texttt{root} partition (\textbf{not} the \texttt{boot}) so a space the size of the
-wanted swap is free \textbf{after} the partition. You'd want something around 1GB.
-\item In the empty space, create a new partition, which type is "linux swap".
-\item Find and take note of the UUID of the new partition. This is useful hereafter.
-\item \texttt{sync}
-\item Un-mount everything, eject SD card.
-\item Put the SD card back in the Kria.
-\item Boot back to Ubuntu.
-\end{itemize}
-
-Going back on the Kria board Ubuntu after boot, the \texttt{/etc/fstab} file can be
-updated as follow, modulo your actual UUID for the newly created partition, to
-enable swap at boot time.
-\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
-sudo -s
-echo "UUID=8b13ed05-a91d-4x50-a44a-e654a0c67a2c none   swap    sw      0       0" >> /etc/fstab
-reboot now
-\end{minted}
-
 \subsection{[DEPRECATED] Proxy and DNS}
-\label{sec:org5eebac2}
+\label{sec:org24a4130}
 \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 \textbf{WARNING}: This setup is not needed anymore when using Honda-sensei's lab
 wired network.
@@ -466,7 +465,7 @@ echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" >> ~/.bashrc
 Eventually the board can be rebooted in order for the setup to get applied cleanly.
 
 \subsection{[DEPRECATED] Jupyter notebook setup}
-\label{sec:org5c5ba8a}
+\label{sec:orge32ca3c}
 Here are some instruction on how to install and setup Jupyter on a KRIA board,
 accessing it remotely and using it for making data analysis.
 
@@ -496,23 +495,24 @@ From there, it is possible to use the displayed URL (something that looks like
 \texttt{http://localhost:8888/tree?token}) to access the remote Notebook system from a local web browser.
 It is possible to do so with \texttt{localhost} since we have the \texttt{ssh} port map connection going on.
 
-Eventually creating Notebooks and stuff, it is possible to obtain a situation like shown in the figure \ref{fig:org032dfcc} below.
+Eventually creating Notebooks and stuff, it is possible to obtain a situation like shown in the figure \ref{fig:orga4f7602} below.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{img/jupyter.png}
-\caption{\label{fig:org032dfcc}A test Jupyter Notebook for CSV data analysis.}
+\caption{\label{fig:orga4f7602}A test Jupyter Notebook for CSV data analysis.}
 \end{figure}
 
-\subsection{{\bfseries\sffamily TODO} Using a PetaLinux kernel in Ubuntu}
-\label{sec:org86ae7ff}
+\subsection{[TODO] Using a PetaLinux kernel in Ubuntu}
+\label{sec:org1b9190b}
+TBD
 
 \section{RPMsg standalone evaluation}
-\label{sec:org2e7e5b1}
-\subsection{{\bfseries\sffamily TODO} RPMsg Cortex R5F demonstration firmware}
-\label{sec:org8be88fa}
+\label{sec:org9e7b6ef}
+\subsection{[TODO] RPMsg Cortex R5F demonstration firmware}
+\label{sec:orge565501}
 \subsection{RPMsg \texttt{echo\_test} software}
-\label{sec:orgcc5afb9}
+\label{sec:org34b48fd}
 In order to test the deployment of the firmware on the R5F side, and in particular
 to test the RPMsg function, we need some program on the Linux side of the KRIA
 board to "talk" with the real-time side.

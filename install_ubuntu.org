@@ -395,12 +395,13 @@ If it is the case, it means that the patch was successful and  that the remote p
 ready to be used!
 #+LATEX: \pagebreak
 
-** [NEW] Enabling ~remoteproc~ for RPMsg in userspace using a device-tree patching
+** [NEW] Enabling ~remoteproc~ for RPMsg in userspace with device-tree patch
 *** Patching the device tree for RPMsg in userspace
+The  ~system_uio.patch~
 #+BEGIN_SRC bash
 sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
 
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/806dcaa16ed9f2571539fb98e9f027226a485a6a/src/system_uio.patch
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/system_uio.patch
 
 patch system.dts < system_uio.patch
 

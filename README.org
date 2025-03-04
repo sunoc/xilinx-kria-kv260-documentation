@@ -217,11 +217,6 @@ In order to have this node up and running, you need to set basically all the pre
 #+LATEX: \clearpage
 #+LATEX: \appendix
 
-* Setting up a Vitis IDE project
-#+INCLUDE: "./vitis_ide.org" :minlevel 2 :lines "34-301"
-#+latex: \clearpage
-** COMMENT LINK: [[id:dfc7e5d2-fe7b-432e-8dcc-e1227929fc62][KRIA board Vitis IDE setup]]
-
 * DTO patch
 This file is available in this repository: [[https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/blob/b7300116e153f4b5a1542f8804e4646db8030033/src/system.patch][system.patch]]
 #+LATEX: \inputminted[linenos, frame=single]{diff}{./src/system.patch}

@@ -25,16 +25,3 @@ ubuntu_report:
   artifacts:
     paths:
       - install_ubuntu.pdf
-
-vitis_report:
-  stage: build
-  script:
-    - apt-get update -y
-    - apt-get install -y python3 python3-pip
-    - pip install pygments
-    - pdflatex --shell-escape vitis_ide.tex
-    - pdflatex --shell-escape vitis_ide.tex
-
-  artifacts:
-    paths:
-      - vitis_ide.pdf

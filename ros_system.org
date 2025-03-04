@@ -92,8 +92,7 @@ of you system.
 
 This part of the guide will present how to install Docker on the
 Kria board and then how to use it to deploy the latest version of ROS2.
-This section of the report assumes that Docker was installer on the target system
-as presented in section [[Installing Docker]].
+This section of the report assumes that Docker was installer on the target system.
 
 The following commands will pull a ROS container, version ~iron~, and name it ~ros_build~.
 

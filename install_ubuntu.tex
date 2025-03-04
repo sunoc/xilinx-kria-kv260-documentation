@@ -1,4 +1,4 @@
-% Created 2025-03-03 Mon 14:25
+% Created 2025-03-04 Tue 19:17
 \documentclass[10pt]{article}
 \usepackage{graphicx}
 \usepackage{longtable}
@@ -39,7 +39,7 @@
 \tableofcontents
 
 \section{Preparing and booting a Ubuntu 22.04 media}
-\label{sec:org7be3dcd}
+\label{sec:org41f487b}
 An \href{https://ubuntu.com/download/amd-xilinx}{official Ubuntu image} exists and is
 provided by Xilinx, allowing the OS installation to be quick and
 straightforward.
@@ -98,12 +98,12 @@ host# ssh ubuntu@192.168.4.11
 \end{minted}
 
 \section{Network and admin setups}
-\label{sec:org2395c7f}
+\label{sec:org7a883b4}
 This section presents a variety of extra convenience configurations
 that can be used when setting-up the Kria board.
 
 \subsection{Static IP address}
-\label{sec:orge5ad797}
+\label{sec:org0e2dce7}
 A static IP can be set by writing the following
 configuration into your \texttt{netplan} configuration file\footnote{The \texttt{chmod} command is used to update the permissions and silence some warnings}.
 
@@ -139,7 +139,7 @@ sudo netplan apply
 \end{minted}
 
 \subsection{[facultative] \texttt{root} password}
-\label{sec:org1e2aede}
+\label{sec:org27ca52c}
 \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 \textbf{WARNING}: Depending on your use-case, the setup presented in this
 subsection can be a critical security breach as it remove the need for a root
@@ -174,7 +174,7 @@ sudo reboot now
 \end{minted}
 
 \subsection{Adding Xilinx specific repositories}
-\label{sec:org86be99d}
+\label{sec:org06f3dae}
 The following commands will add \texttt{PPA} repositories that are specific for Xilinx boards using Ubuntu.
 It is then possible to update the package list and eventually upgrade to some new packages.
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
@@ -185,14 +185,14 @@ sudo apt upgrade
 \end{minted}
 
 \subsection{[facultative] Installing Docker}
-\label{sec:org74416bd}
+\label{sec:org55a94e6}
 It is possible to have a version of Docker installed simply by using the available repository,
 but since we are on Ubuntu, a PPA is available from Docker in order to have the most up-to-date version.
 
 Following \href{https://docs.docker.com/engine/install/ubuntu/\#install-using-the-repository}{the official documentation}, the following steps can be taken to install the latest version of
 Docker on a Ubuntu system. The last command is meant to test the install.
 If everything went smoothly, you should see something similar to what is presented
-in the figure \ref{fig:orgeab6332} below, after the commands:
+in the figure \ref{fig:org6df28c2} below, after the commands:
 
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
 sudo apt-get update
@@ -223,11 +223,11 @@ docker run hello-world
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.7\textwidth]{img/hello-docker.png}
-\caption{\label{fig:orgeab6332}The return of a successful run of the \texttt{hello world} test Docker container.}
+\caption{\label{fig:org6df28c2}The return of a successful run of the \texttt{hello world} test Docker container.}
 \end{figure}
 
 \subsection{[recommended] Purging \texttt{snap}}
-\label{sec:org6e3b37e}
+\label{sec:org621d84b}
 As the desktop-specific software are not used at all in the case
 of our project, there are some packages that can be purges in order for the
 system to become more lightweight.
@@ -267,7 +267,7 @@ systemctl list-units | grep snapd
 \end{minted}
 
 \subsection{[facultative] Other unused heavy packages}
-\label{sec:org4244f7d}
+\label{sec:orga4ea05d}
 Some other pieces of software can safely be removed since the desktop is
 not to be used.
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
@@ -280,7 +280,7 @@ sudo reboot now
 \end{minted}
 
 \subsection{[facultative] Slow boot services to disable}
-\label{sec:org46b7d05}
+\label{sec:org89eef98}
 These packages (in particular the first one) are taking up a LOT of time at boot while providing no benefits\footnote{The CUPS and Docker services will be activated when used instead of during boot time.}.
 
 It is possible to disable them as follow:
@@ -299,7 +299,7 @@ sudo systemd-analyze blame
 \end{minted}
 
 \subsection{[facultative] Adding a swap partition}
-\label{sec:orgcc4b31a}
+\label{sec:orgc1111f0}
 This part is very optional, in particular as it might slow down a bit the
 boot time of the board (\textasciitilde{}2s), however it might become handy to have swap memory
 available to avoid system failure under heavy use.
@@ -332,7 +332,7 @@ reboot now
 \end{minted}
 
 \subsection{[OLD] Enabling \texttt{remoteproc} with Device-Tree patching}
-\label{sec:org0a38574}
+\label{sec:orgb763816}
 One of the advantage of this Kria board, as cited previously, is the presence of
 multiple types of core (APU, MCU, FPGA) on the same chip.
 
@@ -359,6 +359,8 @@ is not enabled by default within the Ubuntu image provided by Xilinx.
 In that regard, some modification of the device tree overlay (DTO) is required in order to have
 the \texttt{remoteproc} system starting.
 
+\subsubsection{Patching the device tree for RPMsg (standard, kernel space mode)}
+\label{sec:orgdbfa179}
 Firstly, we need to get the original firmware device tree, converted
 into a readable format (DTS):
 
@@ -370,12 +372,13 @@ Then, a custom-made patch file can be downloaded and applied.
 This file is available at the URL visible in the command below.
 
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/806dcaa16ed9f2571539fb98e9f027226a485a6a/src/system.patch
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/system.patch
 
 patch system.dts < system.patch
 \end{minted}
 
-
+\subsubsection{Kernel \texttt{cmd} edit}
+\label{sec:org6ed31ac}
 As for the board to be able to reserve the correct amount of memory with the new settings, some
 \texttt{cma} kernel configuration is needed\footnote{The overlapping memory will not prevent the board to boot,
 but it disables the PWM for the CPU fan, which will then run at full speed, making noise.}:
@@ -397,6 +400,8 @@ sudo mv user-override.dtb /boot/firmware/
 sudo reboot now
 \end{minted}
 
+\subsubsection{Checking the patching}
+\label{sec:org00243e5}
 After rebooting, you can check the content of the \verb|remoteproc| system directory,
 and a \texttt{remoteproc0} device should be visible, as follow:
 
@@ -410,9 +415,19 @@ ready to be used!
 \pagebreak
 
 \subsection{[NEW] Enabling \texttt{remoteproc} for RPMsg in userspace with device-tree patch}
-\label{sec:org4c7e49b}
+\label{sec:org883cdd5}
+\subsubsection{Kernel \texttt{cmd} edit}
+\label{sec:org944d8c0}
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
+sudo nano /etc/default/flash-kernel
+
+LINUX_KERNEL_CMDLINE="quiet splash cma=512M cpuidle.off=1"
+LINUX_KERNEL_CMDLINE_DEFAULTS=""
+sudo flash-kernel
+\end{minted}
+
 \subsubsection{Patching the device tree for RPMsg in userspace}
-\label{sec:org5aafe37}
+\label{sec:org9a2254a}
 The  \texttt{system\_uio.patch}
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{bash}
 sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
@@ -427,7 +442,7 @@ sudo reboot now
 \end{minted}
 
 \subsubsection{Checking the patching}
-\label{sec:org98b8447}
+\label{sec:org13ddc19}
 If everything went correctly, on reboot and re-logging in the device, you should
 see an output to the following command:
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{bash}
@@ -435,7 +450,7 @@ ls /sys/class/remoteproc/
 \end{minted}
 
 \subsection{[DEPRECATED] Proxy and DNS}
-\label{sec:org9df441f}
+\label{sec:orge11ec70}
 \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 \textbf{WARNING}: This setup is not needed anymore when using Honda-sensei's lab
 wired network.
@@ -466,7 +481,7 @@ echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" >> ~/.bashrc
 Eventually the board can be rebooted in order for the setup to get applied cleanly.
 
 \subsection{[DEPRECATED] Jupyter notebook setup}
-\label{sec:orga5556c4}
+\label{sec:orge794b43}
 Here are some instruction on how to install and setup Jupyter on a KRIA board,
 accessing it remotely and using it for making data analysis.
 
@@ -496,24 +511,24 @@ From there, it is possible to use the displayed URL (something that looks like
 \texttt{http://localhost:8888/tree?token}) to access the remote Notebook system from a local web browser.
 It is possible to do so with \texttt{localhost} since we have the \texttt{ssh} port map connection going on.
 
-Eventually creating Notebooks and stuff, it is possible to obtain a situation like shown in the figure \ref{fig:org31dc01b} below.
+Eventually creating Notebooks and stuff, it is possible to obtain a situation like shown in the figure \ref{fig:org5166754} below.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{img/jupyter.png}
-\caption{\label{fig:org31dc01b}A test Jupyter Notebook for CSV data analysis.}
+\caption{\label{fig:org5166754}A test Jupyter Notebook for CSV data analysis.}
 \end{figure}
 
 \subsection{[TODO] Using a PetaLinux kernel in Ubuntu}
-\label{sec:org548dcb6}
+\label{sec:orga6be693}
 TBD
 
 \section{RPMsg standalone evaluation}
-\label{sec:org492cc0a}
+\label{sec:org1266719}
 \subsection{[TODO] RPMsg Cortex R5F demonstration firmware}
-\label{sec:orgee3dec0}
+\label{sec:org09e7877}
 \subsection{RPMsg \texttt{echo\_test} software}
-\label{sec:orgdfa4bb2}
+\label{sec:orgf032811}
 In order to test the deployment of the firmware on the R5F side, and in particular
 to test the RPMsg function, we need some program on the Linux side of the KRIA
 board to "talk" with the real-time side.

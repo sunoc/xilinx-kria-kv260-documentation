@@ -346,6 +346,7 @@ is not enabled by default within the Ubuntu image provided by Xilinx.
 In that regard, some modification of the device tree overlay (DTO) is required in order to have
 the ~remoteproc~ system starting.
 
+*** Patching the device tree for RPMsg (standard, kernel space mode)
 Firstly, we need to get the original firmware device tree, converted
 into a readable format (DTS):
 
@@ -357,12 +358,12 @@ Then, a custom-made patch file can be downloaded and applied.
 This file is available at the URL visible in the command below.
 
 #+BEGIN_SRC sh
-wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/806dcaa16ed9f2571539fb98e9f027226a485a6a/src/system.patch
+wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/system.patch
 
 patch system.dts < system.patch
 #+END_SRC
 
-
+*** Kernel ~cmd~ edit
 As for the board to be able to reserve the correct amount of memory with the new settings, some
 ~cma~ kernel configuration is needed[fn:5]:
 
@@ -383,6 +384,7 @@ sudo mv user-override.dtb /boot/firmware/
 sudo reboot now
 #+END_SRC
 
+*** Checking the patching
 After rebooting, you can check the content of the \verb|remoteproc| system directory,
 and a ~remoteproc0~ device should be visible, as follow:
 
@@ -396,6 +398,15 @@ ready to be used!
 #+LATEX: \pagebreak
 
 ** [NEW] Enabling ~remoteproc~ for RPMsg in userspace with device-tree patch
+*** Kernel ~cmd~ edit
+#+BEGIN_SRC sh
+sudo nano /etc/default/flash-kernel
+
+LINUX_KERNEL_CMDLINE="quiet splash cma=512M cpuidle.off=1"
+LINUX_KERNEL_CMDLINE_DEFAULTS=""
+sudo flash-kernel
+#+END_SRC
+
 *** Patching the device tree for RPMsg in userspace
 The  ~system_uio.patch~
 #+BEGIN_SRC bash

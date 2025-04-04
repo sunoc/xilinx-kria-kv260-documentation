@@ -139,6 +139,14 @@ as follow:
 sudo netplan apply
 #+END_SRC
 
+** [facultative] Proxy for ~apt~ on Nagoya University network
+This is a configuration specific to use the board at Nagoya University, on the
+local network. The following configuration is to be used in ~/etc/apt/apt.conf~:
+#+BEGIN_SRC bash
+Acquire::http::Proxy "http://172.24.8.1:8080";
+Acquire::https::Proxy "http://172.24.8.1:8080";
+#+END_SRC
+
 ** [facultative] ~root~ password
 #+LATEX: \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 *WARNING*: Depending on your use-case, the setup presented in this
@@ -428,7 +436,7 @@ see an output to the following command:
 ls /sys/class/remoteproc/
 #+END_SRC
 
-** [DEPRECATED] Proxy and DNS
+** [DEPRECATED] Nanzan Net Proxy and DNS
 #+LATEX: \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 *WARNING*: This setup is not needed anymore when using Honda-sensei's lab
 wired network.

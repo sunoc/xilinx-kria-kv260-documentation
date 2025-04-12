@@ -147,6 +147,8 @@ Acquire::http::Proxy "http://172.24.8.1:8080";
 Acquire::https::Proxy "http://172.24.8.1:8080";
 #+END_SRC
 
+** [facultative] Check the system clock
+
 ** [facultative] ~root~ password
 #+LATEX: \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 *WARNING*: Depending on your use-case, the setup presented in this

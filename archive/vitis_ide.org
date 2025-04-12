@@ -46,7 +46,7 @@ is positioned in the global project.
 #+CAPTION: A micro-ROS application is shown here, but any real-time firmware will
 #+CAPTION: be deployed in the same way.
 #+NAME: fig:map_microros
-[[file:./img/map_microros.png]]
+[[file:../img/map_microros.png]]
 
 ** Setting up the IDE
 Xilinx's Vitis IDE is the recommended tool used to build software for the Xilinx boards.
@@ -159,48 +159,48 @@ captions.
 #+CAPTION: We are starting with creating a "New Application Project"
 #+CAPTION: You should be greeted with this wizard window. Next.
 #+NAME: fig:project1
-[[file:./img/vitis_new/project1.png]]
+[[file:../img/vitis_new/project1.png]]
 
 #+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: For the platform, we need to get our build Kria configuration.
 #+CAPTION: In the "Create a new platform" tab,
 #+CAPTION: click the "Browse..." button.
 #+NAME: fig:project2
-[[file:./img/vitis_new/project2.png]]
+[[file:../img/vitis_new/project2.png]]
 
 #+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: In the file explorer, we should navigate in the "k26" directory,
 #+CAPTION: where the configuration file was build.
 #+CAPTION: From here we are looking for a ".xsa" file, located in a "hw" directory, as visible.
 #+NAME: fig:project3
-[[file:./img/vitis_new/project3.png]]
+[[file:../img/vitis_new/project3.png]]
 
 #+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: With the configuration file loaded, we can now select a name for our
 #+CAPTION: platform, but most importantly, we have to select the "psu Cortex5 0" core as a target.
 #+CAPTION: The other, Cortex 53 is the APU running Linux.
 #+NAME: fig:project4
-[[file:./img/vitis_new/project4.png]]
+[[file:../img/vitis_new/project4.png]]
 
 #+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: Here, we want to select "freertos10 xilinx" as our Operating System.
 #+CAPTION: The rest can remain unchanged.
 #+NAME: fig:project6
-[[file:./img/vitis_new/project6.png]]
+[[file:../img/vitis_new/project6.png]]
 
 #+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: In this next window, we can give a name to our firmware project.
 #+CAPTION: It is also critical here to select the core we want to build for.
 #+CAPTION: Once again, we want to use the "psu cortex5 0".
 #+NAME: fig:project5
-[[file:./img/vitis_new/project5.png]]
+[[file:../img/vitis_new/project5.png]]
 
 #+ATTR_LATEX: :width .6\textwidth
 #+CAPTION: Finally, we can select the demonstration template we are going to use;
 #+CAPTION: here we go with "OpenAMP echo-test" since we want to
 #+CAPTION: have some simple try of the RPMsg system. Finish.
 #+NAME: fig:project7
-file:./img/vitis_new/project7.png
+file:../img/vitis_new/project7.png
 
 #+LATEX: \pagebreak
 In the Xilinx documentation, it is made mention of the addresses setting that should be checked in the ~script.ld~ file.
@@ -212,7 +212,7 @@ work for the example we are running, including the new DTO patch without overlap
 #+CAPTION: lscript.ld memory configuration for the firmware memory setup.
 #+CAPTION: The same file is available as a whole in this repository's src directory.
 #+NAME: fig:projectmem
-file:./img/vitis_new/project_mem.png
+file:../img/vitis_new/project_mem.png
 
 
 Once your example project is built and you have a ~.elf~ file available, you can
@@ -238,7 +238,7 @@ in FreeRTOS, as visible in the figure [[fig:streambuffer]] below:
 #+CAPTION: here the ~stream_buffer~ setting
 #+CAPTION: in the ~kernel_features~, from the default "false" to "true".
 #+NAME: fig:streambuffer
-[[file:./img/streambuffer.png]]
+[[file:../img/streambuffer.png]]
 
 #+LATEX: \pagebreak
 The second setting is useful in the case when a buffer callback function is used, such as\\
@@ -277,14 +277,14 @@ to recognize the include files and to be able to use them for compiling the firm
 #+CAPTION: (as it is the case for libmicroros) you will need to include each sub-directory individually,
 #+CAPTION: as visible in this figure.
 #+NAME: fig:include
-[[file:./img/vitis_new/include.png]]
+[[file:../img/vitis_new/include.png]]
 
 #+ATTR_LATEX: :width .8\textwidth
 #+CAPTION: Secondly, in the gcc linker "Libraries", you can add the top level directory of your library.
 #+CAPTION: In our case, it is the directory that contains both the "include" directory added earlier,
 #+CAPTION: and also the "libmicroros.a" file.
 #+NAME: fig:include2
-[[file:./img/vitis_new/include2.png]]
+[[file:../img/vitis_new/include2.png]]
 
 #+LATEX: \pagebreak
 With both of these setup in your project and as a minimal test to see if the setup was made correctly,

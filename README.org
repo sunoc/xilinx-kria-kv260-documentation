@@ -576,6 +576,11 @@ With all of this, on the next reboot of the board, the static IP should be avail
 + OpenAMP and the echo test app works fairly "out of the box" if configured
   properly during the build process.
 
+* Archive notes
+#+INCLUDE: "./archive/vitis_ide.org" :minlevel 2 :lines "35-300"
+#+latex: \clearpage
+** COMMENT LINK: [[id:dfc7e5d2-fe7b-432e-8dcc-e1227929fc62][KRIA board Vitis IDE setup]]
+
 * Footnotes
 [fn:35] https://gitlab.com/sunoc/saleae-logic-8-documentation
 

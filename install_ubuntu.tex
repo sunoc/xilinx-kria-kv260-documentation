@@ -1,4 +1,4 @@
-% Created 2025-03-04 Tue 19:17
+% Created 2025-04-20 Sun 14:28
 \documentclass[10pt]{article}
 \usepackage{graphicx}
 \usepackage{longtable}
@@ -39,7 +39,7 @@
 \tableofcontents
 
 \section{Preparing and booting a Ubuntu 22.04 media}
-\label{sec:org41f487b}
+\label{sec:org47b752d}
 An \href{https://ubuntu.com/download/amd-xilinx}{official Ubuntu image} exists and is
 provided by Xilinx, allowing the OS installation to be quick and
 straightforward.
@@ -98,12 +98,12 @@ host# ssh ubuntu@192.168.4.11
 \end{minted}
 
 \section{Network and admin setups}
-\label{sec:org7a883b4}
+\label{sec:org84fba3b}
 This section presents a variety of extra convenience configurations
 that can be used when setting-up the Kria board.
 
 \subsection{Static IP address}
-\label{sec:org0e2dce7}
+\label{sec:org38eff92}
 A static IP can be set by writing the following
 configuration into your \texttt{netplan} configuration file\footnote{The \texttt{chmod} command is used to update the permissions and silence some warnings}.
 
@@ -138,8 +138,20 @@ as follow:
 sudo netplan apply
 \end{minted}
 
+\subsection{[facultative] Proxy for \texttt{apt} on Nagoya University network}
+\label{sec:org5dea2af}
+This is a configuration specific to use the board at Nagoya University, on the
+local network. The following configuration is to be used in \texttt{/etc/apt/apt.conf}:
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{bash}
+Acquire::http::Proxy "http://172.24.8.1:8080";
+Acquire::https::Proxy "http://172.24.8.1:8080";
+\end{minted}
+
+\subsection{[facultative] Check the system clock}
+\label{sec:org0c66159}
+
 \subsection{[facultative] \texttt{root} password}
-\label{sec:org27ca52c}
+\label{sec:orgca16365}
 \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 \textbf{WARNING}: Depending on your use-case, the setup presented in this
 subsection can be a critical security breach as it remove the need for a root
@@ -174,7 +186,7 @@ sudo reboot now
 \end{minted}
 
 \subsection{Adding Xilinx specific repositories}
-\label{sec:org06f3dae}
+\label{sec:orgfecbafc}
 The following commands will add \texttt{PPA} repositories that are specific for Xilinx boards using Ubuntu.
 It is then possible to update the package list and eventually upgrade to some new packages.
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
@@ -185,14 +197,14 @@ sudo apt upgrade
 \end{minted}
 
 \subsection{[facultative] Installing Docker}
-\label{sec:org55a94e6}
+\label{sec:org53289dc}
 It is possible to have a version of Docker installed simply by using the available repository,
 but since we are on Ubuntu, a PPA is available from Docker in order to have the most up-to-date version.
 
 Following \href{https://docs.docker.com/engine/install/ubuntu/\#install-using-the-repository}{the official documentation}, the following steps can be taken to install the latest version of
 Docker on a Ubuntu system. The last command is meant to test the install.
 If everything went smoothly, you should see something similar to what is presented
-in the figure \ref{fig:org6df28c2} below, after the commands:
+in the figure \ref{fig:org6c7a8f1} below, after the commands:
 
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
 sudo apt-get update
@@ -223,11 +235,11 @@ docker run hello-world
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.7\textwidth]{img/hello-docker.png}
-\caption{\label{fig:org6df28c2}The return of a successful run of the \texttt{hello world} test Docker container.}
+\caption{\label{fig:org6c7a8f1}The return of a successful run of the \texttt{hello world} test Docker container.}
 \end{figure}
 
 \subsection{[recommended] Purging \texttt{snap}}
-\label{sec:org621d84b}
+\label{sec:org463d65e}
 As the desktop-specific software are not used at all in the case
 of our project, there are some packages that can be purges in order for the
 system to become more lightweight.
@@ -267,7 +279,7 @@ systemctl list-units | grep snapd
 \end{minted}
 
 \subsection{[facultative] Other unused heavy packages}
-\label{sec:orga4ea05d}
+\label{sec:org47ed341}
 Some other pieces of software can safely be removed since the desktop is
 not to be used.
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
@@ -280,7 +292,7 @@ sudo reboot now
 \end{minted}
 
 \subsection{[facultative] Slow boot services to disable}
-\label{sec:org89eef98}
+\label{sec:orga09e754}
 These packages (in particular the first one) are taking up a LOT of time at boot while providing no benefits\footnote{The CUPS and Docker services will be activated when used instead of during boot time.}.
 
 It is possible to disable them as follow:
@@ -299,7 +311,7 @@ sudo systemd-analyze blame
 \end{minted}
 
 \subsection{[facultative] Adding a swap partition}
-\label{sec:orgc1111f0}
+\label{sec:org1e35785}
 This part is very optional, in particular as it might slow down a bit the
 boot time of the board (\textasciitilde{}2s), however it might become handy to have swap memory
 available to avoid system failure under heavy use.
@@ -332,7 +344,7 @@ reboot now
 \end{minted}
 
 \subsection{[OLD] Enabling \texttt{remoteproc} with Device-Tree patching}
-\label{sec:orgb763816}
+\label{sec:orgbbcab12}
 One of the advantage of this Kria board, as cited previously, is the presence of
 multiple types of core (APU, MCU, FPGA) on the same chip.
 
@@ -360,7 +372,7 @@ In that regard, some modification of the device tree overlay (DTO) is required i
 the \texttt{remoteproc} system starting.
 
 \subsubsection{Patching the device tree for RPMsg (standard, kernel space mode)}
-\label{sec:orgdbfa179}
+\label{sec:org3bf8b53}
 Firstly, we need to get the original firmware device tree, converted
 into a readable format (DTS):
 
@@ -378,7 +390,7 @@ patch system.dts < system.patch
 \end{minted}
 
 \subsubsection{Kernel \texttt{cmd} edit}
-\label{sec:org6ed31ac}
+\label{sec:org6c733cc}
 As for the board to be able to reserve the correct amount of memory with the new settings, some
 \texttt{cma} kernel configuration is needed\footnote{The overlapping memory will not prevent the board to boot,
 but it disables the PWM for the CPU fan, which will then run at full speed, making noise.}:
@@ -401,7 +413,7 @@ sudo reboot now
 \end{minted}
 
 \subsubsection{Checking the patching}
-\label{sec:org00243e5}
+\label{sec:org9a7bf66}
 After rebooting, you can check the content of the \verb|remoteproc| system directory,
 and a \texttt{remoteproc0} device should be visible, as follow:
 
@@ -415,9 +427,9 @@ ready to be used!
 \pagebreak
 
 \subsection{[NEW] Enabling \texttt{remoteproc} for RPMsg in userspace with device-tree patch}
-\label{sec:org883cdd5}
+\label{sec:org761ae3c}
 \subsubsection{Kernel \texttt{cmd} edit}
-\label{sec:org944d8c0}
+\label{sec:orge230584}
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{sh}
 sudo nano /etc/default/flash-kernel
 
@@ -427,7 +439,7 @@ sudo flash-kernel
 \end{minted}
 
 \subsubsection{Patching the device tree for RPMsg in userspace}
-\label{sec:org9a2254a}
+\label{sec:orgffc70fc}
 The  \texttt{system\_uio.patch}
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{bash}
 sudo dtc /sys/firmware/fdt 2> /dev/null > system.dts
@@ -442,15 +454,97 @@ sudo reboot now
 \end{minted}
 
 \subsubsection{Checking the patching}
-\label{sec:org13ddc19}
+\label{sec:orgf88c1bf}
 If everything went correctly, on reboot and re-logging in the device, you should
 see an output to the following command:
 \begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{bash}
 ls /sys/class/remoteproc/
 \end{minted}
 
-\subsection{[DEPRECATED] Proxy and DNS}
-\label{sec:orge11ec70}
+
+\subsection{[NEW] Nagoya University proxy and NTP}
+\label{sec:orgeda60e0}
+\begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
+\textbf{WARNING}: This setup is needed when using the KRIA board with wired internet
+at Honda Lab in Nagoya University, because of the local network proxy.
+\end{tcolorbox}
+
+Two main addresses for working behind the lab's local network proxy are:
+\begin{itemize}
+\item \texttt{172.24.8.1} for HTTP and HTTPS proxy.
+\item \texttt{172.24.8.19} for the local NTP server.
+\end{itemize}
+
+The following sub-sections will present how to use these.
+
+\subsubsection{General HTTP proxy}
+\label{sec:org3662116}
+These lines must be places at the end of the \texttt{\textasciitilde{}/.bashrc} file:
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{bash}
+export http_proxy="172.24.8.1:8080"
+export https_proxy="172.24.8.1:8080"
+export no_proxy="localhost,127.0.0.1,::1"
+\end{minted}
+
+\subsubsection{HTTP proxy for the package manager}
+\label{sec:orgf340d69}
+These lines must be places at the end of the \texttt{/etc/apt/apt.conf} file:
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{text}
+Acquire::http::Proxy "http://172.24.8.1:8080";
+Acquire::https::Proxy "http://172.24.8.1:8080";
+\end{minted}
+
+\subsubsection{Local NTP server}
+\label{sec:orgb98abc1}
+Installing a NTP tool:
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{bash}
+sudo apt update
+sudo apt install systemd-timesyncd
+\end{minted}
+
+These lines must be places at the end of the \texttt{/etc/systemd/timesyncd.conf} file:
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{text}
+[Time]
+NTP=172.24.8.19
+\end{minted}
+
+Start and enable the NTP tool systemd daemon:
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{bash}
+sudo systemctl start systemd-timesyncd
+sudo systemctl enable systemd-timesyncd
+timedatectl
+\end{minted}
+
+\subsubsection{Git forges SSH access through proxy}
+\label{sec:orgd635198}
+A SSH through HTTP tunneling tool must be installed:
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{bash}
+sudo apt update
+sudo apt install corkscrew
+\end{minted}
+
+These lines must be places at the end of the \texttt{\textasciitilde{}/.gitconfig} file:
+\begin{minted}[frame=single,framesep=2mm,baselinestretch=1.2,linenos,breaklines,fontsize=\footnotesize]{text}
+Host github.com
+     User git
+     Port 443
+     Hostname ssh.github.com
+     TCPKeepAlive yes
+     IdentityFile ~/.ssh/id_ed25519
+     IdentitiesOnly yes
+     ProxyCommand /usr/bin/corkscrew 172.24.8.1 8080 %h %p
+
+Host gitlab.com
+     User git
+     Port 443
+     Hostname altssh.gitlab.com
+     IdentityFile ~/.ssh/id_ed25519
+     ProxyCommand /usr/bin/corkscrew 172.24.8.1 8080 %h %p
+\end{minted}
+
+
+\subsection{[DEPRECATED] Nanzan Net Proxy and DNS}
+\label{sec:orga82d9e4}
 \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 \textbf{WARNING}: This setup is not needed anymore when using Honda-sensei's lab
 wired network.
@@ -481,7 +575,7 @@ echo "export no_proxy=\"localhost, 127.0.0.1,::1\"" >> ~/.bashrc
 Eventually the board can be rebooted in order for the setup to get applied cleanly.
 
 \subsection{[DEPRECATED] Jupyter notebook setup}
-\label{sec:orge794b43}
+\label{sec:orge973c6b}
 Here are some instruction on how to install and setup Jupyter on a KRIA board,
 accessing it remotely and using it for making data analysis.
 
@@ -511,24 +605,24 @@ From there, it is possible to use the displayed URL (something that looks like
 \texttt{http://localhost:8888/tree?token}) to access the remote Notebook system from a local web browser.
 It is possible to do so with \texttt{localhost} since we have the \texttt{ssh} port map connection going on.
 
-Eventually creating Notebooks and stuff, it is possible to obtain a situation like shown in the figure \ref{fig:org5166754} below.
+Eventually creating Notebooks and stuff, it is possible to obtain a situation like shown in the figure \ref{fig:orgbf8b972} below.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.6\textwidth]{img/jupyter.png}
-\caption{\label{fig:org5166754}A test Jupyter Notebook for CSV data analysis.}
+\caption{\label{fig:orgbf8b972}A test Jupyter Notebook for CSV data analysis.}
 \end{figure}
 
 \subsection{[TODO] Using a PetaLinux kernel in Ubuntu}
-\label{sec:orga6be693}
+\label{sec:org187214a}
 TBD
 
 \section{RPMsg standalone evaluation}
-\label{sec:org1266719}
+\label{sec:orgdffdd8d}
 \subsection{[TODO] RPMsg Cortex R5F demonstration firmware}
-\label{sec:org09e7877}
+\label{sec:orgee92f91}
 \subsection{RPMsg \texttt{echo\_test} software}
-\label{sec:orgf032811}
+\label{sec:org2548360}
 In order to test the deployment of the firmware on the R5F side, and in particular
 to test the RPMsg function, we need some program on the Linux side of the KRIA
 board to "talk" with the real-time side.

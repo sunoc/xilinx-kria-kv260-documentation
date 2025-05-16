@@ -438,6 +438,81 @@ see an output to the following command:
 ls /sys/class/remoteproc/
 #+END_SRC
 
+
+** [NEW] Nagoya University proxy and NTP
+#+LATEX: \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
+*WARNING*: This setup is needed when using the KRIA board with wired internet
+at Honda Lab in Nagoya University, because of the local network proxy.
+#+LATEX: \end{tcolorbox}
+
+Two main addresses for working behind the lab's local network proxy are:
++ ~172.24.8.1~ for HTTP and HTTPS proxy.
++ ~172.24.8.19~ for the local NTP server.
+
+The following sub-sections will present how to use these.
+  
+*** General HTTP proxy
+These lines must be places at the end of the ~~/.bashrc~ file:
+#+BEGIN_SRC bash
+export http_proxy="172.24.8.1:8080"
+export https_proxy="172.24.8.1:8080"
+export no_proxy="localhost,127.0.0.1,::1"
+#+END_SRC
+
+*** HTTP proxy for the package manager
+These lines must be places at the end of the ~/etc/apt/apt.conf~ file:
+#+BEGIN_SRC text
+Acquire::http::Proxy "http://172.24.8.1:8080";
+Acquire::https::Proxy "http://172.24.8.1:8080";
+	#+END_SRC
+
+*** Local NTP server
+Installing a NTP tool:
+#+BEGIN_SRC bash
+sudo apt update
+sudo apt install systemd-timesyncd
+#+END_SRC
+
+These lines must be places at the end of the ~/etc/systemd/timesyncd.conf~ file:
+#+BEGIN_SRC text
+[Time]
+NTP=172.24.8.19
+#+END_SRC
+
+Start and enable the NTP tool systemd daemon:
+#+BEGIN_SRC bash
+sudo systemctl start systemd-timesyncd
+sudo systemctl enable systemd-timesyncd
+timedatectl
+#+END_SRC
+
+*** Git forges SSH access through proxy
+A SSH through HTTP tunneling tool must be installed:
+#+BEGIN_SRC bash
+sudo apt update
+sudo apt install corkscrew
+#+END_SRC
+
+These lines must be places at the end of the ~~/.gitconfig~ file:
+#+BEGIN_SRC text
+Host github.com
+     User git
+     Port 443
+     Hostname ssh.github.com
+     TCPKeepAlive yes
+     IdentityFile ~/.ssh/id_ed25519
+     IdentitiesOnly yes
+     ProxyCommand /usr/bin/corkscrew 172.24.8.1 8080 %h %p
+
+Host gitlab.com
+     User git
+     Port 443
+     Hostname altssh.gitlab.com
+     IdentityFile ~/.ssh/id_ed25519
+     ProxyCommand /usr/bin/corkscrew 172.24.8.1 8080 %h %p
+#+END_SRC
+
+
 ** [DEPRECATED] Nanzan Net Proxy and DNS
 #+LATEX: \begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black]
 *WARNING*: This setup is not needed anymore when using Honda-sensei's lab

@@ -10,17 +10,19 @@ that can be used to port it to a different platform.
 In this section, the goal is to build the micro-ROS library in order to be
 able to integrate it's functions into our Cortex R5F firmware.
 
-All of this should be done via cross-compiling on a host machine, however
-it is most common in the guides about micro-ROS to build the firmware and libraries within a Docker,
-so we can have access of the ROS environment without installing it permanently.
+All of this should be done via cross-compiling on a host machine, however it is
+most common in the guides about micro-ROS to build the firmware and libraries
+within a podman container, so we can have access of the ROS environment without
+installing it permanently.
 
-One can simply run this command to summon a ROS2 Docker[fn:8] with the wanted version,
-but first we also need to check the cross-compilation tools.
+One can simply run this command to summon a ROS2 container[fn:8] with the wanted
+version, but first we also need to check the cross-compilation tools.
 
-We are downloading the latest ~arm-none-eabi~ gcc compiler directly from the ARM website.
+We are downloading the latest ~arm-none-eabi~ gcc compiler directly from the ARM
+website.
 
-The cross-compilation tool can then be extracted, set as our ~toolchain~ variable,
-then passed as a parameter when creating the Docker container:
+The cross-compilation tool can then be extracted, set as our ~toolchain~
+variable, then passed as a parameter when creating the podman container:
 #+BEGIN_SRC sh
 pushd /home/$USER/Downloads
 wget https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
@@ -30,7 +32,7 @@ popd
 toolchain="/home/$USER/Downloads/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/"
 
 
-docker run -d --name ros_build -it --net=host \
+podman run -d --name ros_build -it --net=host \
        --hostname ros_build \
        -v $toolchain:/armr5-toolchain \
        --privileged ros:iron
@@ -41,7 +43,7 @@ docker run -d --name ros_build -it --net=host \
 Now the container named ~ros_build~ was created, it is possible to "enter" it, and having access
 to the tools in it by running the following command that will open a ~bash~ shell in said container:
 #+BEGIN_SRC sh
-docker exec -it ros_build bash
+podman exec -it ros_build bash
 #+END_SRC
 
 ** Building the static library
@@ -83,6 +85,8 @@ wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/cus
 
 wget https://gitlab.com/sunoc/xilinx-kria-kv260-documentation/-/raw/main/src/custom_r5f_colcon.meta
 
+sed -i 's/TRANSPORT_MTU 512/TRANSPORT_MTU 4096/' ./firmware/mcu_ws/eProsima/Micro-XRCE-DDS-Client/CMakeLists.txt
+
 cp -r /armr5-toolchain/ $(pwd)/firmware/toolchain && \
     export PATH=$PATH:$(pwd)/firmware/toolchain/bin
 
@@ -91,10 +95,19 @@ ros2 run micro_ros_setup build_firmware.sh \
      $(pwd)/custom_r5f_colcon.meta
 #+END_SRC
 
+#+RESULTS:
+
+** Get the result from the container
+#+BEGIN_SRC bash
+podman cp ros_build:./microros_ws/firmware/build/include/ .
+podman cp ros_build:./microros_ws/firmware/build/libmicroros.a .
+#+END_SRC
+
+
 * Footnotes
 [fn:9] Both files are also visible in the appendixes [[Custom tool-chain CMake settings]]
 and [[Custom Colcon meta settings]] the end of this report.}
 
-[fn:8] If Docker is not set up on your machine, you can follow the guide on [[https://docs.docker.com/engine/install/ubuntu/][the official website]].
+[fn:8] If Docker or podman is not set up on your machine, you can follow the guide on [[https://docs.docker.com/engine/install/ubuntu/][the official website]].
 When you can successfully run the "hello-world" container, you are good to go.
 
